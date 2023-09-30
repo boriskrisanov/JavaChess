@@ -1,15 +1,15 @@
 package io.github.boriskrisanov.javachess;
 
-import io.github.boriskrisanov.javachess.board.Board;
-import io.github.boriskrisanov.javachess.board.Move;
-import io.github.boriskrisanov.javachess.piece.Piece;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
+import io.github.boriskrisanov.javachess.board.*;
+import io.github.boriskrisanov.javachess.piece.*;
+import org.junit.jupiter.api.*;
+
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MoveGenerationTest {
-    private long generateMoves(Board board, int depth) {
+    private long generateMoves(Board board, int depth, boolean rootNode, TreeMap<String, Long> positionsReachedMap) {
         long positionsReached = 0;
 
         if (depth == 0) {
@@ -17,46 +17,53 @@ public class MoveGenerationTest {
         }
 
         for (Move move : board.getAllLegalMovesForSide(Piece.Color.WHITE)) {
-             board.makeMove(move);
+            board.makeMove(move);
 
-            long result = generateMoves(board, depth - 1);
+            System.out.println("========== " + move.toUciString());
+            System.out.println(board);
+
+            long result = generateMoves(board, depth - 1, false, positionsReachedMap);
             positionsReached += result;
 
-             board.unmakeMove(move);
+            if (rootNode) {
+                positionsReachedMap.putIfAbsent(move.toUciString(), positionsReached);
+                positionsReachedMap.computeIfPresent(move.toUciString(), (k, v) -> result);
+            }
+
+            board.unmakeMove(move);
         }
 
         return positionsReached;
     }
 
-    @Test
-    void testDepth1() {
+    private long runTest(int depth) {
+        System.out.println("Running move generation test with depth " + depth);
+
         Board board = new Board();
         board.loadStartingPosition();
 
-        long result = generateMoves(board, 1);
+        TreeMap<String, Long> positionsReached = new TreeMap<>();
 
-        assertEquals(20, result);
+        long result = generateMoves(board, depth, true, positionsReached);
+
+        positionsReached.forEach((k, v) -> System.out.println(k + ": " + v));
+
+        return result;
     }
 
     @Test
-    @Disabled
+    void testDepth1() {
+        assertEquals(20, runTest(1));
+    }
+
+    @Test
     void testDepth2() {
-        Board board = new Board();
-        board.loadStartingPosition();
-
-        long result = generateMoves(board, 2);
-
-        assertEquals(400, result);
+        assertEquals(400, runTest(2));
     }
 
     @Test
     @Disabled
     void testDepth3() {
-        Board board = new Board();
-        board.loadStartingPosition();
-
-        long result = generateMoves(board, 3);
-
-        assertEquals(8902, result);
+//        assertEquals(20, runTest(3));
     }
 }

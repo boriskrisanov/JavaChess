@@ -11,4 +11,8 @@ public record Move(
     public String toString() {
         return String.format("Move(%s -> %s)", start, destination);
     }
+
+    public String toUciString() {
+        return start.toString() + destination.toString();
+    }
 }

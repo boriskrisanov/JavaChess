@@ -151,7 +151,6 @@ public class Board {
         return board[index] == null;
     }
 
-
     public Piece getPieceOn(int index) {
         return board[index];
     }
