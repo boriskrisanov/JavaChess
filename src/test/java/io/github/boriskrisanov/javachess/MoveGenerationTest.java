@@ -9,20 +9,22 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class MoveGenerationTest {
-    private long generateMoves(Board board, int depth, boolean rootNode, TreeMap<String, Long> positionsReachedMap) {
+    private long generateMoves(Board board, int depth, boolean rootNode, TreeMap<String, Long> positionsReachedMap, int currentDepth) {
         long positionsReached = 0;
 
         if (depth == 0) {
             return 1;
         }
 
-        for (Move move : board.getAllLegalMovesForSide(Piece.Color.WHITE)) {
+        for (Move move : board.getLegalMovesForSideToMove()) {
             board.makeMove(move);
+//            System.out.println(">".repeat(currentDepth) + " ==========" + move.toUciString());
+//            for (String line : board.toString().split("\n")) {
+//                System.out.print(">".repeat(currentDepth) + " " + line + "\n");
+//            }
 
-            System.out.println("========== " + move.toUciString());
-            System.out.println(board);
 
-            long result = generateMoves(board, depth - 1, false, positionsReachedMap);
+            long result = generateMoves(board, depth - 1, false, positionsReachedMap, currentDepth + 1);
             positionsReached += result;
 
             if (rootNode) {
@@ -44,7 +46,7 @@ public class MoveGenerationTest {
 
         TreeMap<String, Long> positionsReached = new TreeMap<>();
 
-        long result = generateMoves(board, depth, true, positionsReached);
+        long result = generateMoves(board, depth, true, positionsReached, 0);
 
         positionsReached.forEach((k, v) -> System.out.println(k + ": " + v));
 

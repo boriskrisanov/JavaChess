@@ -5,10 +5,7 @@ import io.github.boriskrisanov.javachess.board.Square;
 import io.github.boriskrisanov.javachess.piece.*;
 import org.junit.jupiter.api.Assertions;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 
 public class Util {
     public static void assertSquareListEquals(List<Square> expected, List<Square> actual) {

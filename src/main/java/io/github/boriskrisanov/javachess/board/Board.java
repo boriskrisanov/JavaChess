@@ -195,6 +195,8 @@ public class Board {
 
         board[destinationIndex].setPosition(move.destination());
         board[destinationIndex].setBoard(this);
+
+        sideToMove = sideToMove.getOpposite();
     }
 
     public void unmakeMove(Move move) {
@@ -215,6 +217,8 @@ public class Board {
 
         piece.setPosition(move.start());
         piece.setBoard(this);
+
+        sideToMove = sideToMove.getOpposite();
     }
 
     /**
@@ -311,6 +315,18 @@ public class Board {
                 .forEach(piece -> legalMoves.addAll(piece.getLegalMoves()));
 
         return legalMoves;
+    }
+
+    public ArrayList<Move> getLegalMovesForSideToMove() {
+        var moves = new ArrayList<Move>();
+
+        for (Piece piece : board) {
+            if (piece != null && piece.getColor() == sideToMove) {
+                moves.addAll(piece.getLegalMoves());
+            }
+        }
+
+        return moves;
     }
 
     public Piece[] getBoard() {
