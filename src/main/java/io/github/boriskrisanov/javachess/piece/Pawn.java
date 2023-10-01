@@ -1,11 +1,8 @@
 package io.github.boriskrisanov.javachess.piece;
 
-import io.github.boriskrisanov.javachess.board.Board;
-import io.github.boriskrisanov.javachess.board.EdgeDistance;
-import io.github.boriskrisanov.javachess.board.Move;
-import io.github.boriskrisanov.javachess.board.Square;
+import io.github.boriskrisanov.javachess.board.*;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Pawn extends Piece {
 
@@ -22,23 +19,23 @@ public class Pawn extends Piece {
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
 
         if (this.color == Color.WHITE) {
-            if (!board.isSquareEmpty(index - 8 + 1) && edgeDistance.bottom > 0 && edgeDistance.left > 0) {
+            if (!board.isSquareEmpty(index - 8 + 1) && edgeDistance.top > 0 && edgeDistance.right > 0) {
                 moveIndexes.add(index - 8 + 1);
             }
-            if (!board.isSquareEmpty(index - 8 - 1) && edgeDistance.bottom > 0 && edgeDistance.right > 0) {
+            if (!board.isSquareEmpty(index - 8 - 1) && edgeDistance.top > 0 && edgeDistance.left > 0) {
                 moveIndexes.add(index - 8 - 1);
             }
-            if (enPassantTargetSquare != null && (enPassantTargetSquare.getIndex() == index - 8 - 1 || enPassantTargetSquare.getIndex() == index - 8 + 1)) {
+            if (enPassantTargetSquare != null && ((enPassantTargetSquare.getIndex() == index - 8 - 1 && edgeDistance.top > 0 && edgeDistance.left > 0) || (enPassantTargetSquare.getIndex() == index - 8 + 1 && edgeDistance.top > 0 && edgeDistance.right > 0))) {
                 moveIndexes.add(enPassantTargetSquare.getIndex());
             }
         } else {
-            if (!board.isSquareEmpty(index + 8 + 1) && edgeDistance.bottom > 0 && edgeDistance.left > 0) {
+            if (!board.isSquareEmpty(index + 8 + 1) && edgeDistance.bottom > 0 && edgeDistance.right > 0) {
                 moveIndexes.add(index + 8 + 1);
             }
-            if (!board.isSquareEmpty(index + 8 - 1) && edgeDistance.bottom > 0 && edgeDistance.right > 0) {
+            if (!board.isSquareEmpty(index + 8 - 1) && edgeDistance.bottom > 0 && edgeDistance.left > 0) {
                 moveIndexes.add(index + 8 - 1);
             }
-            if (enPassantTargetSquare != null && (enPassantTargetSquare.getIndex() == index + 8 - 1 || enPassantTargetSquare.getIndex() == index + 8 + 1)) {
+            if (enPassantTargetSquare != null && ((enPassantTargetSquare.getIndex() == index + 8 - 1 && edgeDistance.bottom > 0 && edgeDistance.left > 0) || (enPassantTargetSquare.getIndex() == index + 8 + 1 && edgeDistance.bottom > 0 && edgeDistance.right > 0))) {
                 moveIndexes.add(enPassantTargetSquare.getIndex());
             }
         }

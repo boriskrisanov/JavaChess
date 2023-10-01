@@ -1,15 +1,15 @@
 package io.github.boriskrisanov.javachess;
 
 import io.github.boriskrisanov.javachess.board.*;
-import io.github.boriskrisanov.javachess.piece.*;
 import org.junit.jupiter.api.*;
 
 import java.util.*;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.*;
+
 
 public class MoveGenerationTest {
-    private long generateMoves(Board board, int depth, boolean rootNode, TreeMap<String, Long> positionsReachedMap, int currentDepth) {
+    private long generateMoves(Board board, int depth, TreeMap<String, Long> moveCounts, boolean rootNode) {
         long positionsReached = 0;
 
         if (depth == 0) {
@@ -18,18 +18,15 @@ public class MoveGenerationTest {
 
         for (Move move : board.getLegalMovesForSideToMove()) {
             board.makeMove(move);
-//            System.out.println(">".repeat(currentDepth) + " ==========" + move.toUciString());
-//            for (String line : board.toString().split("\n")) {
-//                System.out.print(">".repeat(currentDepth) + " " + line + "\n");
-//            }
 
+//            System.out.println(board);
 
-            long result = generateMoves(board, depth - 1, false, positionsReachedMap, currentDepth + 1);
+            long result = generateMoves(board, depth - 1, moveCounts, false);
             positionsReached += result;
 
             if (rootNode) {
-                positionsReachedMap.putIfAbsent(move.toUciString(), positionsReached);
-                positionsReachedMap.computeIfPresent(move.toUciString(), (k, v) -> result);
+                moveCounts.putIfAbsent(move.toUciString(), positionsReached);
+                moveCounts.computeIfPresent(move.toUciString(), (k, v) -> result);
             }
 
             board.unmakeMove(move);
@@ -39,16 +36,18 @@ public class MoveGenerationTest {
     }
 
     private long runTest(int depth) {
-        System.out.println("Running move generation test with depth " + depth);
-
         Board board = new Board();
-        board.loadStartingPosition();
 
-        TreeMap<String, Long> positionsReached = new TreeMap<>();
+//        board.makeMove(new Move(new Square("a2"), new Square("a4"), null));
+//         board.makeMove(new Move(new Square("h7"), new Square("h5"), null));
 
-        long result = generateMoves(board, depth, true, positionsReached, 0);
+        var moveCounts = new TreeMap<String, Long>();
 
-        positionsReached.forEach((k, v) -> System.out.println(k + ": " + v));
+        long result = generateMoves(board, depth, moveCounts, true);
+
+        moveCounts.forEach((move, count) -> System.out.println(move + ": " + count));
+
+        System.out.println("Positions reached: " + result);
 
         return result;
     }
@@ -64,8 +63,8 @@ public class MoveGenerationTest {
     }
 
     @Test
-    @Disabled
     void testDepth3() {
-//        assertEquals(20, runTest(3));
+//        runTest(1);
+        assertEquals(8902, runTest(3));
     }
 }
