@@ -21,8 +21,7 @@ public class EdgeDistance {
      * Calculates the distance from a square to each edge of the board.
      * For example, the square A8 has the edge distance left=0, right=7, top=0, bottom=7.
      */
-    public EdgeDistance(Square square) {
-        int index = square.getIndex();
+    public EdgeDistance(byte index) {
         int rank = index / 8 + 1;
 
         left = 8 - (rank * 8 - index);

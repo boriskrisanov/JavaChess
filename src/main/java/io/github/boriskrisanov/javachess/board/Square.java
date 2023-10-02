@@ -19,12 +19,13 @@ public class Square {
         // @formatter:on
     }
 
-    public Square(String square) {
-        int file;
+    public static byte fromString(String square) {
+        byte rank;
+        byte file;
 
         try {
-            file = square.toLowerCase().charAt(0) - 'a' + 1;
-            rank = Integer.parseInt(String.valueOf(square.charAt(1)));
+            file = (byte) (square.toLowerCase().charAt(0) - 'a' + 1);
+            rank = (byte) Integer.parseInt(String.valueOf(square.charAt(1)));
         } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
             throw new InvalidSquareException("Square \"" + square + "\" is not a valid square");
         }
@@ -33,10 +34,10 @@ public class Square {
             throw new InvalidSquareException("Square \"" + square + "\" is not a valid square");
         }
 
-        int down = 8 * (8 - rank);
-        int left = file - 1;
+        byte down = (byte) (8 * (8 - rank));
+        byte left = (byte) (file - 1);
 
-        this.index = down + left;
+        return (byte) (down + left);
     }
 
     @Override
@@ -56,11 +57,6 @@ public class Square {
         return file + String.valueOf(rank);
     }
 
-    
-    EdgeDistance getEdgeDistance() {
-        return new EdgeDistance(this);
-    }
-
     @Override
     public boolean equals(Object object) {
         return object instanceof Square && ((Square) object).getIndex() == index;
@@ -70,15 +66,17 @@ public class Square {
         return index;
     }
 
-    public void setIndex(int index) {
-        this.index = index;
-    }
-
-    public int getRank() {
-        return rank;
-    }
-
-    public void setRank(int rank) {
-        this.rank = rank;
+    public static byte getRank(byte index) {
+        // @formatter:off
+        if      (index < 8)     return 8;
+        else if (index < 8 * 2) return 7;
+        else if (index < 8 * 3) return 6;
+        else if (index < 8 * 4) return 5;
+        else if (index < 8 * 5) return 4;
+        else if (index < 8 * 6) return 3;
+        else if (index < 8 * 7) return 2;
+        else if (index < 8 * 8) return 1;
+        // @formatter:on
+        else throw new IllegalStateException();
     }
 }

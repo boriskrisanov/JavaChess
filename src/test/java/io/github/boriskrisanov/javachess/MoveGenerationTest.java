@@ -18,8 +18,6 @@ public class MoveGenerationTest {
         for (Move move : board.getLegalMovesForSideToMove()) {
             board.makeMove(move);
 
-//            System.out.println(board);
-
             long result = generateMoves(board, depth - 1, moveCounts, false);
             positionsReached += result;
 
@@ -66,5 +64,15 @@ public class MoveGenerationTest {
     @Test
     void testDepth4() {
         assertEquals(197281, runTest(4));
+    }
+
+    @Test
+    void testDepth5() {
+        assertEquals(4865609, runTest(5));
+    }
+
+    @Test
+    void testDepth6() {
+        assertEquals(119060324, runTest(6));
     }
 }

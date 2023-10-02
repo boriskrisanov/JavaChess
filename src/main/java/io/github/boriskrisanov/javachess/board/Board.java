@@ -1,19 +1,15 @@
 package io.github.boriskrisanov.javachess.board;
 
-import io.github.boriskrisanov.javachess.piece.King;
-import io.github.boriskrisanov.javachess.piece.Pawn;
-import io.github.boriskrisanov.javachess.piece.Piece;
+import io.github.boriskrisanov.javachess.piece.*;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Objects;
+import java.util.*;
 
 /**
  * Holds the current state of the game (piece positions, side to move, check, checkmate and en passant target square)
  */
 public class Board {
     private Piece[] board = new Piece[64];
-    private Square enPassantTargetSquare;
+    private byte enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
     private int halfMoveClock;
@@ -59,16 +55,16 @@ public class Board {
                 int n = Integer.parseInt(String.valueOf(c));
                 i += n - 1;
             }
-            board[i] = Piece.fromChar(c, new Square(i), this);
+            board[i] = Piece.fromChar(c, (byte) i, this);
             i++;
         }
 
         this.castlingRights = new CastlingRights(castling);
 
         if (enPassantTargetSquare.equals("-")) {
-            this.enPassantTargetSquare = null;
+            this.enPassantTargetSquare = -1;
         } else {
-            this.enPassantTargetSquare = new Square(enPassantTargetSquare.toLowerCase());
+            this.enPassantTargetSquare = Square.fromString(enPassantTargetSquare.toLowerCase());
         }
 
         this.sideToMove = sideToMove.equals("w") ? Piece.Color.WHITE : Piece.Color.BLACK;
@@ -109,7 +105,7 @@ public class Board {
 
         fen.append(sideToMove == Piece.Color.WHITE ? " w " : " b ");
         fen.append(castlingRights).append(" ");
-        fen.append(enPassantTargetSquare == null ? "-" : enPassantTargetSquare);
+        fen.append(enPassantTargetSquare == -1 ? "-" : enPassantTargetSquare);
         fen.append(" ").append(halfMoveClock);
         fen.append(" ").append(moveNumber);
 
@@ -160,37 +156,31 @@ public class Board {
         return board[square.getIndex()];
     }
 
-
-    public Piece getPieceOn(String square) {
-        return getPieceOn(new Square(square));
-    }
-
     /**
      * Makes a move on the board without checking if it is legal. Also updates en passant target square.
      */
     public void makeMove(Move move) {
-        int startIndex = move.start().getIndex();
-        int destinationIndex = move.destination().getIndex();
+        int destinationIndex = move.destination();
 
-        var piece = board[startIndex];
+        var piece = board[move.start()];
 
         // The right to capture en passant has been lost because another move has been made
-        enPassantTargetSquare = null;
+        enPassantTargetSquare = -1;
 
         // Set the en passant target square if a pawn moved 2 squares forward
         if (piece instanceof Pawn) {
-            if (destinationIndex == startIndex - 8 * 2) {
-                enPassantTargetSquare = new Square(startIndex - 8);
-            } else if (destinationIndex == startIndex + 8 * 2) {
-                enPassantTargetSquare = new Square(startIndex + 8);
+            if (destinationIndex == move.start() - 8 * 2) {
+                enPassantTargetSquare = (byte) (move.start() - 8);
+            } else if (destinationIndex == move.destination() + 8 * 2) {
+                enPassantTargetSquare = (byte) (move.destination() + 8);
             }
         }
 
         if (move.capturedPiece() != null) {
-            board[move.capturedPiece().getPosition().getIndex()] = null;
+            board[move.capturedPiece().getPosition()] = null;
         }
 
-        board[startIndex] = null;
+        board[move.start()] = null;
         board[destinationIndex] = piece;
 
         board[destinationIndex].setPosition(move.destination());
@@ -202,17 +192,17 @@ public class Board {
     public void unmakeMove(Move move) {
         // makeMove(new Move(move.destination(), move.start(), null));
 
-        Piece piece = board[move.destination().getIndex()];
+        Piece piece = board[move.destination()];
 
         if (move.capturedPiece() != null) {
-            board[move.destination().getIndex()] = null;
-            board[move.start().getIndex()] = piece;
-            board[move.capturedPiece().getPosition().getIndex()] = move.capturedPiece();
-            board[move.capturedPiece().getPosition().getIndex()].setPosition(move.capturedPiece().getPosition());
-            board[move.capturedPiece().getPosition().getIndex()].setBoard(this);
+            board[move.destination()] = null;
+            board[move.start()] = piece;
+            board[move.capturedPiece().getPosition()] = move.capturedPiece();
+            board[move.capturedPiece().getPosition()].setPosition(move.capturedPiece().getPosition());
+            board[move.capturedPiece().getPosition()].setBoard(this);
         } else {
-            board[move.destination().getIndex()] = null;
-            board[move.start().getIndex()] = piece;
+            board[move.destination()] = null;
+            board[move.start()] = piece;
         }
 
         piece.setPosition(move.start());
@@ -256,8 +246,8 @@ public class Board {
             return false;
         }
 
-        ArrayList<Square> squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
-        Square kingPos = king.getPosition();
+        ArrayList<Byte> squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
+        Byte kingPos = king.getPosition();
 
         return squaresAttackedBySide.contains(kingPos);
     }
@@ -284,14 +274,14 @@ public class Board {
         // throw new InvalidPositionException(color.name() + " king not found on board");
     }
 
-    public ArrayList<Square> getSquaresAttackedBySide(Piece.Color side) {
-        var squares = new ArrayList<Square>();
+    public ArrayList<Byte> getSquaresAttackedBySide(Piece.Color side) {
+        var squares = new ArrayList<Byte>();
 
-        Arrays.stream(board)
-                .filter(piece -> piece != null && piece.getColor() == side)
-                .forEach(piece ->
-                        squares.addAll(piece.getAttackingSquares())
-                );
+        for (Piece piece : board) {
+            if (piece != null && piece.getColor() == side) {
+                squares.addAll(piece.getAttackingSquares());
+            }
+        }
 
         return squares;
     }
@@ -333,7 +323,7 @@ public class Board {
         return board;
     }
 
-    public Square getEnPassantTargetSquare() {
+    public byte getEnPassantTargetSquare() {
         return enPassantTargetSquare;
     }
 

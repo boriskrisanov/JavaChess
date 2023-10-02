@@ -1,9 +1,8 @@
 package io.github.boriskrisanov.javachess;
 
-import io.github.boriskrisanov.javachess.board.Move;
-import io.github.boriskrisanov.javachess.board.Square;
+import io.github.boriskrisanov.javachess.board.*;
 import io.github.boriskrisanov.javachess.piece.*;
-import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.*;
 
 import java.util.*;
 
@@ -12,30 +11,6 @@ public class Util {
         expected.sort(Comparator.comparing(Square::getIndex));
         actual.sort(Comparator.comparing(Square::getIndex));
         Assertions.assertEquals(expected, actual);
-    }
-
-    public static void assertMoveListEquals(String[] expected, List<Move> actual) {
-        var expectedSquares = new ArrayList<>(
-                Arrays.stream(expected)
-                        .map(Square::new)
-                        .toList()
-        );
-
-        var actualSquares = new ArrayList<>(
-                actual.stream()
-                        .map(Move::destination)
-                        .toList()
-        );
-
-        assertSquareListEquals(expectedSquares, actualSquares);
-    }
-
-    public static ArrayList<Square> squareListFromStringArray(String[] array) {
-        var squares = new ArrayList<Square>();
-
-        Arrays.stream(array).forEach(s -> squares.add(new Square(s)));
-
-        return squares;
     }
 
     /**

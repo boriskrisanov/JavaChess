@@ -1,92 +1,70 @@
 package io.github.boriskrisanov.javachess.piece;
 
-import io.github.boriskrisanov.javachess.board.Board;
-import io.github.boriskrisanov.javachess.board.EdgeDistance;
-import io.github.boriskrisanov.javachess.board.Move;
-import io.github.boriskrisanov.javachess.board.Square;
+import io.github.boriskrisanov.javachess.board.*;
 
-import java.util.ArrayList;
+import java.util.*;
 
 public class Rook extends Piece {
 
-    public Rook(Color color, Square position, Board board) {
+    public Rook(Color color, byte position, Board board) {
         super(color, position, board);
     }
 
     @Override
-    public  ArrayList<Square> getAttackingSquares() {
-        ArrayList<Integer> moveIndexes = new ArrayList<>();
+    public ArrayList<Byte> getAttackingSquares() {
+        ArrayList<Byte> moves = new ArrayList<>();
 
-        moveIndexes.addAll(getLegalMoveIndexesOnLine(Direction.NORTH));
-        moveIndexes.addAll(getLegalMoveIndexesOnLine(Direction.SOUTH));
-        moveIndexes.addAll(getLegalMoveIndexesOnLine(Direction.WEST));
-        moveIndexes.addAll(getLegalMoveIndexesOnLine(Direction.EAST));
+        moves.addAll(getLegalMoveIndexesOnLine(Direction.NORTH));
+        moves.addAll(getLegalMoveIndexesOnLine(Direction.SOUTH));
+        moves.addAll(getLegalMoveIndexesOnLine(Direction.WEST));
+        moves.addAll(getLegalMoveIndexesOnLine(Direction.EAST));
 
-        return new ArrayList<>(
-                moveIndexes.stream()
-                        .map(Square::new)
-                        .toList()
-        );
+        return moves;
     }
 
-    @Override
-    public  ArrayList<Move> getLegalMoves() {
-        // TODO: Castling
-        ArrayList<Square> attackingSquares = getAttackingSquares();
-        var legalMoves = new ArrayList<Move>();
-
-        attackingSquares.stream()
-                .map(square -> new Move(this.position, square, board.getPieceOn(square.getIndex())))
-                .filter(move -> !board.isSideInCheckAfterMove(this.color, move))
-                .forEach(legalMoves::add);
-
-        return legalMoves;
-    }
-
-    private ArrayList<Integer> getLegalMoveIndexesOnLine(Direction direction) {
+    private ArrayList<Byte> getLegalMoveIndexesOnLine(Direction direction) {
         interface PossibleSquareCalculator {
-            int calculate(int i);
+            byte calculate(byte i);
         }
 
         var edgeDistance = new EdgeDistance(position);
-        int index = position.getIndex();
         int maxI = 0;
-        PossibleSquareCalculator possibleSquareCalculator = i -> 0;
+        PossibleSquareCalculator possibleSquareCalculator = i -> (byte) 0;
 
         switch (direction) {
             case NORTH -> {
                 maxI = edgeDistance.top + 1;
-                possibleSquareCalculator = i -> index + (i * -8);
+                possibleSquareCalculator = i -> (byte) (position + (i * -8));
             }
             case SOUTH -> {
                 maxI = edgeDistance.bottom + 1;
-                possibleSquareCalculator = i -> index + (i * 8);
+                possibleSquareCalculator = i -> (byte) (position + (i * 8));
             }
             case WEST -> {
                 maxI = edgeDistance.left + 1;
-                possibleSquareCalculator = i -> index - i;
+                possibleSquareCalculator = i -> (byte) (position - i);
             }
             case EAST -> {
                 maxI = edgeDistance.right + 1;
-                possibleSquareCalculator = i -> index + i;
+                possibleSquareCalculator = i -> (byte) (position + i);
             }
         }
 
-        ArrayList<Integer> possibleMoveIndexes = new ArrayList<>();
+        ArrayList<Byte> possibleMoves = new ArrayList<>();
 
-        for (int i = 1; i < maxI; i++) {
-            int possibleSquare = possibleSquareCalculator.calculate(i);
+        for (byte i = 1; i < maxI; i++) {
+            byte possibleSquare = possibleSquareCalculator.calculate(i);
             var targetPiece = board.getPieceOn(possibleSquare);
 
             if (targetPiece == null) {
                 // Square is empty, we can keep moving in this direction
-                possibleMoveIndexes.add(possibleSquare);
+                possibleMoves.add(possibleSquare);
                 continue;
             }
 
             if (targetPiece.getColor() == this.color.getOpposite()) {
                 // We can capture the piece but can't move any further in this direction
-                possibleMoveIndexes.add(possibleSquare);
+                possibleMoves.add(possibleSquare);
                 break;
             } else if (targetPiece.getColor() == this.color) {
                 // One of our own pieces is in the way, so we can't capture or move past it
@@ -94,7 +72,7 @@ public class Rook extends Piece {
             }
         }
 
-        return possibleMoveIndexes;
+        return possibleMoves;
     }
 
     private enum Direction {

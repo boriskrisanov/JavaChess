@@ -1,19 +1,17 @@
 package io.github.boriskrisanov.javachess.piece;
 
-import io.github.boriskrisanov.javachess.board.Board;
-import io.github.boriskrisanov.javachess.board.Move;
-import io.github.boriskrisanov.javachess.board.Square;
+import io.github.boriskrisanov.javachess.board.*;
 
-import java.util.ArrayList;
+import java.util.*;
 
-import static io.github.boriskrisanov.javachess.piece.Piece.Color.WHITE;
+import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
 
 public abstract class Piece {
     protected final Color color;
-    protected Square position;
+    protected byte position;
     protected Board board;
 
-    public Piece(Color color, Square position, Board board) {
+    public Piece(Color color, byte position, Board board) {
         this.color = color;
         this.position = position;
         this.board = board;
@@ -26,7 +24,9 @@ public abstract class Piece {
      * @param position The square on which the piece should be placed
      * @param board    The board on which the piece should be placed
      */
-    public static Piece fromChar(char c, Square position, Board board) {
+
+    // TODO: Create separate function for filtering out pseudo legal moves
+    public static Piece fromChar(char c, byte position, Board board) {
         Piece piece = null;
         Color color = Character.isUpperCase(c) ? WHITE : Color.BLACK;
 
@@ -43,10 +43,25 @@ public abstract class Piece {
     }
 
 
-    public abstract ArrayList<Square> getAttackingSquares();
+    public abstract ArrayList<Byte> getAttackingSquares();
 
+    public ArrayList<Move> getLegalMoves() {
+        ArrayList<Move> moves = new ArrayList<>();
 
-    public abstract ArrayList<Move> getLegalMoves();
+        for (byte attackingSquare : getAttackingSquares()) {
+            Piece capturedPiece = board.getPieceOn(attackingSquare);
+            Move move = new Move(position, attackingSquare, capturedPiece);
+
+            if (!board.isSideInCheckAfterMove(this.color, move)
+                    && (board.isSquareEmpty(attackingSquare)
+                    || board.getPieceOn(attackingSquare).getColor() == this.color.getOpposite()
+            )) {
+                moves.add(move);
+            }
+        }
+
+        return moves;
+    }
 
     /**
      * @return The piece's algebraic notation letter
@@ -57,11 +72,11 @@ public abstract class Piece {
         return color;
     }
 
-    public Square getPosition() {
+    public byte getPosition() {
         return position;
     }
 
-    public void setPosition(Square position) {
+    public void setPosition(byte position) {
         this.position = position;
     }
 
