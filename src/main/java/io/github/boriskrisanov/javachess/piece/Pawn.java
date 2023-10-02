@@ -3,6 +3,7 @@ package io.github.boriskrisanov.javachess.piece;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
+import java.util.stream.*;
 
 public class Pawn extends Piece {
 
@@ -11,7 +12,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public  ArrayList<Square> getAttackingSquares() {
+    public ArrayList<Square> getAttackingSquares() {
         ArrayList<Integer> moveIndexes = new ArrayList<>();
 
         var edgeDistance = new EdgeDistance(position);
@@ -48,7 +49,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public  ArrayList<Move> getLegalMoves() {
+    public ArrayList<Move> getLegalMoves() {
         // TODO: Promotion
         var legalMoves = new ArrayList<Move>();
         var attackingSquares = getAttackingSquares();
@@ -104,7 +105,9 @@ public class Pawn extends Piece {
 
         }
 
-        return legalMoves;
+        return (ArrayList<Move>) legalMoves.stream()
+                .filter(move -> board.getCheckStateAfterMove(move) != this.color)
+                .collect(Collectors.toList());
     }
 
     @Override

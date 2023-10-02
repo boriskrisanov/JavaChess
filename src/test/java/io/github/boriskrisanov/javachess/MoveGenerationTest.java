@@ -7,7 +7,6 @@ import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 public class MoveGenerationTest {
     private long generateMoves(Board board, int depth, TreeMap<String, Long> moveCounts, boolean rootNode) {
         long positionsReached = 0;
@@ -38,9 +37,6 @@ public class MoveGenerationTest {
     private long runTest(int depth) {
         Board board = new Board();
 
-//        board.makeMove(new Move(new Square("a2"), new Square("a4"), null));
-//         board.makeMove(new Move(new Square("h7"), new Square("h5"), null));
-
         var moveCounts = new TreeMap<String, Long>();
 
         long result = generateMoves(board, depth, moveCounts, true);
@@ -64,7 +60,11 @@ public class MoveGenerationTest {
 
     @Test
     void testDepth3() {
-//        runTest(1);
         assertEquals(8902, runTest(3));
+    }
+
+    @Test
+    void testDepth4() {
+        assertEquals(197281, runTest(4));
     }
 }
