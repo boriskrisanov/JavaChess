@@ -160,8 +160,6 @@ public class Board {
      * Makes a move on the board without checking if it is legal. Also updates en passant target square.
      */
     public void makeMove(Move move) {
-        int destinationIndex = move.destination();
-
         var piece = board[move.start()];
 
         // The right to capture en passant has been lost because another move has been made
@@ -169,10 +167,10 @@ public class Board {
 
         // Set the en passant target square if a pawn moved 2 squares forward
         if (piece instanceof Pawn) {
-            if (destinationIndex == move.start() - 8 * 2) {
+            if (move.destination() == move.start() - 8 * 2) {
                 enPassantTargetSquare = (byte) (move.start() - 8);
-            } else if (destinationIndex == move.destination() + 8 * 2) {
-                enPassantTargetSquare = (byte) (move.destination() + 8);
+            } else if (move.destination() == move.start() + 8 * 2) {
+                enPassantTargetSquare = (byte) (move.start() + 8);
             }
         }
 
@@ -181,10 +179,10 @@ public class Board {
         }
 
         board[move.start()] = null;
-        board[destinationIndex] = piece;
+        board[move.destination()] = piece;
 
-        board[destinationIndex].setPosition(move.destination());
-        board[destinationIndex].setBoard(this);
+        board[move.destination()].setPosition(move.destination());
+        board[move.destination()].setBoard(this);
 
         sideToMove = sideToMove.getOpposite();
     }

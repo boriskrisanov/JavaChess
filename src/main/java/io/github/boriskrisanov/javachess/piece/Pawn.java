@@ -47,11 +47,10 @@ public class Pawn extends Piece {
     public ArrayList<Move> getLegalMoves() {
         // TODO: Promotion
         var legalMoves = new ArrayList<Move>();
-        var attackingSquares = getAttackingSquares();
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
 
         // Captures
-        for (byte destinationSquare : attackingSquares) {
+        for (byte destinationSquare : getAttackingSquares()) {
             boolean isMoveEnPassantCapture = enPassantTargetSquare == destinationSquare;
             Piece capturedPiece = board.getPieceOn(destinationSquare);
 
@@ -64,9 +63,8 @@ public class Pawn extends Piece {
             }
 
             Move move = new Move(this.position, destinationSquare, capturedPiece);
-//            var checkStateAfterMove = board.getCheckStateAfterMove(move);
 
-            if (capturedPiece == null || capturedPiece.getColor() == this.color || board.isSideInCheckAfterMove(this.color, move)) {
+            if (capturedPiece == null || capturedPiece.getColor() == this.color) {
                 continue;
             }
 
@@ -92,26 +90,9 @@ public class Pawn extends Piece {
             }
         }
 
-        // En passant
-        if (this.color == Color.WHITE) {
+        legalMoves.removeIf(move -> board.isSideInCheckAfterMove(this.color, move));
 
-        } else {
-
-        }
-
-        ArrayList<Move> result = new ArrayList<>();
-
-        for (Move move : legalMoves) {
-            if (board.getCheckStateAfterMove(move) != this.color) {
-                result.add(move);
-            }
-        }
-
-        return result;
-
-//        return (ArrayList<Move>) legalMoves.stream()
-//                .filter(move -> board.getCheckStateAfterMove(move) != this.color)
-//                .collect(Collectors.toList());
+        return legalMoves;
     }
 
     @Override

@@ -5,7 +5,7 @@ import io.github.boriskrisanov.javachess.piece.*;
 public record Move(
         byte start,
         byte destination,
-         Piece capturedPiece
+        Piece capturedPiece
 ) {
     @Override
     public String toString() {

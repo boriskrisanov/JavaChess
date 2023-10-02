@@ -35,6 +35,8 @@ public class MoveGenerationTest {
     private long runTest(int depth) {
         Board board = new Board();
 
+//        board.makeMove(new Move(Square.fromString("c2"), Square.fromString("c3"), null));
+
         var moveCounts = new TreeMap<String, Long>();
 
         long result = generateMoves(board, depth, moveCounts, true);
