@@ -19,10 +19,10 @@ public class Pawn extends Piece {
 
         if (this.color == Color.WHITE) {
             if (!board.isSquareEmpty(position - 8 + 1) && edgeDistance.top > 0 && edgeDistance.right > 0) {
-                moveIndexes.add((int) (position - 8 + 1));
+                moveIndexes.add(position - 8 + 1);
             }
             if (!board.isSquareEmpty(position - 8 - 1) && edgeDistance.top > 0 && edgeDistance.left > 0) {
-                moveIndexes.add((int) (position - 8 - 1));
+                moveIndexes.add(position - 8 - 1);
             }
             if ((enPassantTargetSquare == position - 8 - 1 && edgeDistance.top > 0 && edgeDistance.left > 0)
                     || (enPassantTargetSquare == position - 8 + 1 && edgeDistance.top > 0 && edgeDistance.right > 0)) {
@@ -30,10 +30,10 @@ public class Pawn extends Piece {
             }
         } else {
             if (!board.isSquareEmpty(position + 8 + 1) && edgeDistance.bottom > 0 && edgeDistance.right > 0) {
-                moveIndexes.add((int) (position + 8 + 1));
+                moveIndexes.add(position + 8 + 1);
             }
             if (!board.isSquareEmpty(position + 8 - 1) && edgeDistance.bottom > 0 && edgeDistance.left > 0) {
-                moveIndexes.add((int) (position + 8 - 1));
+                moveIndexes.add(position + 8 - 1);
             }
             if ((enPassantTargetSquare == position + 8 - 1 && edgeDistance.bottom > 0 && edgeDistance.left > 0) || (enPassantTargetSquare == position + 8 + 1 && edgeDistance.bottom > 0 && edgeDistance.right > 0)) {
                 moveIndexes.add(enPassantTargetSquare);
@@ -74,18 +74,18 @@ public class Pawn extends Piece {
         // Normal moves
         if (this.color == Color.WHITE) {
             if (board.isSquareEmpty(position - 8)) {
-                legalMoves.add(new Move(position, (int) (position - 8), null));
+                legalMoves.add(new Move(position, position - 8, null));
 
                 if (Square.getRank(position) == 2 && board.isSquareEmpty(position - 8 * 2)) {
-                    legalMoves.add(new Move(position, (int) (position - 8 * 2), null));
+                    legalMoves.add(new Move(position, position - 8 * 2, null));
                 }
             }
         } else {
             if (board.isSquareEmpty(position + 8)) {
-                legalMoves.add(new Move(position, (int) (position + 8), null));
+                legalMoves.add(new Move(position, position + 8, null));
 
                 if (Square.getRank(position) == 7 && board.isSquareEmpty(position + 8 * 2)) {
-                    legalMoves.add(new Move(position, (int) (position + 8 * 2), null));
+                    legalMoves.add(new Move(position, position + 8 * 2, null));
                 }
             }
         }

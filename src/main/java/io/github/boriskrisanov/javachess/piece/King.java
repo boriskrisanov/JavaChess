@@ -13,31 +13,32 @@ public class King extends Piece {
     @Override
     public ArrayList<Integer> getAttackingSquares() {
         var moves = new ArrayList<Integer>();
+        var opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
         var edgeDist = new EdgeDistance(position);
 
-        if (edgeDist.left >= 1) {
-            moves.add((int) (position - 1));
+        if (edgeDist.left >= 1 && !opponentAttackingSquares.contains(position - 1)) {
+            moves.add(position - 1);
         }
-        if (edgeDist.right >= 1) {
-            moves.add((int) (position + 1));
+        if (edgeDist.right >= 1 && !opponentAttackingSquares.contains(position + 1)) {
+            moves.add(position + 1);
         }
-        if (edgeDist.top >= 1) {
-            moves.add((int) (position - 8));
+        if (edgeDist.top >= 1 && !opponentAttackingSquares.contains(position - 8)) {
+            moves.add(position - 8);
         }
-        if (edgeDist.bottom >= 1) {
-            moves.add((int) (position + 8));
+        if (edgeDist.bottom >= 1 && !opponentAttackingSquares.contains(position + 8)) {
+            moves.add(position + 8);
         }
-        if (edgeDist.left >= 1 && edgeDist.top >= 1) {
-            moves.add((int) (position - 8 - 1));
+        if (edgeDist.left >= 1 && edgeDist.top >= 1 && !opponentAttackingSquares.contains(position - 8 - 1)) {
+            moves.add(position - 8 - 1);
         }
-        if (edgeDist.right >= 1 && edgeDist.top >= 1) {
-            moves.add((int) (position - 8 + 1));
+        if (edgeDist.right >= 1 && edgeDist.top >= 1 && !opponentAttackingSquares.contains(position - 8 + 1)) {
+            moves.add(position - 8 + 1);
         }
-        if (edgeDist.left >= 1 && edgeDist.bottom >= 1) {
-            moves.add((int) (position + 8 - 1));
+        if (edgeDist.left >= 1 && edgeDist.bottom >= 1 && !opponentAttackingSquares.contains(position + 8 - 1)) {
+            moves.add(position + 8 - 1);
         }
-        if (edgeDist.right >= 1 && edgeDist.bottom >= 1) {
-            moves.add((int) (position + 8 + 1));
+        if (edgeDist.right >= 1 && edgeDist.bottom >= 1 && !opponentAttackingSquares.contains(position + 8 + 1)) {
+            moves.add(position + 8 + 1);
         }
 
         return moves;

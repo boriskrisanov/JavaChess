@@ -1,10 +1,10 @@
 package io.github.boriskrisanov.javachess.board;
 
 public class CastlingRights {
-    boolean whiteCanShortCastle;
-    boolean whiteCanLongCastle;
-    boolean blackCanShortCastle;
-    boolean blackCanLongCastle;
+    final boolean whiteCanShortCastle;
+    final boolean whiteCanLongCastle;
+    final boolean blackCanShortCastle;
+    final boolean blackCanLongCastle;
 
     public CastlingRights(boolean whiteCanShortCastle, boolean whiteCanLongCastle, boolean blackCanShortCastle, boolean blackCanLongCastle) {
         this.whiteCanShortCastle = whiteCanShortCastle;

@@ -12,15 +12,7 @@ public class Queen extends Piece {
 
     @Override
     public ArrayList<Integer> getAttackingSquares() {
-        var rook = new Rook(color, position, board);
-        var bishop = new Bishop(color, position, board);
-
-        var moves = new ArrayList<Integer>();
-
-        moves.addAll(rook.getAttackingSquares());
-        moves.addAll(bishop.getAttackingSquares());
-
-        return moves;
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, Direction.values());
     }
 
     @Override

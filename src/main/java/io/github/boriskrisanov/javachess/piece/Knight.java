@@ -17,28 +17,28 @@ public class Knight extends Piece {
         var edgeDistance = new EdgeDistance(position);
 
         if (edgeDistance.left >= 2 && edgeDistance.top >= 1) {
-            moves.add((int) (position - 8 - 2));
+            moves.add(position - 8 - 2);
         }
         if (edgeDistance.left >= 1 && edgeDistance.top >= 2) {
-            moves.add((int) (position - 8 * 2 - 1));
+            moves.add(position - 8 * 2 - 1);
         }
         if (edgeDistance.right >= 1 && edgeDistance.top >= 2) {
-            moves.add((int) (position - 8 * 2 + 1));
+            moves.add(position - 8 * 2 + 1);
         }
         if (edgeDistance.left >= 2 && edgeDistance.bottom >= 1) {
-            moves.add((int) (position - 2 + 8));
+            moves.add(position - 2 + 8);
         }
         if (edgeDistance.right >= 2 && edgeDistance.bottom >= 1) {
-            moves.add((int) (position + 2 + 8));
+            moves.add(position + 2 + 8);
         }
         if (edgeDistance.left >= 1 && edgeDistance.bottom >= 2) {
-            moves.add((int) (position + 8 * 2 - 1));
+            moves.add(position + 8 * 2 - 1);
         }
         if (edgeDistance.right >= 1 && edgeDistance.bottom >= 2) {
-            moves.add((int) (position + 8 * 2 + 1));
+            moves.add(position + 8 * 2 + 1);
         }
         if (edgeDistance.right >= 2 && edgeDistance.top >= 1) {
-            moves.add((int) (position - 8 + 2));
+            moves.add(position - 8 + 2);
         }
 
         return moves;

@@ -56,8 +56,9 @@ public class Board {
             if (Character.isDigit(c)) {
                 int n = Integer.parseInt(String.valueOf(c));
                 i += n - 1;
+            } else {
+                board[i] = Piece.fromChar(c, i, this);
             }
-            board[i] = Piece.fromChar(c, (int) i, this);
             i++;
         }
 
@@ -170,9 +171,9 @@ public class Board {
         // Set the en passant target square if a pawn moved 2 squares forward
         if (piece instanceof Pawn) {
             if (move.destination() == move.start() - 8 * 2) {
-                enPassantTargetSquare = (int) (move.start() - 8);
+                enPassantTargetSquare = move.start() - 8;
             } else if (move.destination() == move.start() + 8 * 2) {
-                enPassantTargetSquare = (int) (move.start() + 8);
+                enPassantTargetSquare = move.start() + 8;
             }
         }
 
@@ -189,7 +190,8 @@ public class Board {
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
-        PinLines.compute(this);
+        computePinLines(Piece.Color.WHITE);
+        computePinLines(Piece.Color.BLACK);
     }
 
     public void unmakeMove(Move move) {
@@ -214,14 +216,45 @@ public class Board {
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
-        PinLines.compute(this);
+        computePinLines(Piece.Color.WHITE);
+        computePinLines(Piece.Color.BLACK);
     }
 
     private void computeAttackingSquares() {
-        if (sideToMove == Piece.Color.WHITE) {
-            squaresAttackedByWhite = getSquaresAttackedBySide(Piece.Color.WHITE);
-        } else {
-            squaresAttackedByBlack = getSquaresAttackedBySide(Piece.Color.BLACK);
+        // TODO: It might not be necessary to run this for both sides
+        squaresAttackedByWhite = getSquaresAttackedBySide(Piece.Color.WHITE);
+        squaresAttackedByBlack = getSquaresAttackedBySide(Piece.Color.BLACK);
+    }
+
+    private void computePinLines(Piece.Color side) {
+        int kingPosition = getKing(side).getPosition();
+        Piece lastFriendlyPieceSeen = null;
+
+        // Reset pin directions
+        for (Piece piece : board) {
+            if (piece != null) {
+                piece.setPinDirection(PinDirection.NONE);
+            }
+        }
+
+        for (Direction direction : Direction.values()) {
+            for (int i = kingPosition; i < EdgeDistance.get(i, direction); i += direction.offset) {
+                if (board[i].isSlidingPiece() && board[i].getColor() != side) {
+                    if (lastFriendlyPieceSeen == null) {
+                        // King is in check from this direction
+                        break;
+                    }
+                    lastFriendlyPieceSeen.setPinDirection(PinDirection.VERTICAL);
+                    break;
+                }
+                if (lastFriendlyPieceSeen != null && board[i] != null) {
+                    // There are more than 2 friendly pieces in front of the king, therefore none of them are pinned
+                    break;
+                }
+                if (board[i].getColor() == side) {
+                    lastFriendlyPieceSeen = board[i];
+                }
+            }
         }
     }
 
@@ -289,8 +322,7 @@ public class Board {
     }
 
     public ArrayList<Integer> getSquaresAttackedBySide(Piece.Color side) {
-        return computeAttackingSquaresForSide(side);
-        // return side == Piece.Color.WHITE ? squaresAttackedByWhite : squaresAttackedByBlack;
+        return side == Piece.Color.WHITE ? squaresAttackedByWhite : squaresAttackedByBlack;
     }
 
     private ArrayList<Integer> computeAttackingSquaresForSide(Piece.Color side) {
