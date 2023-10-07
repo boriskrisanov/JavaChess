@@ -6,39 +6,39 @@ import java.util.*;
 
 public class Knight extends Piece {
 
-    public Knight(Color color, byte position, Board board) {
+    public Knight(Color color, int position, Board board) {
         super(color, position, board);
     }
 
     @Override
-    public ArrayList<Byte> getAttackingSquares() {
-        ArrayList<Byte> moves = new ArrayList<>();
+    public ArrayList<Integer> getAttackingSquares() {
+        ArrayList<Integer> moves = new ArrayList<>();
 
         var edgeDistance = new EdgeDistance(position);
 
         if (edgeDistance.left >= 2 && edgeDistance.top >= 1) {
-            moves.add((byte) (position - 8 - 2));
+            moves.add((int) (position - 8 - 2));
         }
         if (edgeDistance.left >= 1 && edgeDistance.top >= 2) {
-            moves.add((byte) (position - 8 * 2 - 1));
+            moves.add((int) (position - 8 * 2 - 1));
         }
         if (edgeDistance.right >= 1 && edgeDistance.top >= 2) {
-            moves.add((byte) (position - 8 * 2 + 1));
+            moves.add((int) (position - 8 * 2 + 1));
         }
         if (edgeDistance.left >= 2 && edgeDistance.bottom >= 1) {
-            moves.add((byte) (position - 2 + 8));
+            moves.add((int) (position - 2 + 8));
         }
         if (edgeDistance.right >= 2 && edgeDistance.bottom >= 1) {
-            moves.add((byte) (position + 2 + 8));
+            moves.add((int) (position + 2 + 8));
         }
         if (edgeDistance.left >= 1 && edgeDistance.bottom >= 2) {
-            moves.add((byte) (position + 8 * 2 - 1));
+            moves.add((int) (position + 8 * 2 - 1));
         }
         if (edgeDistance.right >= 1 && edgeDistance.bottom >= 2) {
-            moves.add((byte) (position + 8 * 2 + 1));
+            moves.add((int) (position + 8 * 2 + 1));
         }
         if (edgeDistance.right >= 2 && edgeDistance.top >= 1) {
-            moves.add((byte) (position - 8 + 2));
+            moves.add((int) (position - 8 + 2));
         }
 
         return moves;

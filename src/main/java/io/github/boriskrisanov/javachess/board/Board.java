@@ -9,7 +9,9 @@ import java.util.*;
  */
 public class Board {
     private Piece[] board = new Piece[64];
-    private byte enPassantTargetSquare;
+    private ArrayList<Integer> squaresAttackedByWhite = new ArrayList<>();
+    private ArrayList<Integer> squaresAttackedByBlack = new ArrayList<>();
+    private int enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
     private int halfMoveClock;
@@ -55,7 +57,7 @@ public class Board {
                 int n = Integer.parseInt(String.valueOf(c));
                 i += n - 1;
             }
-            board[i] = Piece.fromChar(c, (byte) i, this);
+            board[i] = Piece.fromChar(c, (int) i, this);
             i++;
         }
 
@@ -78,7 +80,7 @@ public class Board {
      */
     public String getFen() {
         var fen = new StringBuilder();
-        byte skippedSquaresCount = 0;
+        int skippedSquaresCount = 0;
 
         for (int i = 0; i < 64; i++) {
             boolean goingToNextRank = i % 8 == 0 && i != 0;
@@ -168,9 +170,9 @@ public class Board {
         // Set the en passant target square if a pawn moved 2 squares forward
         if (piece instanceof Pawn) {
             if (move.destination() == move.start() - 8 * 2) {
-                enPassantTargetSquare = (byte) (move.start() - 8);
+                enPassantTargetSquare = (int) (move.start() - 8);
             } else if (move.destination() == move.start() + 8 * 2) {
-                enPassantTargetSquare = (byte) (move.start() + 8);
+                enPassantTargetSquare = (int) (move.start() + 8);
             }
         }
 
@@ -185,6 +187,9 @@ public class Board {
         board[move.destination()].setBoard(this);
 
         sideToMove = sideToMove.getOpposite();
+
+        computeAttackingSquares();
+        PinLines.compute(this);
     }
 
     public void unmakeMove(Move move) {
@@ -207,6 +212,17 @@ public class Board {
         piece.setBoard(this);
 
         sideToMove = sideToMove.getOpposite();
+
+        computeAttackingSquares();
+        PinLines.compute(this);
+    }
+
+    private void computeAttackingSquares() {
+        if (sideToMove == Piece.Color.WHITE) {
+            squaresAttackedByWhite = getSquaresAttackedBySide(Piece.Color.WHITE);
+        } else {
+            squaresAttackedByBlack = getSquaresAttackedBySide(Piece.Color.BLACK);
+        }
     }
 
     /**
@@ -244,8 +260,8 @@ public class Board {
             return false;
         }
 
-        ArrayList<Byte> squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
-        Byte kingPos = king.getPosition();
+        ArrayList<Integer> squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
+        Integer kingPos = king.getPosition();
 
         return squaresAttackedBySide.contains(kingPos);
     }
@@ -272,8 +288,13 @@ public class Board {
         // throw new InvalidPositionException(color.name() + " king not found on board");
     }
 
-    public ArrayList<Byte> getSquaresAttackedBySide(Piece.Color side) {
-        var squares = new ArrayList<Byte>();
+    public ArrayList<Integer> getSquaresAttackedBySide(Piece.Color side) {
+        return computeAttackingSquaresForSide(side);
+        // return side == Piece.Color.WHITE ? squaresAttackedByWhite : squaresAttackedByBlack;
+    }
+
+    private ArrayList<Integer> computeAttackingSquaresForSide(Piece.Color side) {
+        var squares = new ArrayList<Integer>();
 
         for (Piece piece : board) {
             if (piece != null && piece.getColor() == side) {
@@ -321,7 +342,7 @@ public class Board {
         return board;
     }
 
-    public byte getEnPassantTargetSquare() {
+    public int getEnPassantTargetSquare() {
         return enPassantTargetSquare;
     }
 

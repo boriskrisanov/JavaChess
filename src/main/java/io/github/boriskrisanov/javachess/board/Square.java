@@ -19,13 +19,13 @@ public class Square {
         // @formatter:on
     }
 
-    public static byte fromString(String square) {
-        byte rank;
-        byte file;
+    public static int fromString(String square) {
+        int rank;
+        int file;
 
         try {
-            file = (byte) (square.toLowerCase().charAt(0) - 'a' + 1);
-            rank = (byte) Integer.parseInt(String.valueOf(square.charAt(1)));
+            file = square.toLowerCase().charAt(0) - 'a' + 1;
+            rank = Integer.parseInt(String.valueOf(square.charAt(1)));
         } catch (NumberFormatException | StringIndexOutOfBoundsException e) {
             throw new InvalidSquareException("Square \"" + square + "\" is not a valid square");
         }
@@ -34,10 +34,10 @@ public class Square {
             throw new InvalidSquareException("Square \"" + square + "\" is not a valid square");
         }
 
-        byte down = (byte) (8 * (8 - rank));
-        byte left = (byte) (file - 1);
+        int down = 8 * (8 - rank);
+        int left = file - 1;
 
-        return (byte) (down + left);
+        return down + left;
     }
 
     @Override
@@ -66,7 +66,7 @@ public class Square {
         return index;
     }
 
-    public static byte getRank(byte index) {
+    public static int getRank(int index) {
         // @formatter:off
         if      (index < 8)     return 8;
         else if (index < 8 * 2) return 7;
@@ -78,5 +78,9 @@ public class Square {
         else if (index < 8 * 8) return 1;
         // @formatter:on
         else throw new IllegalStateException();
+    }
+
+    public static int getFile(int index) {
+        return new EdgeDistance(index).left + 1;
     }
 }

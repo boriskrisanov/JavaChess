@@ -6,16 +6,16 @@ import java.util.*;
 
 public class Queen extends Piece {
 
-    public Queen(Color color, byte position, Board board) {
+    public Queen(Color color, int position, Board board) {
         super(color, position, board);
     }
 
     @Override
-    public ArrayList<Byte> getAttackingSquares() {
+    public ArrayList<Integer> getAttackingSquares() {
         var rook = new Rook(color, position, board);
         var bishop = new Bishop(color, position, board);
 
-        var moves = new ArrayList<Byte>();
+        var moves = new ArrayList<Integer>();
 
         moves.addAll(rook.getAttackingSquares());
         moves.addAll(bishop.getAttackingSquares());

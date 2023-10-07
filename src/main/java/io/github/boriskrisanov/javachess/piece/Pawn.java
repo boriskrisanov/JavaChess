@@ -6,23 +6,23 @@ import java.util.*;
 
 public class Pawn extends Piece {
 
-    public Pawn(Color color, byte position, Board board) {
+    public Pawn(Color color, int position, Board board) {
         super(color, position, board);
     }
 
     @Override
-    public ArrayList<Byte> getAttackingSquares() {
-        ArrayList<Byte> moveIndexes = new ArrayList<>();
+    public ArrayList<Integer> getAttackingSquares() {
+        ArrayList<Integer> moveIndexes = new ArrayList<>();
 
         var edgeDistance = new EdgeDistance(position);
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
 
         if (this.color == Color.WHITE) {
             if (!board.isSquareEmpty(position - 8 + 1) && edgeDistance.top > 0 && edgeDistance.right > 0) {
-                moveIndexes.add((byte) (position - 8 + 1));
+                moveIndexes.add((int) (position - 8 + 1));
             }
             if (!board.isSquareEmpty(position - 8 - 1) && edgeDistance.top > 0 && edgeDistance.left > 0) {
-                moveIndexes.add((byte) (position - 8 - 1));
+                moveIndexes.add((int) (position - 8 - 1));
             }
             if ((enPassantTargetSquare == position - 8 - 1 && edgeDistance.top > 0 && edgeDistance.left > 0)
                     || (enPassantTargetSquare == position - 8 + 1 && edgeDistance.top > 0 && edgeDistance.right > 0)) {
@@ -30,10 +30,10 @@ public class Pawn extends Piece {
             }
         } else {
             if (!board.isSquareEmpty(position + 8 + 1) && edgeDistance.bottom > 0 && edgeDistance.right > 0) {
-                moveIndexes.add((byte) (position + 8 + 1));
+                moveIndexes.add((int) (position + 8 + 1));
             }
             if (!board.isSquareEmpty(position + 8 - 1) && edgeDistance.bottom > 0 && edgeDistance.left > 0) {
-                moveIndexes.add((byte) (position + 8 - 1));
+                moveIndexes.add((int) (position + 8 - 1));
             }
             if ((enPassantTargetSquare == position + 8 - 1 && edgeDistance.bottom > 0 && edgeDistance.left > 0) || (enPassantTargetSquare == position + 8 + 1 && edgeDistance.bottom > 0 && edgeDistance.right > 0)) {
                 moveIndexes.add(enPassantTargetSquare);
@@ -50,7 +50,7 @@ public class Pawn extends Piece {
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
 
         // Captures
-        for (byte destinationSquare : getAttackingSquares()) {
+        for (int destinationSquare : getAttackingSquares()) {
             boolean isMoveEnPassantCapture = enPassantTargetSquare == destinationSquare;
             Piece capturedPiece = board.getPieceOn(destinationSquare);
 
@@ -74,18 +74,18 @@ public class Pawn extends Piece {
         // Normal moves
         if (this.color == Color.WHITE) {
             if (board.isSquareEmpty(position - 8)) {
-                legalMoves.add(new Move(position, (byte) (position - 8), null));
+                legalMoves.add(new Move(position, (int) (position - 8), null));
 
                 if (Square.getRank(position) == 2 && board.isSquareEmpty(position - 8 * 2)) {
-                    legalMoves.add(new Move(position, (byte) (position - 8 * 2), null));
+                    legalMoves.add(new Move(position, (int) (position - 8 * 2), null));
                 }
             }
         } else {
             if (board.isSquareEmpty(position + 8)) {
-                legalMoves.add(new Move(position, (byte) (position + 8), null));
+                legalMoves.add(new Move(position, (int) (position + 8), null));
 
                 if (Square.getRank(position) == 7 && board.isSquareEmpty(position + 8 * 2)) {
-                    legalMoves.add(new Move(position, (byte) (position + 8 * 2), null));
+                    legalMoves.add(new Move(position, (int) (position + 8 * 2), null));
                 }
             }
         }

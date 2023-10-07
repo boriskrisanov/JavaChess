@@ -6,13 +6,13 @@ import java.util.*;
 
 public class Rook extends Piece {
 
-    public Rook(Color color, byte position, Board board) {
+    public Rook(Color color, int position, Board board) {
         super(color, position, board);
     }
 
     @Override
-    public ArrayList<Byte> getAttackingSquares() {
-        ArrayList<Byte> moves = new ArrayList<>();
+    public ArrayList<Integer> getAttackingSquares() {
+        ArrayList<Integer> moves = new ArrayList<>();
 
         moves.addAll(getLegalMoveIndexesOnLine(Direction.NORTH));
         moves.addAll(getLegalMoveIndexesOnLine(Direction.SOUTH));
@@ -22,38 +22,38 @@ public class Rook extends Piece {
         return moves;
     }
 
-    private ArrayList<Byte> getLegalMoveIndexesOnLine(Direction direction) {
+    private ArrayList<Integer> getLegalMoveIndexesOnLine(Direction direction) {
         interface PossibleSquareCalculator {
-            byte calculate(byte i);
+            int calculate(int i);
         }
 
         var edgeDistance = new EdgeDistance(position);
         int maxI = 0;
-        PossibleSquareCalculator possibleSquareCalculator = i -> (byte) 0;
+        PossibleSquareCalculator possibleSquareCalculator = i -> (int) 0;
 
         switch (direction) {
             case NORTH -> {
                 maxI = edgeDistance.top + 1;
-                possibleSquareCalculator = i -> (byte) (position + (i * -8));
+                possibleSquareCalculator = i -> (int) (position + (i * -8));
             }
             case SOUTH -> {
                 maxI = edgeDistance.bottom + 1;
-                possibleSquareCalculator = i -> (byte) (position + (i * 8));
+                possibleSquareCalculator = i -> (int) (position + (i * 8));
             }
             case WEST -> {
                 maxI = edgeDistance.left + 1;
-                possibleSquareCalculator = i -> (byte) (position - i);
+                possibleSquareCalculator = i -> (int) (position - i);
             }
             case EAST -> {
                 maxI = edgeDistance.right + 1;
-                possibleSquareCalculator = i -> (byte) (position + i);
+                possibleSquareCalculator = i -> (int) (position + i);
             }
         }
 
-        ArrayList<Byte> possibleMoves = new ArrayList<>();
+        ArrayList<Integer> possibleMoves = new ArrayList<>();
 
-        for (byte i = 1; i < maxI; i++) {
-            byte possibleSquare = possibleSquareCalculator.calculate(i);
+        for (int i = 1; i < maxI; i++) {
+            int possibleSquare = possibleSquareCalculator.calculate(i);
             var targetPiece = board.getPieceOn(possibleSquare);
 
             if (targetPiece == null) {

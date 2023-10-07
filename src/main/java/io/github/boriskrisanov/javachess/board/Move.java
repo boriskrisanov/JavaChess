@@ -3,8 +3,8 @@ package io.github.boriskrisanov.javachess.board;
 import io.github.boriskrisanov.javachess.piece.*;
 
 public record Move(
-        byte start,
-        byte destination,
+        int start,
+        int destination,
         Piece capturedPiece
 ) {
     @Override

@@ -8,10 +8,11 @@ import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
 
 public abstract class Piece {
     protected final Color color;
-    protected byte position;
+    protected int position;
     protected Board board;
+    protected PinDirection pinDirection;
 
-    public Piece(Color color, byte position, Board board) {
+    public Piece(Color color, int position, Board board) {
         this.color = color;
         this.position = position;
         this.board = board;
@@ -26,29 +27,27 @@ public abstract class Piece {
      */
 
     // TODO: Create separate function for filtering out pseudo legal moves
-    public static Piece fromChar(char c, byte position, Board board) {
-        Piece piece = null;
-        Color color = Character.isUpperCase(c) ? WHITE : Color.BLACK;
+    public static Piece fromChar(char c, int position, Board board) {
+        Color color = Character.isUpperCase(c) ? WHITE : BLACK;
 
-        switch (Character.toLowerCase(c)) {
-            case 'p' -> piece = new Pawn(color, position, board);
-            case 'n' -> piece = new Knight(color, position, board);
-            case 'b' -> piece = new Bishop(color, position, board);
-            case 'r' -> piece = new Rook(color, position, board);
-            case 'q' -> piece = new Queen(color, position, board);
-            case 'k' -> piece = new King(color, position, board);
-        }
-
-        return piece;
+        return switch (Character.toLowerCase(c)) {
+            case 'p' -> new Pawn(color, position, board);
+            case 'n' -> new Knight(color, position, board);
+            case 'b' -> new Bishop(color, position, board);
+            case 'r' -> new Rook(color, position, board);
+            case 'q' -> new Queen(color, position, board);
+            case 'k' -> new King(color, position, board);
+            default -> throw new IllegalArgumentException(String.valueOf(c));
+        };
     }
 
 
-    public abstract ArrayList<Byte> getAttackingSquares();
+    public abstract ArrayList<Integer> getAttackingSquares();
 
     public ArrayList<Move> getLegalMoves() {
         ArrayList<Move> moves = new ArrayList<>();
 
-        for (byte attackingSquare : getAttackingSquares()) {
+        for (int attackingSquare : getAttackingSquares()) {
             Piece capturedPiece = board.getPieceOn(attackingSquare);
             Move move = new Move(position, attackingSquare, capturedPiece);
 
@@ -72,11 +71,11 @@ public abstract class Piece {
         return color;
     }
 
-    public byte getPosition() {
+    public int getPosition() {
         return position;
     }
 
-    public void setPosition(byte position) {
+    public void setPosition(int position) {
         this.position = position;
     }
 
@@ -88,6 +87,10 @@ public abstract class Piece {
         this.board = board;
     }
 
+    public boolean isSlidingPiece() {
+        return this instanceof Rook || this instanceof Bishop || this instanceof Queen;
+    }
+
     public enum Color {
         WHITE,
         BLACK;
@@ -95,5 +98,13 @@ public abstract class Piece {
         public Color getOpposite() {
             return this == WHITE ? BLACK : WHITE;
         }
+    }
+
+    public PinDirection getPinDirection() {
+        return pinDirection;
+    }
+
+    public void setPinDirection(PinDirection pinDirection) {
+        this.pinDirection = pinDirection;
     }
 }
