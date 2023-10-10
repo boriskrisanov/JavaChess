@@ -48,10 +48,6 @@ public abstract class Piece {
         ArrayList<Move> moves = new ArrayList<>();
 
         for (int attackingSquare : getAttackingSquares()) {
-            if (attackingSquare == 60) {
-                System.out.println();
-            }
-
             Piece capturedPiece = board.getPieceOn(attackingSquare);
             Move move = new Move(position, attackingSquare, capturedPiece);
 

@@ -222,8 +222,8 @@ public class Board {
 
     private void computeAttackingSquares() {
         // TODO: It might not be necessary to run this for both sides
-        squaresAttackedByWhite = getSquaresAttackedBySide(Piece.Color.WHITE);
-        squaresAttackedByBlack = getSquaresAttackedBySide(Piece.Color.BLACK);
+        squaresAttackedByWhite = computeAttackingSquaresForSide(Piece.Color.WHITE);
+        squaresAttackedByBlack = computeAttackingSquaresForSide(Piece.Color.BLACK);
     }
 
     private void computePinLines(Piece.Color side) {

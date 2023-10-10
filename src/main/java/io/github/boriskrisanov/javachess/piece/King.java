@@ -45,6 +45,27 @@ public class King extends Piece {
     }
 
     @Override
+    public ArrayList<Move> getLegalMoves() {
+        ArrayList<Integer> opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
+        var moves = new ArrayList<Move>();
+
+        for (Integer attackingSquare : getAttackingSquares()) {
+            if (opponentAttackingSquares.contains(attackingSquare)) {
+                continue;
+            }
+
+            Piece capturedPiece = board.getPieceOn(attackingSquare);
+            Move move = new Move(position, attackingSquare, capturedPiece);
+
+            if (board.isSquareEmpty(attackingSquare) || board.getPieceOn(attackingSquare).getColor() == this.color.getOpposite()) {
+                moves.add(move);
+            }
+        }
+
+        return moves;
+    }
+
+    @Override
     public char getChar() {
         return color == Color.WHITE ? 'K' : 'k';
     }
