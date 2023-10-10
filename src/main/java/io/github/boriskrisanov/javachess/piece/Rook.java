@@ -14,7 +14,18 @@ public class Rook extends Piece {
 
     @Override
     public ArrayList<Integer> getAttackingSquares() {
-        io.github.boriskrisanov.javachess.board.Direction[] directions = {UP, DOWN, LEFT, RIGHT};
+        var directions = new ArrayList<Direction>();
+
+        if (pinDirection != PinDirection.VERTICAL) {
+            directions.add(UP);
+            directions.add(DOWN);
+        }
+
+        if (pinDirection != PinDirection.HORIZONTAL) {
+            directions.add(LEFT);
+            directions.add(RIGHT);
+        }
+
         return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
 

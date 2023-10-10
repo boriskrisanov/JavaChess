@@ -233,7 +233,7 @@ public class Board {
         // Reset pin directions
         for (Piece piece : board) {
             if (piece != null) {
-                piece.setPinDirection(PinDirection.NONE);
+                piece.setPinDirection(null);
             }
         }
 

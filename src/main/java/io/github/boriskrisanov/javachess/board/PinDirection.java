@@ -4,5 +4,5 @@ public enum PinDirection {
     VERTICAL,
     HORIZONTAL,
     POSITIVE_DIAGONAL,
-    NONE, NEGATIVE_DIAGONAL
+    NEGATIVE_DIAGONAL
 }
