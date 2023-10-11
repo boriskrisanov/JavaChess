@@ -190,13 +190,10 @@ public class Board {
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
-        computePinLines(Piece.Color.WHITE);
-        computePinLines(Piece.Color.BLACK);
+        computePinLines();
     }
 
     public void unmakeMove(Move move) {
-        // makeMove(new Move(move.destination(), move.start(), null));
-
         Piece piece = board[move.destination()];
 
         if (move.capturedPiece() != null) {
@@ -216,8 +213,7 @@ public class Board {
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
-        computePinLines(Piece.Color.WHITE);
-        computePinLines(Piece.Color.BLACK);
+        computePinLines();
     }
 
     private void computeAttackingSquares() {
@@ -226,9 +222,13 @@ public class Board {
         squaresAttackedByBlack = computeAttackingSquaresForSide(Piece.Color.BLACK);
     }
 
+    private void computePinLines() {
+        computePinLines(Piece.Color.WHITE);
+        computePinLines(Piece.Color.BLACK);
+    }
+
     private void computePinLines(Piece.Color side) {
         int kingPosition = getKing(side).getPosition();
-        Piece lastFriendlyPieceSeen = null;
 
         // Reset pin directions
         for (Piece piece : board) {
@@ -238,23 +238,61 @@ public class Board {
         }
 
         for (Direction direction : Direction.values()) {
-            for (int i = kingPosition; i < EdgeDistance.get(i, direction); i += direction.offset) {
-                if (board[i].isSlidingPiece() && board[i].getColor() != side) {
+            Piece lastFriendlyPieceSeen = null;
+            PinDirection pinDirection = null;
+
+            if (direction == Direction.UP || direction == Direction.DOWN) {
+                pinDirection = PinDirection.VERTICAL;
+            } else if (direction == Direction.LEFT || direction == Direction.RIGHT) {
+                pinDirection = PinDirection.HORIZONTAL;
+            } else if (direction == Direction.BOTTOM_LEFT || direction == Direction.TOP_RIGHT) {
+                pinDirection = PinDirection.POSITIVE_DIAGONAL;
+            } else if (direction == Direction.BOTTOM_RIGHT || direction == Direction.TOP_LEFT) {
+                pinDirection = PinDirection.NEGATIVE_DIAGONAL;
+            }
+
+            for (int i = 0; i < EdgeDistance.get(kingPosition, direction); i++) {
+                int targetSquare = kingPosition + direction.offset * (i + 1);
+
+                if (board[targetSquare] == null) {
+                    continue;
+                }
+
+                if (board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() != side) {
                     if (lastFriendlyPieceSeen == null) {
                         // King is in check from this direction
                         break;
                     }
-                    lastFriendlyPieceSeen.setPinDirection(PinDirection.VERTICAL);
+
+                    lastFriendlyPieceSeen.setPinDirection(pinDirection);
                     break;
                 }
-                if (lastFriendlyPieceSeen != null && board[i] != null) {
+                if (lastFriendlyPieceSeen != null && board[targetSquare] != null) {
                     // There are more than 2 friendly pieces in front of the king, therefore none of them are pinned
                     break;
                 }
-                if (board[i].getColor() == side) {
-                    lastFriendlyPieceSeen = board[i];
+                if (board[targetSquare].getColor() == side) {
+                    lastFriendlyPieceSeen = board[targetSquare];
                 }
             }
+
+//            for (int i = kingPosition; i < EdgeDistance.get(i, direction); i += direction.offset) {
+//                if (board[i].isSlidingPiece() && board[i].getColor() != side) {
+//                    if (lastFriendlyPieceSeen == null) {
+//                        // King is in check from this direction
+//                        break;
+//                    }
+//                    lastFriendlyPieceSeen.setPinDirection(PinDirection.VERTICAL);
+//                    break;
+//                }
+//                if (lastFriendlyPieceSeen != null && board[i] != null) {
+//                    // There are more than 2 friendly pieces in front of the king, therefore none of them are pinned
+//                    break;
+//                }
+//                if (board[i].getColor() == side) {
+//                    lastFriendlyPieceSeen = board[i];
+//                }
+//            }
         }
     }
 

@@ -49,15 +49,15 @@ public class King extends Piece {
         ArrayList<Integer> opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
         var moves = new ArrayList<Move>();
 
-        for (Integer attackingSquare : getAttackingSquares()) {
-            if (opponentAttackingSquares.contains(attackingSquare)) {
+        for (Integer targetSquare : getAttackingSquares()) {
+            if (opponentAttackingSquares.contains(targetSquare) && targetSquare != board.getEnPassantTargetSquare()) {
                 continue;
             }
 
-            Piece capturedPiece = board.getPieceOn(attackingSquare);
-            Move move = new Move(position, attackingSquare, capturedPiece);
+            Piece capturedPiece = board.getPieceOn(targetSquare);
+            Move move = new Move(position, targetSquare, capturedPiece);
 
-            if (board.isSquareEmpty(attackingSquare) || board.getPieceOn(attackingSquare).getColor() == this.color.getOpposite()) {
+            if (board.isSquareEmpty(targetSquare) || board.getPieceOn(targetSquare).getColor() == this.color.getOpposite()) {
                 moves.add(move);
             }
         }

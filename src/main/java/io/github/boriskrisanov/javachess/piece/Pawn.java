@@ -4,8 +4,6 @@ import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
 
-import static io.github.boriskrisanov.javachess.board.PinDirection.*;
-
 public class Pawn extends Piece {
 
     public Pawn(Color color, int position, Board board) {
@@ -76,7 +74,7 @@ public class Pawn extends Piece {
         }
 
         // Normal moves
-        if (pinDirection != VERTICAL) {
+        if (pinDirection == null) {
             if (this.color == Color.WHITE) {
                 if (board.isSquareEmpty(position - 8)) {
                     legalMoves.add(new Move(position, position - 8, null));
