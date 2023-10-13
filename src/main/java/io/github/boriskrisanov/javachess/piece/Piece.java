@@ -48,6 +48,18 @@ public abstract class Piece {
         ArrayList<Move> moves = new ArrayList<>();
 
         for (int attackingSquare : getAttackingSquares()) {
+//            if (board.isSideInCheck(this.color) && !board.getCheckResolutions().contains(attackingSquare)) {
+//                continue;
+//            }
+
+//            if (board.isSideInCheck(this.color)) {
+//                for (int resolution : board.getCheckResolutions()) {
+////                    if (pinDirection EdgeDistance.get(resolution, Direction.UP))
+//
+//                    moves.add(new Move(position, resolution, board.getBoard()[resolution]));
+//                }
+//            }
+
             Piece capturedPiece = board.getPieceOn(attackingSquare);
             Move move = new Move(position, attackingSquare, capturedPiece);
 

@@ -4,6 +4,8 @@ import io.github.boriskrisanov.javachess.piece.*;
 
 import java.util.*;
 
+import static io.github.boriskrisanov.javachess.board.Direction.*;
+
 /**
  * Holds the current state of the game (piece positions, side to move, check, checkmate and en passant target square)
  */
@@ -11,6 +13,7 @@ public class Board {
     private Piece[] board = new Piece[64];
     private ArrayList<Integer> squaresAttackedByWhite = new ArrayList<>();
     private ArrayList<Integer> squaresAttackedByBlack = new ArrayList<>();
+    private ArrayList<Integer> checkResolutions = new ArrayList<>();
     private int enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
@@ -191,6 +194,7 @@ public class Board {
 
         computeAttackingSquares();
         computePinLines();
+        computeCheckResolutions();
     }
 
     public void unmakeMove(Move move) {
@@ -214,12 +218,124 @@ public class Board {
 
         computeAttackingSquares();
         computePinLines();
+        computeCheckResolutions();
     }
 
     private void computeAttackingSquares() {
-        // TODO: It might not be necessary to run this for both sides
         squaresAttackedByWhite = computeAttackingSquaresForSide(Piece.Color.WHITE);
         squaresAttackedByBlack = computeAttackingSquaresForSide(Piece.Color.BLACK);
+    }
+
+    /**
+     * Computes the squares to which a piece can move to block a check
+     */
+    private void computeCheckResolutions() {
+        if (!isSideInCheck(sideToMove)) {
+            return;
+        }
+
+        var sideInCheck = sideToMove;
+        var checkResolutionBuffer = new ArrayList<Integer>();
+
+        checkResolutions.clear();
+
+        int kingPosition = getKing(sideInCheck).getPosition();
+        int numSlidingCheckDirections = 0;
+
+        // Sliding pieces
+        for (Direction direction : Direction.values()) {
+            ArrayList<Integer> squares = new ArrayList<>();
+            for (int i = 0; i < EdgeDistance.get(kingPosition, direction); i++) {
+                int targetSquare = kingPosition + direction.offset * (i + 1);
+
+                if (board[targetSquare] == null) {
+                    squares.add(targetSquare);
+                } else if (board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() != sideInCheck) {
+                    // In check from this direction
+                    checkResolutionBuffer.addAll(squares);
+                    checkResolutionBuffer.add(targetSquare);
+                    numSlidingCheckDirections++;
+                    break;
+                } else if (board[targetSquare] != null) {
+                    // Piece is in the way, not in check from this direction
+                    break;
+                }
+            }
+        }
+
+        boolean checkFromNonSlidingPiece = false;
+
+        // Pawns
+        {
+            int p1;
+            int p2;
+            if (sideInCheck == Piece.Color.WHITE) {
+                p1 = kingPosition + Direction.TOP_LEFT.offset;
+                p2 = kingPosition + Direction.TOP_RIGHT.offset;
+
+            } else {
+                p1 = kingPosition + Direction.BOTTOM_LEFT.offset;
+                p2 = kingPosition + Direction.BOTTOM_RIGHT.offset;
+
+            }
+            if (board[p1] instanceof Pawn && board[p1].getColor() == sideInCheck.getOpposite()) {
+                checkResolutions.add(p1);
+                checkFromNonSlidingPiece = true;
+            }
+            if (board[p2] instanceof Pawn && board[p2].getColor() == sideInCheck.getOpposite()) {
+                checkResolutions.add(p2);
+                checkFromNonSlidingPiece = true;
+            }
+        }
+
+        // Knights
+        {
+            ArrayList<Integer> knightPositions = new ArrayList<>();
+            var edgeDistance = new EdgeDistance(kingPosition);
+
+            if (edgeDistance.left >= 1 && edgeDistance.top >= 2) {
+                knightPositions.add(kingPosition + LEFT.offset + UP.offset * 2);
+            }
+            if (edgeDistance.right >= 1 && edgeDistance.top >= 2) {
+                knightPositions.add(kingPosition + RIGHT.offset + UP.offset * 2);
+            }
+            if (edgeDistance.left >= 1 && edgeDistance.bottom >= 2) {
+                knightPositions.add(kingPosition + LEFT.offset + DOWN.offset * 2);
+            }
+            if (edgeDistance.right >= 1 && edgeDistance.bottom >= 2) {
+                knightPositions.add(kingPosition + RIGHT.offset + DOWN.offset * 2);
+            }
+            if (edgeDistance.left >= 2 && edgeDistance.top >= 1) {
+                knightPositions.add(kingPosition + LEFT.offset * 2 + UP.offset);
+            }
+            if (edgeDistance.left >= 2 && edgeDistance.bottom >= 1) {
+                knightPositions.add(kingPosition + LEFT.offset * 2 + DOWN.offset);
+            }
+            if (edgeDistance.right >= 2 && edgeDistance.top >= 1) {
+                knightPositions.add(kingPosition + RIGHT.offset * 2 + UP.offset);
+            }
+            if (edgeDistance.right >= 2 && edgeDistance.bottom >= 1) {
+                knightPositions.add(kingPosition + RIGHT.offset * 2 + DOWN.offset);
+            }
+
+            for (int position : knightPositions) {
+                if (board[position] instanceof Knight && board[position].getColor() == sideInCheck.getOpposite()) {
+                    checkResolutions.add(position);
+                    checkFromNonSlidingPiece = true;
+                    break;
+                }
+            }
+        }
+
+        if (numSlidingCheckDirections > 0 && checkFromNonSlidingPiece || numSlidingCheckDirections > 1) {
+            // Discovered double check, there are no resolution squares because it cannot be blocked and both pieces
+            // cannot be captured in one move.
+            checkResolutionBuffer.clear();
+        }
+
+        // TODO: This might cause concurrency bugs
+        checkResolutions.clear();
+        checkResolutions.addAll(checkResolutionBuffer);
     }
 
     private void computePinLines() {
@@ -275,24 +391,6 @@ public class Board {
                     lastFriendlyPieceSeen = board[targetSquare];
                 }
             }
-
-//            for (int i = kingPosition; i < EdgeDistance.get(i, direction); i += direction.offset) {
-//                if (board[i].isSlidingPiece() && board[i].getColor() != side) {
-//                    if (lastFriendlyPieceSeen == null) {
-//                        // King is in check from this direction
-//                        break;
-//                    }
-//                    lastFriendlyPieceSeen.setPinDirection(PinDirection.VERTICAL);
-//                    break;
-//                }
-//                if (lastFriendlyPieceSeen != null && board[i] != null) {
-//                    // There are more than 2 friendly pieces in front of the king, therefore none of them are pinned
-//                    break;
-//                }
-//                if (board[i].getColor() == side) {
-//                    lastFriendlyPieceSeen = board[i];
-//                }
-//            }
         }
     }
 
@@ -430,5 +528,9 @@ public class Board {
 
     public int getMoveNumber() {
         return moveNumber;
+    }
+
+    public ArrayList<Integer> getCheckResolutions() {
+        return checkResolutions;
     }
 }
