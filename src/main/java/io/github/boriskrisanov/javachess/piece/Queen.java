@@ -17,17 +17,18 @@ public class Queen extends Piece {
     public ArrayList<Integer> getAttackingSquares() {
         var directions = new ArrayList<Direction>();
 
-        if (pinDirection != VERTICAL) {
+        if (pinDirection == null) {
+            directions.addAll(List.of(Direction.values()));
+        } else if (pinDirection == VERTICAL) {
             directions.add(UP);
             directions.add(DOWN);
-        }
-
-        if (pinDirection != POSITIVE_DIAGONAL) {
+        } else if (pinDirection == HORIZONTAL) {
+            directions.add(LEFT);
+            directions.add(RIGHT);
+        } else if (pinDirection == POSITIVE_DIAGONAL) {
             directions.add(TOP_RIGHT);
             directions.add(BOTTOM_LEFT);
-        }
-
-        if (pinDirection != NEGATIVE_DIAGONAL) {
+        } else if (pinDirection == NEGATIVE_DIAGONAL) {
             directions.add(TOP_LEFT);
             directions.add(BOTTOM_RIGHT);
         }

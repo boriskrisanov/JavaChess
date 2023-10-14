@@ -16,12 +16,15 @@ public class Rook extends Piece {
     public ArrayList<Integer> getAttackingSquares() {
         var directions = new ArrayList<Direction>();
 
-        if (pinDirection != PinDirection.VERTICAL) {
+        if (pinDirection == null) {
             directions.add(UP);
             directions.add(DOWN);
-        }
-
-        if (pinDirection != PinDirection.HORIZONTAL) {
+            directions.add(LEFT);
+            directions.add(RIGHT);
+        } else if (pinDirection == PinDirection.VERTICAL) {
+            directions.add(UP);
+            directions.add(DOWN);
+        } else if (pinDirection == PinDirection.HORIZONTAL) {
             directions.add(LEFT);
             directions.add(RIGHT);
         }

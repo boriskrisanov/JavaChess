@@ -8,18 +8,20 @@ import static io.github.boriskrisanov.javachess.board.Direction.*;
 import static io.github.boriskrisanov.javachess.board.PinDirection.*;
 
 
-
 public class Bishop extends Piece {
     @Override
     public ArrayList<Integer> getAttackingSquares() {
         var directions = new ArrayList<Direction>();
 
-        if (pinDirection != POSITIVE_DIAGONAL) {
+        if (pinDirection == null) {
             directions.add(TOP_RIGHT);
             directions.add(BOTTOM_LEFT);
-        }
-
-        if (pinDirection != NEGATIVE_DIAGONAL) {
+            directions.add(TOP_LEFT);
+            directions.add(BOTTOM_RIGHT);
+        } else if (pinDirection == POSITIVE_DIAGONAL) {
+            directions.add(TOP_RIGHT);
+            directions.add(BOTTOM_LEFT);
+        } else if (pinDirection == NEGATIVE_DIAGONAL) {
             directions.add(TOP_LEFT);
             directions.add(BOTTOM_RIGHT);
         }
