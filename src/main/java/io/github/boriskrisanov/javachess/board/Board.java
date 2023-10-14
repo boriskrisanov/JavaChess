@@ -346,7 +346,7 @@ public class Board {
 
         // Reset pin directions
         for (Piece piece : board) {
-            if (piece != null) {
+            if (piece != null && piece.getColor() == side) {
                 piece.setPinDirection(null);
             }
         }
