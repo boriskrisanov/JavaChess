@@ -47,24 +47,38 @@ public abstract class Piece {
     public ArrayList<Move> getLegalMoves() {
         ArrayList<Move> moves = new ArrayList<>();
 
+        if (this instanceof Knight && this.color == BLACK) {
+//            System.out.println();
+        }
+
         for (int attackingSquare : getAttackingSquares()) {
-//            if (board.isSideInCheck(this.color) && !board.getCheckResolutions().contains(attackingSquare)) {
-//                continue;
-//            }
+            if (board.isSideInCheck(this.color)) {
+                for (int resolution : board.getCheckResolutions()) {
+                    // Check if this piece can move to the resolution square
+                    // TODO: Some of this might be redundant
 
-//            if (board.isSideInCheck(this.color)) {
-//                for (int resolution : board.getCheckResolutions()) {
-////                    if (pinDirection EdgeDistance.get(resolution, Direction.UP))
-//
-//                    moves.add(new Move(position, resolution, board.getBoard()[resolution]));
-//                }
-//            }
+                    if (resolution != attackingSquare) {
+                        continue;
+                    }
 
-            Piece capturedPiece = board.getPieceOn(attackingSquare);
-            Move move = new Move(position, attackingSquare, capturedPiece);
+                    if ((pinDirection == PinDirection.HORIZONTAL && Square.getRank(position) != Square.getRank(resolution))
+                            || (pinDirection == PinDirection.VERTICAL && Square.getFile(position) != Square.getFile(resolution))) {
+                        continue;
+                    }
 
-            if (board.isSquareEmpty(attackingSquare) || board.getPieceOn(attackingSquare).getColor() == this.color.getOpposite()) {
-                moves.add(move);
+                    // No need to check whether the square is empty because either the king is in check from a sliding
+                    // piece, in which case the resolution squares must be empty, or the king is in check from a pawn or
+                    // a knight, in which case it can be captured. A resolution square can never contain a friendly piece.
+
+                    moves.add(new Move(position, resolution, board.getBoard()[resolution]));
+                }
+            } else {
+                Piece capturedPiece = board.getPieceOn(attackingSquare);
+                Move move = new Move(position, attackingSquare, capturedPiece);
+
+                if (board.isSquareEmpty(attackingSquare) || board.getPieceOn(attackingSquare).getColor() == this.color.getOpposite()) {
+                    moves.add(move);
+                }
             }
         }
 

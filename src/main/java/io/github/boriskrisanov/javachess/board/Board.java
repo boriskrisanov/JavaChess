@@ -13,7 +13,7 @@ public class Board {
     private Piece[] board = new Piece[64];
     private ArrayList<Integer> squaresAttackedByWhite = new ArrayList<>();
     private ArrayList<Integer> squaresAttackedByBlack = new ArrayList<>();
-    private ArrayList<Integer> checkResolutions = new ArrayList<>();
+    private final ArrayList<Integer> checkResolutions = new ArrayList<>();
     private int enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
@@ -236,8 +236,6 @@ public class Board {
 
         var sideInCheck = sideToMove;
         var checkResolutionBuffer = new ArrayList<Integer>();
-
-        checkResolutions.clear();
 
         int kingPosition = getKing(sideInCheck).getPosition();
         int numSlidingCheckDirections = 0;

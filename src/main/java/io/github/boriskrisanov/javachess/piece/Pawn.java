@@ -48,10 +48,11 @@ public class Pawn extends Piece {
         // TODO: Promotion
         var legalMoves = new ArrayList<Move>();
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
+        var attackingSquares = getAttackingSquares();
 
         // Captures
         if (pinDirection == null) {
-            for (int destinationSquare : getAttackingSquares()) {
+            for (int destinationSquare : attackingSquares) {
                 boolean isMoveEnPassantCapture = enPassantTargetSquare == destinationSquare;
                 Piece capturedPiece = board.getPieceOn(destinationSquare);
 
@@ -92,6 +93,18 @@ public class Pawn extends Piece {
                     }
                 }
             }
+        }
+
+        if (board.isSideInCheck(this.color)) {
+            var legalResolutionMoves = new ArrayList<Move>();
+
+            for (Move move : legalMoves) {
+                if (board.getCheckResolutions().contains(move.destination())) {
+                    legalResolutionMoves.add(move);
+                }
+            }
+
+            return legalResolutionMoves;
         }
 
         return legalMoves;
