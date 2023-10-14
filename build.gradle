@@ -4,6 +4,7 @@ plugins {
 
 group = 'io.github.boriskrisanov.javachess'
 version = '1.0-SNAPSHOT'
+sourceCompatibility = '20'
 
 repositories {
     mavenCentral()

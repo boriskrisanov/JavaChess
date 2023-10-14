@@ -35,9 +35,9 @@ public class MoveGenerationTest {
     private long runTest(int depth) {
         Board board = new Board();
 
-        // board.makeMove(new Move(Square.fromString("c2"), Square.fromString("c3"), null));
-        // board.makeMove(new Move(Square.fromString("d7"), Square.fromString("d6"), null));
-        // board.makeMove(new Move(Square.fromString("d1"), Square.fromString("a4"), null));
+//        board.makeMove(new Move(Square.fromString("d2"), Square.fromString("d3"), null));
+//        board.makeMove(new Move(Square.fromString("a7"), Square.fromString("a6"), null));
+//        board.makeMove(new Move(Square.fromString("c1"), Square.fromString("e3"), null));
 
         var moveCounts = new TreeMap<String, Long>();
 
@@ -67,7 +67,6 @@ public class MoveGenerationTest {
 
     @Test
     void testDepth4() {
-//        runTest(1);
         assertEquals(197281, runTest(4));
     }
 
@@ -79,5 +78,15 @@ public class MoveGenerationTest {
     @Test
     void testDepth6() {
         assertEquals(119060324, runTest(6));
+    }
+
+    @Test
+    void testDepth7() {
+        assertEquals(3195901860L, runTest(7));
+    }
+
+    @Test
+    void testDepth8() {
+        assertEquals(84998978956L, runTest(8));
     }
 }

@@ -372,7 +372,10 @@ public class Board {
                     continue;
                 }
 
-                if (board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() != side) {
+                if (board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() != side
+                        && (((direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT) && (board[targetSquare] instanceof Rook || board[targetSquare] instanceof Queen))
+                        || ((direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT) && (board[targetSquare] instanceof Bishop || board[targetSquare] instanceof Queen)))
+                ) {
                     if (lastFriendlyPieceSeen == null) {
                         // King is in check from this direction
                         break;
