@@ -16,6 +16,18 @@ public class Rook extends Piece {
     public ArrayList<Integer> getAttackingSquares() {
         var directions = new ArrayList<Direction>();
 
+        directions.add(UP);
+        directions.add(DOWN);
+        directions.add(LEFT);
+        directions.add(RIGHT);
+
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+    }
+
+    @Override
+    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
+        var directions = new ArrayList<Direction>();
+
         if (pinDirection == null) {
             directions.add(UP);
             directions.add(DOWN);

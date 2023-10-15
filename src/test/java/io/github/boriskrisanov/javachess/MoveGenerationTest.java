@@ -35,10 +35,10 @@ public class MoveGenerationTest {
     private long runTest(int depth) {
         Board board = new Board();
 
-        // board.makeMove(new Move(Square.fromString("b2"), Square.fromString("b3"), null));
-        // board.makeMove(new Move(Square.fromString("a7"), Square.fromString("a6"), null));
-        // board.makeMove(new Move(Square.fromString("c1"), Square.fromString("b2"), null));
-        // board.makeMove(new Move(Square.fromString("a6"), Square.fromString("a5"), null));
+        // board.makeMove(new Move(Square.fromString("d2"), Square.fromString("d3"), null));
+        // board.makeMove(new Move(Square.fromString("c7"), Square.fromString("c6"), null));
+        // board.makeMove(new Move(Square.fromString("b1"), Square.fromString("d2"), null));
+        // board.makeMove(new Move(Square.fromString("d8"), Square.fromString("a5"), null));
 
         var moveCounts = new TreeMap<String, Long>();
 

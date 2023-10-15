@@ -66,6 +66,11 @@ public class King extends Piece {
     }
 
     @Override
+    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
+        return getAttackingSquares();
+    }
+
+    @Override
     public char getChar() {
         return color == Color.WHITE ? 'K' : 'k';
     }

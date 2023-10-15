@@ -15,6 +15,13 @@ public class Queen extends Piece {
 
     @Override
     public ArrayList<Integer> getAttackingSquares() {
+
+        var directions = new ArrayList<Direction>(List.of(Direction.values()));
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+    }
+
+    @Override
+    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
         var directions = new ArrayList<Direction>();
 
         if (pinDirection == null) {

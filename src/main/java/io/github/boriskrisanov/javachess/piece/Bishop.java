@@ -13,6 +13,19 @@ public class Bishop extends Piece {
     public ArrayList<Integer> getAttackingSquares() {
         var directions = new ArrayList<Direction>();
 
+        directions.add(TOP_RIGHT);
+        directions.add(BOTTOM_LEFT);
+        directions.add(TOP_LEFT);
+        directions.add(BOTTOM_RIGHT);
+
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+    }
+
+    @Override
+    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
+        ArrayList<Integer> moves = new ArrayList<>();
+        var directions = new ArrayList<Direction>();
+
         if (pinDirection == null) {
             directions.add(TOP_RIGHT);
             directions.add(BOTTOM_LEFT);

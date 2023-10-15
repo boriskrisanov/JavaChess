@@ -45,6 +45,19 @@ public class Knight extends Piece {
     }
 
     @Override
+    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
+        ArrayList<Integer> moves = new ArrayList<>();
+
+        if (pinDirection != null) {
+            // If the knight is pinned, it doesn't have any legal moves because it always moves in both axes and
+            // therefore can't move to the pin diagonal
+            return moves;
+        }
+
+        return getAttackingSquares();
+    }
+
+    @Override
     public char getChar() {
         return color == Color.WHITE ? 'N' : 'n';
     }

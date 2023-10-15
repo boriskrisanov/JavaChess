@@ -55,7 +55,7 @@ public class Pawn extends Piece {
             boolean isMoveEnPassantCapture = enPassantTargetSquare == targetSquare;
             Piece capturedPiece = board.getPieceOn(targetSquare);
 
-            if (isMoveEnPassantCapture && pinDirection != PinDirection.VERTICAL) {
+            if (isMoveEnPassantCapture && pinDirection != null) {
                 if (this.color == Color.WHITE) {
                     capturedPiece = board.getPieceOn(targetSquare + 8);
                 } else {
@@ -77,7 +77,7 @@ public class Pawn extends Piece {
         }
 
         // Normal moves
-        if (pinDirection == null) {
+        if (pinDirection == null || pinDirection == PinDirection.VERTICAL) {
             if (this.color == Color.WHITE) {
                 if (board.isSquareEmpty(position - 8)) {
                     legalMoves.add(new Move(position, position - 8, null));
@@ -110,6 +110,11 @@ public class Pawn extends Piece {
         }
 
         return legalMoves;
+    }
+
+    @Override
+    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
+        return getAttackingSquares();
     }
 
     @Override

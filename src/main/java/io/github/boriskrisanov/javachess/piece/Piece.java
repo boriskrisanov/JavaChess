@@ -44,14 +44,12 @@ public abstract class Piece {
 
     public abstract ArrayList<Integer> getAttackingSquares();
 
+    protected abstract ArrayList<Integer> getAttackingSquaresIncludingPins();
+
     public ArrayList<Move> getLegalMoves() {
         ArrayList<Move> moves = new ArrayList<>();
 
-        if (this instanceof Knight && this.color == BLACK) {
-//            System.out.println();
-        }
-
-        for (int attackingSquare : getAttackingSquares()) {
+        for (int attackingSquare : getAttackingSquaresIncludingPins()) {
             if (board.isSideInCheck(this.color)) {
                 for (int resolution : board.getCheckResolutions()) {
                     // Check if this piece can move to the resolution square
