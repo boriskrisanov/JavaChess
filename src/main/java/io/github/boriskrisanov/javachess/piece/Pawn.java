@@ -51,27 +51,29 @@ public class Pawn extends Piece {
         var attackingSquares = getAttackingSquares();
 
         // Captures
-        if (pinDirection == null) {
-            for (int destinationSquare : attackingSquares) {
-                boolean isMoveEnPassantCapture = enPassantTargetSquare == destinationSquare;
-                Piece capturedPiece = board.getPieceOn(destinationSquare);
+        for (int targetSquare : attackingSquares) {
+            boolean isMoveEnPassantCapture = enPassantTargetSquare == targetSquare;
+            Piece capturedPiece = board.getPieceOn(targetSquare);
 
-                if (isMoveEnPassantCapture) {
-                    if (this.color == Color.WHITE) {
-                        capturedPiece = board.getPieceOn(destinationSquare + 8);
-                    } else {
-                        capturedPiece = board.getPieceOn(destinationSquare - 8);
-                    }
+            if (isMoveEnPassantCapture && pinDirection != PinDirection.VERTICAL) {
+                if (this.color == Color.WHITE) {
+                    capturedPiece = board.getPieceOn(targetSquare + 8);
+                } else {
+                    capturedPiece = board.getPieceOn(targetSquare - 8);
                 }
-
-                Move move = new Move(this.position, destinationSquare, capturedPiece);
-
-                if (capturedPiece == null || capturedPiece.getColor() == this.color) {
-                    continue;
-                }
-
-                legalMoves.add(move);
             }
+
+            Move move = new Move(this.position, targetSquare, capturedPiece);
+
+            if (capturedPiece == null || capturedPiece.getColor() == this.color
+                    || (targetSquare == position - 8 - 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))
+                    || (targetSquare == position - 8 + 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
+                    || (targetSquare == position + 8 - 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
+                    || (targetSquare == position + 8 - 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))) {
+                continue;
+            }
+
+            legalMoves.add(move);
         }
 
         // Normal moves
