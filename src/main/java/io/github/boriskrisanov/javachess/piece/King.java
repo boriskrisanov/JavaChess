@@ -13,31 +13,30 @@ public class King extends Piece {
     @Override
     public ArrayList<Integer> getAttackingSquares() {
         var moves = new ArrayList<Integer>();
-        var opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
         var edgeDist = new EdgeDistance(position);
 
-        if (edgeDist.left >= 1 && !opponentAttackingSquares.contains(position - 1)) {
+        if (edgeDist.left >= 1) {
             moves.add(position - 1);
         }
-        if (edgeDist.right >= 1 && !opponentAttackingSquares.contains(position + 1)) {
+        if (edgeDist.right >= 1) {
             moves.add(position + 1);
         }
-        if (edgeDist.top >= 1 && !opponentAttackingSquares.contains(position - 8)) {
+        if (edgeDist.top >= 1) {
             moves.add(position - 8);
         }
-        if (edgeDist.bottom >= 1 && !opponentAttackingSquares.contains(position + 8)) {
+        if (edgeDist.bottom >= 1) {
             moves.add(position + 8);
         }
-        if (edgeDist.left >= 1 && edgeDist.top >= 1 && !opponentAttackingSquares.contains(position - 8 - 1)) {
+        if (edgeDist.left >= 1 && edgeDist.top >= 1) {
             moves.add(position - 8 - 1);
         }
-        if (edgeDist.right >= 1 && edgeDist.top >= 1 && !opponentAttackingSquares.contains(position - 8 + 1)) {
+        if (edgeDist.right >= 1 && edgeDist.top >= 1) {
             moves.add(position - 8 + 1);
         }
-        if (edgeDist.left >= 1 && edgeDist.bottom >= 1 && !opponentAttackingSquares.contains(position + 8 - 1)) {
+        if (edgeDist.left >= 1 && edgeDist.bottom >= 1) {
             moves.add(position + 8 - 1);
         }
-        if (edgeDist.right >= 1 && edgeDist.bottom >= 1 && !opponentAttackingSquares.contains(position + 8 + 1)) {
+        if (edgeDist.right >= 1 && edgeDist.bottom >= 1) {
             moves.add(position + 8 + 1);
         }
 
@@ -56,6 +55,11 @@ public class King extends Piece {
 
             Piece capturedPiece = board.getPieceOn(targetSquare);
             Move move = new Move(position, targetSquare, capturedPiece);
+
+            // TODO: Improve efficiency
+            if (board.isSideInCheck(this.color) && board.isSideInCheckAfterMove(this.color, move)) {
+                continue;
+            }
 
             if (board.isSquareEmpty(targetSquare) || board.getPieceOn(targetSquare).getColor() == this.color.getOpposite()) {
                 moves.add(move);

@@ -18,10 +18,10 @@ public class Pawn extends Piece {
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
 
         if (this.color == Color.WHITE) {
-            if (!board.isSquareEmpty(position - 8 + 1) && edgeDistance.top > 0 && edgeDistance.right > 0) {
+            if (edgeDistance.top > 0 && edgeDistance.right > 0) {
                 moveIndexes.add(position - 8 + 1);
             }
-            if (!board.isSquareEmpty(position - 8 - 1) && edgeDistance.top > 0 && edgeDistance.left > 0) {
+            if (edgeDistance.top > 0 && edgeDistance.left > 0) {
                 moveIndexes.add(position - 8 - 1);
             }
             if ((enPassantTargetSquare == position - 8 - 1 && edgeDistance.top > 0 && edgeDistance.left > 0)
@@ -29,10 +29,10 @@ public class Pawn extends Piece {
                 moveIndexes.add(enPassantTargetSquare);
             }
         } else {
-            if (!board.isSquareEmpty(position + 8 + 1) && edgeDistance.bottom > 0 && edgeDistance.right > 0) {
+            if (edgeDistance.bottom > 0 && edgeDistance.right > 0) {
                 moveIndexes.add(position + 8 + 1);
             }
-            if (!board.isSquareEmpty(position + 8 - 1) && edgeDistance.bottom > 0 && edgeDistance.left > 0) {
+            if (edgeDistance.bottom > 0 && edgeDistance.left > 0) {
                 moveIndexes.add(position + 8 - 1);
             }
             if ((enPassantTargetSquare == position + 8 - 1 && edgeDistance.bottom > 0 && edgeDistance.left > 0) || (enPassantTargetSquare == position + 8 + 1 && edgeDistance.bottom > 0 && edgeDistance.right > 0)) {
@@ -52,6 +52,10 @@ public class Pawn extends Piece {
 
         // Captures
         for (int targetSquare : attackingSquares) {
+            if (board.getBoard()[targetSquare] == null || board.getBoard()[targetSquare].getColor() == this.color) {
+                continue;
+            }
+
             boolean isMoveEnPassantCapture = enPassantTargetSquare == targetSquare;
             Piece capturedPiece = board.getPieceOn(targetSquare);
 

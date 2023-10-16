@@ -26,7 +26,6 @@ public abstract class Piece {
      * @param board    The board on which the piece should be placed
      */
 
-    // TODO: Create separate function for filtering out pseudo legal moves
     public static Piece fromChar(char c, int position, Board board) {
         Color color = Character.isUpperCase(c) ? WHITE : BLACK;
 

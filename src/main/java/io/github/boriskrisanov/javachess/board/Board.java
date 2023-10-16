@@ -318,14 +318,15 @@ public class Board {
 
             for (int position : knightPositions) {
                 if (board[position] instanceof Knight && board[position].getColor() == sideInCheck.getOpposite()) {
-                    checkResolutions.add(position);
+                    checkResolutionBuffer.add(position);
                     checkFromNonSlidingPiece = true;
+                    // There cannot be a check from 2 knights at once, so there is no need to check other possible knight positions
                     break;
                 }
             }
         }
 
-        if (numSlidingCheckDirections > 0 && checkFromNonSlidingPiece || numSlidingCheckDirections > 1) {
+        if ((numSlidingCheckDirections > 0 && checkFromNonSlidingPiece) || numSlidingCheckDirections > 1) {
             // Discovered double check, there are no resolution squares because it cannot be blocked and both pieces
             // cannot be captured in one move.
             checkResolutionBuffer.clear();

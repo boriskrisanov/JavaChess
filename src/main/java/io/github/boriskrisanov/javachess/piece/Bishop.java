@@ -23,7 +23,6 @@ public class Bishop extends Piece {
 
     @Override
     protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
-        ArrayList<Integer> moves = new ArrayList<>();
         var directions = new ArrayList<Direction>();
 
         if (pinDirection == null) {
