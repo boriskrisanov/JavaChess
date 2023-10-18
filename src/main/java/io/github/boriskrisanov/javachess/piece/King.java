@@ -49,7 +49,7 @@ public class King extends Piece {
         var moves = new ArrayList<Move>();
 
         for (int targetSquare : getAttackingSquares()) {
-            if (opponentAttackingSquares.contains(targetSquare) && targetSquare != board.getEnPassantTargetSquare()) {
+            if (opponentAttackingSquares.contains(targetSquare)) {
                 continue;
             }
 

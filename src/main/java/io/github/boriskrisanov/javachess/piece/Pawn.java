@@ -15,7 +15,6 @@ public class Pawn extends Piece {
         ArrayList<Integer> moveIndexes = new ArrayList<>();
 
         var edgeDistance = new EdgeDistance(position);
-        var enPassantTargetSquare = board.getEnPassantTargetSquare();
 
         if (this.color == Color.WHITE) {
             if (edgeDistance.top > 0 && edgeDistance.right > 0) {
@@ -24,19 +23,12 @@ public class Pawn extends Piece {
             if (edgeDistance.top > 0 && edgeDistance.left > 0) {
                 moveIndexes.add(position - 8 - 1);
             }
-            if ((enPassantTargetSquare == position - 8 - 1 && edgeDistance.top > 0 && edgeDistance.left > 0)
-                    || (enPassantTargetSquare == position - 8 + 1 && edgeDistance.top > 0 && edgeDistance.right > 0)) {
-                moveIndexes.add(enPassantTargetSquare);
-            }
         } else {
             if (edgeDistance.bottom > 0 && edgeDistance.right > 0) {
                 moveIndexes.add(position + 8 + 1);
             }
             if (edgeDistance.bottom > 0 && edgeDistance.left > 0) {
                 moveIndexes.add(position + 8 - 1);
-            }
-            if ((enPassantTargetSquare == position + 8 - 1 && edgeDistance.bottom > 0 && edgeDistance.left > 0) || (enPassantTargetSquare == position + 8 + 1 && edgeDistance.bottom > 0 && edgeDistance.right > 0)) {
-                moveIndexes.add(enPassantTargetSquare);
             }
         }
 
@@ -49,6 +41,7 @@ public class Pawn extends Piece {
         var legalMoves = new ArrayList<Move>();
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
         var attackingSquares = getAttackingSquares();
+        var edgeDist = new EdgeDistance(position);
 
         // Captures
         for (int targetSquare : attackingSquares) {
@@ -56,17 +49,7 @@ public class Pawn extends Piece {
                 continue;
             }
 
-            boolean isMoveEnPassantCapture = enPassantTargetSquare == targetSquare;
             Piece capturedPiece = board.getPieceOn(targetSquare);
-
-            if (isMoveEnPassantCapture && pinDirection != null) {
-                if (this.color == Color.WHITE) {
-                    capturedPiece = board.getPieceOn(targetSquare + 8);
-                } else {
-                    capturedPiece = board.getPieceOn(targetSquare - 8);
-                }
-            }
-
             Move move = new Move(this.position, targetSquare, capturedPiece);
 
             if (capturedPiece == null || capturedPiece.getColor() == this.color
@@ -78,6 +61,23 @@ public class Pawn extends Piece {
             }
 
             legalMoves.add(move);
+        }
+
+        // En passant
+        if (enPassantTargetSquare != -1) {
+            if (this.color == Color.WHITE) {
+                if (enPassantTargetSquare == position - 8 - 1 && (pinDirection == null || pinDirection == PinDirection.NEGATIVE_DIAGONAL) && edgeDist.left > 0 && edgeDist.top > 0) {
+                    legalMoves.add(new Move(position, enPassantTargetSquare, board.getPieceOn(position - 1)));
+                } else if (enPassantTargetSquare == position - 8 + 1 && (pinDirection == null || pinDirection == PinDirection.POSITIVE_DIAGONAL) && edgeDist.right > 0 && edgeDist.top > 0) {
+                    legalMoves.add(new Move(position, enPassantTargetSquare, board.getPieceOn(position + 1)));
+                }
+            } else {
+                if (enPassantTargetSquare == position + 8 - 1 && (pinDirection == null || pinDirection == PinDirection.POSITIVE_DIAGONAL) && edgeDist.left > 0 && edgeDist.bottom > 0) {
+                    legalMoves.add(new Move(position, enPassantTargetSquare, board.getPieceOn(position - 1)));
+                } else if (enPassantTargetSquare == position + 8 + 1 && (pinDirection == null || pinDirection == PinDirection.NEGATIVE_DIAGONAL) && edgeDist.right > 0 && edgeDist.bottom > 0) {
+                    legalMoves.add(new Move(position, enPassantTargetSquare, board.getPieceOn(position + 1)));
+                }
+            }
         }
 
         // Normal moves

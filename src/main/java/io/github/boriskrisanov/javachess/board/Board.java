@@ -12,6 +12,9 @@ import static io.github.boriskrisanov.javachess.board.Direction.*;
 public class Board {
     private Piece[] board = new Piece[64];
     private ArrayList<Integer> squaresAttackedByWhite = new ArrayList<>();
+    private final Deque<Move> moveHistory = new ArrayDeque<>();
+    // TODO: Store this in moves
+    private final Deque<Integer> enPassantSquareHistory = new ArrayDeque<>();
     private ArrayList<Integer> squaresAttackedByBlack = new ArrayList<>();
     private final ArrayList<Integer> checkResolutions = new ArrayList<>();
     private int enPassantTargetSquare;
@@ -166,6 +169,8 @@ public class Board {
      * Makes a move on the board without checking if it is legal. Also updates en passant target square.
      */
     public void makeMove(Move move) {
+        moveHistory.push(move);
+
         var piece = board[move.start()];
 
         // The right to capture en passant has been lost because another move has been made
@@ -179,6 +184,8 @@ public class Board {
                 enPassantTargetSquare = move.start() + 8;
             }
         }
+
+        enPassantSquareHistory.push(enPassantTargetSquare);
 
         if (move.capturedPiece() != null) {
             board[move.capturedPiece().getPosition()] = null;
@@ -198,6 +205,13 @@ public class Board {
     }
 
     public void unmakeMove(Move move) {
+        unmakeMove();
+    }
+
+    public void unmakeMove() {
+        var move = moveHistory.pop();
+        enPassantTargetSquare = enPassantSquareHistory.pop();
+
         Piece piece = board[move.destination()];
 
         if (move.capturedPiece() != null) {
