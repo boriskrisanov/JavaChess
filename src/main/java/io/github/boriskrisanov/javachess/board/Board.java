@@ -231,11 +231,11 @@ public class Board {
 
         sideToMove = sideToMove.getOpposite();
 
-        // computeAttackingSquares();
         squaresAttackedByWhite = boardState.whiteAttackingSquares();
         squaresAttackedByBlack = boardState.blackAttackingSquares();
+
         computePinLines();
-        // computeCheckResolutions();
+
         checkResolutions = boardState.checkResolutions();
     }
 
