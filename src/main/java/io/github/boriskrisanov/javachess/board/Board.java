@@ -218,8 +218,6 @@ public class Board {
         computeAttackingSquares();
         computePinLines();
         computeCheckResolutions();
-
-        // boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos));
     }
 
     public void unmakeMove(Move move) {
@@ -309,18 +307,15 @@ public class Board {
             if (sideInCheck == Piece.Color.WHITE) {
                 p1 = kingPosition + Direction.TOP_LEFT.offset;
                 p2 = kingPosition + Direction.TOP_RIGHT.offset;
-
             } else {
                 p1 = kingPosition + Direction.BOTTOM_LEFT.offset;
                 p2 = kingPosition + Direction.BOTTOM_RIGHT.offset;
-
             }
             if (board[p1] instanceof Pawn && board[p1].getColor() == sideInCheck.getOpposite()) {
-                checkResolutions.add(p1);
+                checkResolutionBuffer.add(p1);
                 checkFromNonSlidingPiece = true;
-            }
-            if (board[p2] instanceof Pawn && board[p2].getColor() == sideInCheck.getOpposite()) {
-                checkResolutions.add(p2);
+            } else if (board[p2] instanceof Pawn && board[p2].getColor() == sideInCheck.getOpposite()) {
+                checkResolutionBuffer.add(p2);
                 checkFromNonSlidingPiece = true;
             }
         }
