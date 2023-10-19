@@ -39,6 +39,7 @@ public class Pawn extends Piece {
     public ArrayList<Move> getLegalMoves() {
         // TODO: Promotion
         var legalMoves = new ArrayList<Move>();
+
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
         var attackingSquares = getAttackingSquares();
         var edgeDist = new EdgeDistance(position);
@@ -56,7 +57,7 @@ public class Pawn extends Piece {
                     || (targetSquare == position - 8 - 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))
                     || (targetSquare == position - 8 + 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
                     || (targetSquare == position + 8 - 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
-                    || (targetSquare == position + 8 - 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))) {
+                    || (targetSquare == position + 8 + 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))) {
                 continue;
             }
 
