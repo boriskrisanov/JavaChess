@@ -49,7 +49,7 @@ public class King extends Piece {
         var moves = new ArrayList<Move>();
 
         for (int targetSquare : getAttackingSquares()) {
-            if (opponentAttackingSquares.contains(targetSquare)) {
+            if (opponentAttackingSquares.contains(targetSquare) || (!board.isSquareEmpty(targetSquare) && board.getPieceOn(targetSquare).getColor() == this.color)) {
                 continue;
             }
 
@@ -61,9 +61,7 @@ public class King extends Piece {
                 continue;
             }
 
-            if (board.isSquareEmpty(targetSquare) || board.getPieceOn(targetSquare).getColor() == this.color.getOpposite()) {
-                moves.add(move);
-            }
+            moves.add(move);
         }
 
         return moves;

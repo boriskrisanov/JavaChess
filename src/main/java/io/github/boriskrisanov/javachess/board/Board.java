@@ -17,6 +17,8 @@ public class Board {
     private final Deque<BoardState> boardHistory = new ArrayDeque<>();
     private ArrayList<Integer> squaresAttackedByBlack = new ArrayList<>();
     private ArrayList<Integer> checkResolutions = new ArrayList<>();
+    private int whiteKingPos = 0;
+    private int blackKingPos = 0;
     private int enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
@@ -64,6 +66,13 @@ public class Board {
                 i += n - 1;
             } else {
                 board[i] = Piece.fromChar(c, i, this);
+                if (board[i] instanceof King) {
+                    if (board[i].getColor() == Piece.Color.WHITE) {
+                        whiteKingPos = i;
+                    } else {
+                        blackKingPos = i;
+                    }
+                }
             }
             i++;
         }
@@ -80,6 +89,8 @@ public class Board {
 
         this.halfMoveClock = Integer.parseInt(halfMoveClock);
         this.moveNumber = Integer.parseInt(fullMoveNumber);
+
+        boardHistory.push(new BoardState(this.enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos));
     }
 
     /**
@@ -170,6 +181,7 @@ public class Board {
      */
     public void makeMove(Move move) {
         moveHistory.push(move);
+        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos));
 
         var piece = board[move.start()];
 
@@ -182,6 +194,12 @@ public class Board {
                 enPassantTargetSquare = move.start() - 8;
             } else if (move.destination() == move.start() + 8 * 2) {
                 enPassantTargetSquare = move.start() + 8;
+            }
+        } else if (piece instanceof King) {
+            if (piece.getColor() == Piece.Color.WHITE) {
+                whiteKingPos = move.destination();
+            } else {
+                blackKingPos = move.destination();
             }
         }
 
@@ -201,7 +219,7 @@ public class Board {
         computePinLines();
         computeCheckResolutions();
 
-        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions));
+        // boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos));
     }
 
     public void unmakeMove(Move move) {
@@ -211,7 +229,10 @@ public class Board {
     public void unmakeMove() {
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
+
         enPassantTargetSquare = boardState.enPassantTargetSquare();
+        whiteKingPos = boardState.whiteKingPos();
+        blackKingPos = boardState.blackKingPos();
 
         Piece piece = board[move.destination()];
 
@@ -255,7 +276,7 @@ public class Board {
         var sideInCheck = sideToMove;
         var checkResolutionBuffer = new ArrayList<Integer>();
 
-        int kingPosition = getKing(sideInCheck).getPosition();
+        int kingPosition = getKingPosition(sideInCheck);
         int numSlidingCheckDirections = 0;
 
         // Sliding pieces
@@ -361,7 +382,7 @@ public class Board {
     }
 
     private void computePinLines(Piece.Color side) {
-        int kingPosition = getKing(side).getPosition();
+        int kingPosition = getKingPosition(side);
 
         // Reset pin directions
         for (Piece piece : board) {
@@ -442,15 +463,9 @@ public class Board {
     }
 
     public boolean isSideInCheck(Piece.Color side) {
-        King king = getKing(side);
-
-        if (king == null) {
-            // This position doesn't have a king, so the concept of check doesn't exist
-            return false;
-        }
+        int kingPos = getKingPosition(side);
 
         ArrayList<Integer> squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
-        Integer kingPos = king.getPosition();
 
         return squaresAttackedBySide.contains(kingPos);
     }
@@ -465,16 +480,8 @@ public class Board {
         return isInCheck;
     }
 
-
-    public King getKing(Piece.Color color) {
-        for (Piece piece : board) {
-            if (piece instanceof King && piece.getColor() == color) {
-                return (King) piece;
-            }
-        }
-
-        return null;
-        // throw new InvalidPositionException(color.name() + " king not found on board");
+    public int getKingPosition(Piece.Color color) {
+        return color == Piece.Color.WHITE ? whiteKingPos : blackKingPos;
     }
 
     public ArrayList<Integer> getSquaresAttackedBySide(Piece.Color side) {

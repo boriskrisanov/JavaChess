@@ -6,7 +6,9 @@ public record BoardState(
         int enPassantTargetSquare,
         ArrayList<Integer> whiteAttackingSquares,
         ArrayList<Integer> blackAttackingSquares,
-        ArrayList<Integer> checkResolutions
+        ArrayList<Integer> checkResolutions,
+        int whiteKingPos,
+        int blackKingPos
 ) {
 
 }
