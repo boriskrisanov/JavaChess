@@ -14,9 +14,9 @@ public class Board {
     private ArrayList<Integer> squaresAttackedByWhite = new ArrayList<>();
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
-    private final Deque<Integer> enPassantSquareHistory = new ArrayDeque<>();
+    private final Deque<BoardState> boardHistory = new ArrayDeque<>();
     private ArrayList<Integer> squaresAttackedByBlack = new ArrayList<>();
-    private final ArrayList<Integer> checkResolutions = new ArrayList<>();
+    private ArrayList<Integer> checkResolutions = new ArrayList<>();
     private int enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
@@ -185,8 +185,6 @@ public class Board {
             }
         }
 
-        enPassantSquareHistory.push(enPassantTargetSquare);
-
         if (move.capturedPiece() != null) {
             board[move.capturedPiece().getPosition()] = null;
         }
@@ -202,6 +200,8 @@ public class Board {
         computeAttackingSquares();
         computePinLines();
         computeCheckResolutions();
+
+        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions));
     }
 
     public void unmakeMove(Move move) {
@@ -210,7 +210,8 @@ public class Board {
 
     public void unmakeMove() {
         var move = moveHistory.pop();
-        enPassantTargetSquare = enPassantSquareHistory.pop();
+        var boardState = boardHistory.pop();
+        enPassantTargetSquare = boardState.enPassantTargetSquare();
 
         Piece piece = board[move.destination()];
 
@@ -230,9 +231,12 @@ public class Board {
 
         sideToMove = sideToMove.getOpposite();
 
-        computeAttackingSquares();
+        // computeAttackingSquares();
+        squaresAttackedByWhite = boardState.whiteAttackingSquares();
+        squaresAttackedByBlack = boardState.blackAttackingSquares();
         computePinLines();
-        computeCheckResolutions();
+        // computeCheckResolutions();
+        checkResolutions = boardState.checkResolutions();
     }
 
     private void computeAttackingSquares() {
