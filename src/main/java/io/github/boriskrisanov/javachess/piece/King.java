@@ -46,6 +46,7 @@ public class King extends Piece {
     @Override
     public ArrayList<Move> getLegalMoves() {
         ArrayList<Integer> opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
+        var castlingRights = board.getCastlingRights();
         var moves = new ArrayList<Move>();
 
         for (int targetSquare : getAttackingSquares()) {
@@ -62,6 +63,45 @@ public class King extends Piece {
             }
 
             moves.add(move);
+        }
+
+        // Castling
+        if (!board.isSideInCheck(this.color)) {
+            if (color == Color.WHITE) {
+                if (castlingRights.canWhiteShortCastle()
+                        && !opponentAttackingSquares.contains(position + 1)
+                        && !opponentAttackingSquares.contains(position + 2)
+                        && board.isSquareEmpty(position + 1)
+                        && board.isSquareEmpty(position + 2)
+                ) {
+                    moves.add(new Move(position, position + 2, null, CastlingDirection.SHORT));
+                }
+                if (castlingRights.canWhiteLongCastle()
+                        && !opponentAttackingSquares.contains(position - 1)
+                        && !opponentAttackingSquares.contains(position - 2)
+                        && board.isSquareEmpty(position - 1)
+                        && board.isSquareEmpty(position - 2)
+                ) {
+                    moves.add(new Move(position, position - 2, null, CastlingDirection.LONG));
+                }
+            } else {
+                if (castlingRights.canBlackShortCastle()
+                        && !opponentAttackingSquares.contains(position + 1)
+                        && !opponentAttackingSquares.contains(position + 2)
+                        && board.isSquareEmpty(position + 1)
+                        && board.isSquareEmpty(position + 2)
+                ) {
+                    moves.add(new Move(position, position + 2, null, CastlingDirection.SHORT));
+                }
+                if (castlingRights.canBlackLongCastle()
+                        && !opponentAttackingSquares.contains(position - 1)
+                        && !opponentAttackingSquares.contains(position - 2)
+                        && board.isSquareEmpty(position - 1)
+                        && board.isSquareEmpty(position - 2)
+                ) {
+                    moves.add(new Move(position, position - 2, null, CastlingDirection.LONG));
+                }
+            }
         }
 
         return moves;

@@ -1,10 +1,12 @@
 package io.github.boriskrisanov.javachess.board;
 
+import io.github.boriskrisanov.javachess.piece.*;
+
 public class CastlingRights {
-    final boolean whiteCanShortCastle;
-    final boolean whiteCanLongCastle;
-    final boolean blackCanShortCastle;
-    final boolean blackCanLongCastle;
+    public boolean whiteCanShortCastle;
+    public boolean whiteCanLongCastle;
+    public boolean blackCanShortCastle;
+    public boolean blackCanLongCastle;
 
     public CastlingRights(boolean whiteCanShortCastle, boolean whiteCanLongCastle, boolean blackCanShortCastle, boolean blackCanLongCastle) {
         this.whiteCanShortCastle = whiteCanShortCastle;
@@ -18,6 +20,13 @@ public class CastlingRights {
         whiteCanLongCastle = fenCastlingRights.contains("Q");
         blackCanShortCastle = fenCastlingRights.contains("k");
         blackCanLongCastle = fenCastlingRights.contains("q");
+    }
+
+    public CastlingRights(CastlingRights other) {
+        this.whiteCanShortCastle = other.whiteCanShortCastle;
+        this.whiteCanLongCastle = other.whiteCanLongCastle;
+        this.blackCanShortCastle = other.blackCanShortCastle;
+        this.blackCanLongCastle = other.blackCanLongCastle;
     }
 
     @Override
@@ -58,5 +67,26 @@ public class CastlingRights {
 
     public boolean canBlackLongCastle() {
         return blackCanLongCastle;
+    }
+
+    public void removeForSide(Piece.Color side, CastlingDirection direction) {
+        if (side == Piece.Color.WHITE) {
+            if (direction == CastlingDirection.SHORT) {
+                whiteCanShortCastle = false;
+            } else {
+                whiteCanLongCastle = false;
+            }
+        } else {
+            if (direction == CastlingDirection.SHORT) {
+                blackCanShortCastle = false;
+            } else {
+                blackCanLongCastle = false;
+            }
+        }
+    }
+
+    public void removeForSide(Piece.Color side) {
+        removeForSide(side, CastlingDirection.SHORT);
+        removeForSide(side, CastlingDirection.LONG);
     }
 }

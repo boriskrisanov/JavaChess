@@ -8,7 +8,8 @@ public record BoardState(
         ArrayList<Integer> blackAttackingSquares,
         ArrayList<Integer> checkResolutions,
         int whiteKingPos,
-        int blackKingPos
+        int blackKingPos,
+        CastlingRights castlingRights
 ) {
 
 }

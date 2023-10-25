@@ -32,10 +32,10 @@ public class MoveGenerationTest {
         return positionsReached;
     }
 
-    private long runTest(int depth) {
-        Board board = new Board();
+    private long runTest(int depth, String fen) {
+        Board board = new Board(fen);
 
-        // board.makeMove(new Move(Square.fromString("c2"), Square.fromString("c4"), null));
+//         board.makeMove(new Move(Square.fromString("e5"), Square.fromString("d7"), null));
         // board.makeMove(new Move(Square.fromString("d7"), Square.fromString("d6"), null));
         // board.makeMove(new Move(Square.fromString("c4"), Square.fromString("c5"), null));
         // board.makeMove(new Move(Square.fromString("e8"), Square.fromString("d7"), null));
@@ -50,6 +50,10 @@ public class MoveGenerationTest {
         System.out.println("Positions reached: " + result);
 
         return result;
+    }
+
+    private long runTest(int depth) {
+        return runTest(depth, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     }
 
     @Test
@@ -90,5 +94,10 @@ public class MoveGenerationTest {
     @Test
     void testDepth8() {
         assertEquals(84998978956L, runTest(8));
+    }
+
+    @Test
+    void testPosition1() {
+        assertEquals(2039, runTest(2, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
     }
 }
