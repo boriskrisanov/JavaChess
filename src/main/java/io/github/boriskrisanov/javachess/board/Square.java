@@ -80,6 +80,14 @@ public class Square {
         else throw new IllegalStateException();
     }
 
+    public static boolean isFirstRank(int index) {
+        return getRank(index) == 1;
+    }
+
+    public static boolean isLastRank(int index) {
+        return getRank(index) == 8;
+    }
+
     public static int getFile(int index) {
         return new EdgeDistance(index).left + 1;
     }

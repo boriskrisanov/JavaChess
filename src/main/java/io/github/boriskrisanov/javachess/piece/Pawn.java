@@ -61,7 +61,14 @@ public class Pawn extends Piece {
                 continue;
             }
 
-            legalMoves.add(move);
+            if ((color == Color.WHITE && Square.isLastRank(targetSquare)) || (color == Color.BLACK && Square.isFirstRank(targetSquare))) {
+                legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.KNIGHT));
+                legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.BISHOP));
+                legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.ROOK));
+                legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.QUEEN));
+            } else {
+                legalMoves.add(move);
+            }
         }
 
         // En passant
@@ -85,7 +92,14 @@ public class Pawn extends Piece {
         if (pinDirection == null || pinDirection == PinDirection.VERTICAL) {
             if (this.color == Color.WHITE) {
                 if (board.isSquareEmpty(position - 8)) {
-                    legalMoves.add(new Move(position, position - 8, null));
+                    if (Square.isLastRank(position - 8)) {
+                        legalMoves.add(new Move(position, position - 8, null, Promotion.KNIGHT));
+                        legalMoves.add(new Move(position, position - 8, null, Promotion.BISHOP));
+                        legalMoves.add(new Move(position, position - 8, null, Promotion.ROOK));
+                        legalMoves.add(new Move(position, position - 8, null, Promotion.QUEEN));
+                    } else {
+                        legalMoves.add(new Move(position, position - 8, null));
+                    }
 
                     if (Square.getRank(position) == 2 && board.isSquareEmpty(position - 8 * 2)) {
                         legalMoves.add(new Move(position, position - 8 * 2, null));
@@ -93,7 +107,14 @@ public class Pawn extends Piece {
                 }
             } else {
                 if (board.isSquareEmpty(position + 8)) {
-                    legalMoves.add(new Move(position, position + 8, null));
+                    if (Square.isFirstRank(position + 8)) {
+                        legalMoves.add(new Move(position, position + 8, null, Promotion.KNIGHT));
+                        legalMoves.add(new Move(position, position + 8, null, Promotion.BISHOP));
+                        legalMoves.add(new Move(position, position + 8, null, Promotion.ROOK));
+                        legalMoves.add(new Move(position, position + 8, null, Promotion.QUEEN));
+                    } else {
+                        legalMoves.add(new Move(position, position + 8, null));
+                    }
 
                     if (Square.getRank(position) == 7 && board.isSquareEmpty(position + 8 * 2)) {
                         legalMoves.add(new Move(position, position + 8 * 2, null));

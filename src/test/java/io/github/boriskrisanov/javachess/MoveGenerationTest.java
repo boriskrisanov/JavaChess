@@ -35,8 +35,8 @@ public class MoveGenerationTest {
     private long runTest(int depth, String fen) {
         Board board = new Board(fen);
 
-//         board.makeMove(new Move(Square.fromString("e5"), Square.fromString("d7"), null));
-        // board.makeMove(new Move(Square.fromString("d7"), Square.fromString("d6"), null));
+//         board.makeMove(new Move(Square.fromString("e5"), Square.fromString("d7"), board.getPieceOn(Square.fromString("d7"))));
+//         board.makeMove(new Move(Square.fromString("b4"), Square.fromString("b3"), null));
         // board.makeMove(new Move(Square.fromString("c4"), Square.fromString("c5"), null));
         // board.makeMove(new Move(Square.fromString("e8"), Square.fromString("d7"), null));
         // board.makeMove(new Move(Square.fromString("c5"), Square.fromString("c6"), null));
@@ -98,6 +98,6 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition1() {
-        assertEquals(2039, runTest(2, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
+        assertEquals(97862, runTest(3, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
     }
 }

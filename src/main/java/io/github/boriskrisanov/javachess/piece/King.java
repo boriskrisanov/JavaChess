@@ -81,6 +81,7 @@ public class King extends Piece {
                         && !opponentAttackingSquares.contains(position - 2)
                         && board.isSquareEmpty(position - 1)
                         && board.isSquareEmpty(position - 2)
+                        && board.isSquareEmpty(position - 3)
                 ) {
                     moves.add(new Move(position, position - 2, null, CastlingDirection.LONG));
                 }
@@ -98,6 +99,7 @@ public class King extends Piece {
                         && !opponentAttackingSquares.contains(position - 2)
                         && board.isSquareEmpty(position - 1)
                         && board.isSquareEmpty(position - 2)
+                        && board.isSquareEmpty(position - 3)
                 ) {
                     moves.add(new Move(position, position - 2, null, CastlingDirection.LONG));
                 }

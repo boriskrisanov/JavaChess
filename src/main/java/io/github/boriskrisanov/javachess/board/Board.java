@@ -90,6 +90,10 @@ public class Board {
         this.halfMoveClock = Integer.parseInt(halfMoveClock);
         this.moveNumber = Integer.parseInt(fullMoveNumber);
 
+        computeAttackingSquares();
+        computePinLines();
+        computeCheckResolutions();
+
         boardHistory.push(new BoardState(this.enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights)));
     }
 
@@ -215,7 +219,16 @@ public class Board {
         }
 
         board[move.start()] = null;
-        board[move.destination()] = piece;
+        if (move.promotion() == null) {
+            board[move.destination()] = piece;
+        } else {
+            board[move.destination()] = switch (move.promotion()) {
+                case QUEEN -> new Queen(sideToMove, move.destination(), this);
+                case ROOK -> new Rook(sideToMove, move.destination(), this);
+                case BISHOP -> new Bishop(sideToMove, move.destination(), this);
+                case KNIGHT -> new Knight(sideToMove, move.destination(), this);
+            };
+        }
 
         if (move.castlingDirection() != null) {
             // Move rook
@@ -294,13 +307,13 @@ public class Board {
 
         if (move.capturedPiece() != null) {
             board[move.destination()] = null;
-            board[move.start()] = piece;
+            board[move.start()] = move.promotion() == null ? piece : new Pawn(piece.getColor(), move.start(), this);
             board[move.capturedPiece().getPosition()] = move.capturedPiece();
             board[move.capturedPiece().getPosition()].setPosition(move.capturedPiece().getPosition());
             board[move.capturedPiece().getPosition()].setBoard(this);
         } else {
             board[move.destination()] = null;
-            board[move.start()] = piece;
+            board[move.start()] = move.promotion() == null ? piece : new Pawn(piece.getColor(), move.start(), this);
         }
 
         piece.setPosition(move.start());
