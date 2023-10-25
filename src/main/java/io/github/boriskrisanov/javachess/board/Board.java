@@ -251,11 +251,6 @@ public class Board {
         computeCheckResolutions();
     }
 
-    @Deprecated
-    public void unmakeMove(Move ignoredMove) {
-        unmakeMove();
-    }
-
     public void unmakeMove() {
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
@@ -516,7 +511,7 @@ public class Board {
 
         makeMove(move);
         checkState = getCheckState();
-        unmakeMove(move);
+        unmakeMove();
 
         return checkState;
     }
@@ -534,7 +529,7 @@ public class Board {
 
         makeMove(move);
         isInCheck = isSideInCheck(side);
-        unmakeMove(move);
+        unmakeMove();
 
         return isInCheck;
     }

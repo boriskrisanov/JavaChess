@@ -26,7 +26,7 @@ public class MoveGenerationTest {
                 moveCounts.computeIfPresent(move.toUciString(), (k, v) -> result);
             }
 
-            board.unmakeMove(move);
+            board.unmakeMove();
         }
 
         return positionsReached;
