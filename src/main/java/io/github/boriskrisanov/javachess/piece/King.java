@@ -57,7 +57,7 @@ public class King extends Piece {
             Piece capturedPiece = board.getPieceOn(targetSquare);
             Move move = new Move(position, targetSquare, capturedPiece);
 
-            // TODO: Improve efficiency
+            // TODO: Improve efficiency (possibly by storing which pieces are defended by another piece and thus cannot be captured by the king)
             if (board.isSideInCheck(this.color) && board.isSideInCheckAfterMove(this.color, move)) {
                 continue;
             }

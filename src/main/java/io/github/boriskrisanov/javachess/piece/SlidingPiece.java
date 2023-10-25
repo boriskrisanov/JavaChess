@@ -23,6 +23,8 @@ public class SlidingPiece {
                 }
                 if (board[targetSquare].getColor() == piece.getColor()) {
                     // A friendly piece is in the way, so we can't move any further in this direction
+                    // This piece doesn't technically attack this square, but it's needed to ensure that the enemy king can't capture defended pieces
+                    attackingSquares.add(targetSquare);
                     break;
                 }
             }
