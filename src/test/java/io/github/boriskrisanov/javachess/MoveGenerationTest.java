@@ -8,7 +8,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MoveGenerationTest {
-    private long generateMoves(Board board, int depth, TreeMap<String, Long> moveCounts, boolean rootNode) {
+    private long generateMoves(Board board, int depth, Map<String, Long> moveCounts, boolean rootNode) {
         long positionsReached = 0;
 
         if (depth == 0) {
@@ -32,14 +32,14 @@ public class MoveGenerationTest {
         return positionsReached;
     }
 
-    private long runTest(int depth, String fen) {
+    private long runTest(int depth, String fen, String moveSequence) {
         Board board = new Board(fen);
 
-//         board.makeMove(new Move(Square.fromString("e5"), Square.fromString("d7"), board.getPieceOn(Square.fromString("d7"))));
-//         board.makeMove(new Move(Square.fromString("b4"), Square.fromString("b3"), null));
-        // board.makeMove(new Move(Square.fromString("c4"), Square.fromString("c5"), null));
-        // board.makeMove(new Move(Square.fromString("e8"), Square.fromString("d7"), null));
-        // board.makeMove(new Move(Square.fromString("c5"), Square.fromString("c6"), null));
+        if (!moveSequence.isEmpty()) {
+            for (String move : moveSequence.split(" ")) {
+                board.makeMove(move);
+            }
+        }
 
         var moveCounts = new TreeMap<String, Long>();
 
@@ -52,48 +52,28 @@ public class MoveGenerationTest {
         return result;
     }
 
-    private long runTest(int depth) {
-        return runTest(depth, "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
+    private long runTest(int depth, String fen) {
+        return runTest(depth, fen, "");
     }
 
     @Test
-    void testDepth1() {
-        assertEquals(20, runTest(1));
-    }
-
-    @Test
-    void testDepth2() {
-        assertEquals(400, runTest(2));
-    }
-
-    @Test
-    void testDepth3() {
-        assertEquals(8902, runTest(3));
-    }
-
-    @Test
-    void testDepth4() {
-        assertEquals(197281, runTest(4));
-    }
-
-    @Test
-    void testDepth5() {
-        assertEquals(4865609, runTest(5));
+    void testStartingPositionDepth5() {
+        assertEquals(4865609, runTest(5, Board.STARTING_POSITION_FEN));
     }
 
     @Test
     void testDepth6() {
-        assertEquals(119060324, runTest(6));
+        assertEquals(119060324, runTest(6, Board.STARTING_POSITION_FEN));
     }
 
     @Test
     void testDepth7() {
-        assertEquals(3195901860L, runTest(7));
+        assertEquals(3195901860L, runTest(7, Board.STARTING_POSITION_FEN));
     }
 
     @Test
     void testDepth8() {
-        assertEquals(84998978956L, runTest(8));
+        assertEquals(84998978956L, runTest(8, Board.STARTING_POSITION_FEN));
     }
 
     @Test

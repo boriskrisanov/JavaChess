@@ -25,6 +25,8 @@ public class Board {
     private int halfMoveClock;
     private int moveNumber;
 
+    public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
     public Board(Piece[] board) {
         this.board = board;
     }
@@ -178,6 +180,17 @@ public class Board {
 
     public Piece getPieceOn(Square square) {
         return board[square.getIndex()];
+    }
+
+    public void makeMove(String uciMove) {
+        if (uciMove.length() != 4) {
+            throw new IllegalArgumentException(uciMove);
+        }
+
+        String start = String.valueOf(uciMove.charAt(0)) + uciMove.charAt(1);
+        String destination = String.valueOf(uciMove.charAt(2)) + uciMove.charAt(3);
+
+        makeMove(new Move(Square.fromString(start), Square.fromString(destination), board[Square.fromString(destination)]));
     }
 
     /**
@@ -476,6 +489,11 @@ public class Board {
                 int targetSquare = kingPosition + direction.offset * (i + 1);
 
                 if (board[targetSquare] == null) {
+                    continue;
+                }
+
+                if (!board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() == side.getOpposite() && lastFriendlyPieceSeen == null) {
+                    // Not in check from this direction
                     continue;
                 }
 
