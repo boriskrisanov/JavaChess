@@ -37,7 +37,6 @@ public class Pawn extends Piece {
 
     @Override
     public ArrayList<Move> getLegalMoves() {
-        // TODO: Promotion
         var legalMoves = new ArrayList<Move>();
 
         var enPassantTargetSquare = board.getEnPassantTargetSquare();

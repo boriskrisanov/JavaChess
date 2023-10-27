@@ -11,7 +11,7 @@ public record Move(
 ) {
     @Override
     public String toString() {
-        return String.format("Move(%s -> %s)", new Square(start), new Square(destination));
+        return toUciString();
     }
 
     /**
@@ -39,6 +39,15 @@ public record Move(
     }
 
     public String toUciString() {
-        return new Square(start).toString() + new Square(destination);
+        if (promotion == null) {
+            return new Square(start).toString() + new Square(destination);
+        }
+
+        return new Square(start).toString() + new Square(destination) + switch (promotion) {
+            case QUEEN -> "q";
+            case ROOK -> "r";
+            case BISHOP -> "b";
+            case KNIGHT -> "n";
+        };
     }
 }

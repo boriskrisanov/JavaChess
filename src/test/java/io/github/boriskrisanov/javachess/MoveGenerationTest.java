@@ -8,7 +8,7 @@ import java.util.*;
 import static org.junit.jupiter.api.Assertions.*;
 
 public class MoveGenerationTest {
-    private long generateMoves(Board board, int depth, Map<String, Long> moveCounts, boolean rootNode) {
+    private long generateMoves(Board board, int depth, TreeMap<String, Long> moveCounts, boolean rootNode) {
         long positionsReached = 0;
 
         if (depth == 0) {
@@ -35,7 +35,9 @@ public class MoveGenerationTest {
     private long runTest(int depth, String fen, String moveSequence) {
         Board board = new Board(fen);
 
-        if (!moveSequence.isEmpty()) {
+        if (moveSequence.length() == 4) {
+            board.makeMove(moveSequence);
+        } else if (!moveSequence.isEmpty()) {
             for (String move : moveSequence.split(" ")) {
                 board.makeMove(move);
             }
@@ -78,6 +80,8 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition1() {
-        assertEquals(97862, runTest(3, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
+//        runTest(2, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P1Q1/P1N5/1PPBBPpP/R3K2R b KQkq - 0 0");
+//        runTest(3, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0", "a2a3");
+        assertEquals(4085603, runTest(4, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
     }
 }

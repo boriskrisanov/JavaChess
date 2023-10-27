@@ -81,11 +81,11 @@ public class Square {
     }
 
     public static boolean isFirstRank(int index) {
-        return getRank(index) == 1;
+        return index >= 56 && index <= 64;
     }
 
     public static boolean isLastRank(int index) {
-        return getRank(index) == 8;
+        return index <= 7;
     }
 
     public static int getFile(int index) {

@@ -10,7 +10,7 @@ import static io.github.boriskrisanov.javachess.board.Direction.*;
  * Holds the current state of the game (piece positions, side to move, check, checkmate and en passant target square)
  */
 public class Board {
-    private Piece[] board = new Piece[64];
+    private final Piece[] board = new Piece[64];
     private ArrayList<Integer> squaresAttackedByWhite = new ArrayList<>();
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
@@ -26,10 +26,6 @@ public class Board {
     private int moveNumber;
 
     public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-
-    public Board(Piece[] board) {
-        this.board = board;
-    }
 
     public Board(String fen) {
         loadFen(fen);
@@ -95,8 +91,6 @@ public class Board {
         computeAttackingSquares();
         computePinLines();
         computeCheckResolutions();
-
-        boardHistory.push(new BoardState(this.enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights)));
     }
 
     /**
@@ -200,40 +194,67 @@ public class Board {
         moveHistory.push(move);
         boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights)));
 
-        var piece = board[move.start()];
+        var movedPiece = board[move.start()];
+        boolean isPromotion = move.promotion() != null;
 
         // The right to capture en passant has been lost because another move has been made
         enPassantTargetSquare = -1;
 
-        if (piece instanceof Pawn) {
+        if (movedPiece instanceof Pawn) {
             // Set the en passant target square if a pawn moved 2 squares forward
             if (move.destination() == move.start() - 8 * 2) {
                 enPassantTargetSquare = move.start() - 8;
             } else if (move.destination() == move.start() + 8 * 2) {
                 enPassantTargetSquare = move.start() + 8;
             }
-        } else if (piece instanceof King) {
-            if (piece.getColor() == Piece.Color.WHITE) {
+        }
+
+        // Update king position and castling
+        if (movedPiece instanceof King) {
+            // Castling
+            if (move.castlingDirection() != null) {
+                // Move rook
+                switch (move.castlingDirection()) {
+                    case SHORT -> {
+                        var rook = movedPiece.getColor() == Piece.Color.WHITE ? board[63] : board[7];
+                        board[rook.getPosition()] = null;
+                        board[move.destination() - 1] = rook;
+                        rook.setPosition(move.destination() - 1);
+                    }
+                    case LONG -> {
+                        var rook = movedPiece.getColor() == Piece.Color.WHITE ? board[56] : board[0];
+                        board[rook.getPosition()] = null;
+                        board[move.destination() + 1] = rook;
+                        rook.setPosition(move.destination() + 1);
+                    }
+                }
+
+                // This side has just castled so castling is no longer possible
+                castlingRights.removeForSide(movedPiece.getColor());
+            }
+
+            if (movedPiece.getColor() == Piece.Color.WHITE) {
                 whiteKingPos = move.destination();
             } else {
                 blackKingPos = move.destination();
             }
             // King has moved, so castling is no longer possible
-            castlingRights.removeForSide(piece.getColor());
-        } else if (piece instanceof Rook || board[move.destination()] instanceof Rook) {
+            castlingRights.removeForSide(movedPiece.getColor());
+        }
+
+        // Update castling rights if rook has moved
+        if (movedPiece instanceof Rook || board[move.destination()] instanceof Rook) {
             // Rook has either moved or been captured, so castling from this side is no longer possible
-            var rookPosition = piece instanceof Rook ? piece.getPosition() : move.destination();
+            var rookPosition = movedPiece instanceof Rook ? movedPiece.getPosition() : move.destination();
             CastlingDirection castlingDirection = rookPosition == 0 || rookPosition == 56 ? CastlingDirection.LONG : CastlingDirection.SHORT;
             castlingRights.removeForSide(board[rookPosition].getColor(), castlingDirection);
         }
 
-        if (move.capturedPiece() != null) {
-            board[move.capturedPiece().getPosition()] = null;
-        }
-
         board[move.start()] = null;
-        if (move.promotion() == null) {
-            board[move.destination()] = piece;
+
+        if (!isPromotion) {
+            board[move.destination()] = movedPiece;
+            movedPiece.setPosition(move.destination());
         } else {
             board[move.destination()] = switch (move.promotion()) {
                 case QUEEN -> new Queen(sideToMove, move.destination(), this);
@@ -242,33 +263,6 @@ public class Board {
                 case KNIGHT -> new Knight(sideToMove, move.destination(), this);
             };
         }
-
-        if (move.castlingDirection() != null) {
-            // Move rook
-            switch (move.castlingDirection()) {
-                case SHORT -> {
-                    var rook = piece.getColor() == Piece.Color.WHITE ? board[63] : board[7];
-                    board[rook.getPosition()] = null;
-                    board[move.destination() - 1] = rook;
-                    rook.setPosition(move.destination() - 1);
-                    rook.setBoard(this);
-                }
-                case LONG -> {
-                    var rook = piece.getColor() == Piece.Color.WHITE ? board[56] : board[0];
-                    board[rook.getPosition()] = null;
-                    board[move.destination() + 1] = rook;
-                    rook.setPosition(move.destination() + 1);
-                    rook.setBoard(this);
-                }
-            }
-
-            // This side has just castled so castling is no longer possible
-            castlingRights.removeForSide(piece.getColor());
-        }
-
-        board[move.destination()].setPosition(move.destination());
-        board[move.destination()].setBoard(this);
-
 
         sideToMove = sideToMove.getOpposite();
 
@@ -286,57 +280,54 @@ public class Board {
         blackKingPos = boardState.blackKingPos();
         castlingRights = boardState.castlingRights();
 
-        Piece piece = board[move.destination()];
+        boolean isPromotion = move.promotion() != null;
+        boolean isCapture = move.capturedPiece() != null;
+        // If this was a promotion, the piece at the destination square (movedPiece) would be the piece that the pawn
+        // promoted to, rather than the pawn itself, which is why this special case is needed.
+        Piece movedPiece = isPromotion ? new Pawn(sideToMove.getOpposite(), move.destination(), this) : board[move.destination()];
 
+        // Undo castling
         if (move.castlingDirection() == CastlingDirection.SHORT) {
-            if (piece.getColor() == Piece.Color.WHITE) {
+            if (movedPiece.getColor() == Piece.Color.WHITE) {
                 var rook = board[61];
                 board[61] = null;
                 board[63] = rook;
                 rook.setPosition(63);
-                rook.setBoard(this);
             } else {
                 var rook = board[5];
                 board[5] = null;
                 board[7] = rook;
                 rook.setPosition(7);
-                rook.setBoard(this);
             }
         } else if (move.castlingDirection() == CastlingDirection.LONG) {
-            if (piece.getColor() == Piece.Color.WHITE) {
+            if (movedPiece.getColor() == Piece.Color.WHITE) {
                 var rook = board[59];
                 board[59] = null;
                 board[56] = rook;
                 rook.setPosition(56);
-                rook.setBoard(this);
             } else {
                 var rook = board[3];
                 board[3] = null;
                 board[0] = rook;
                 rook.setPosition(0);
-                rook.setBoard(this);
             }
         }
 
-        if (move.capturedPiece() != null) {
-            board[move.destination()] = null;
-            board[move.start()] = move.promotion() == null ? piece : new Pawn(piece.getColor(), move.start(), this);
+        board[move.destination()] = null;
+        board[move.start()] = movedPiece;
+
+        if (isCapture) {
+            // In the case of en passant, the position of the captured piece will not be the destination of the move,
+            // so board[move.destination()] can't be used.
             board[move.capturedPiece().getPosition()] = move.capturedPiece();
-            board[move.capturedPiece().getPosition()].setPosition(move.capturedPiece().getPosition());
-            board[move.capturedPiece().getPosition()].setBoard(this);
-        } else {
-            board[move.destination()] = null;
-            board[move.start()] = move.promotion() == null ? piece : new Pawn(piece.getColor(), move.start(), this);
         }
 
-        piece.setPosition(move.start());
-        piece.setBoard(this);
-
-
-        sideToMove = sideToMove.getOpposite();
+        movedPiece.setPosition(move.start());
 
         squaresAttackedByWhite = boardState.whiteAttackingSquares();
         squaresAttackedByBlack = boardState.blackAttackingSquares();
+
+        sideToMove = sideToMove.getOpposite();
 
         computePinLines();
 
@@ -494,7 +485,7 @@ public class Board {
 
                 if (!board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() == side.getOpposite() && lastFriendlyPieceSeen == null) {
                     // Not in check from this direction
-                    continue;
+                    break;
                 }
 
                 if (board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() != side
