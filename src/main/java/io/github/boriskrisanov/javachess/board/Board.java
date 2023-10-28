@@ -177,14 +177,26 @@ public class Board {
     }
 
     public void makeMove(String uciMove) {
-        if (uciMove.length() != 4) {
+        // TODO: Support castling
+        if (uciMove.length() != 4 && uciMove.length() != 5) {
             throw new IllegalArgumentException(uciMove);
         }
 
         String start = String.valueOf(uciMove.charAt(0)) + uciMove.charAt(1);
         String destination = String.valueOf(uciMove.charAt(2)) + uciMove.charAt(3);
 
-        makeMove(new Move(Square.fromString(start), Square.fromString(destination), board[Square.fromString(destination)]));
+        Promotion promotion = null;
+        if (uciMove.length() == 5) {
+            promotion = switch (uciMove.charAt(4)) {
+                case 'n' -> Promotion.KNIGHT;
+                case 'b' -> Promotion.BISHOP;
+                case 'r' -> Promotion.ROOK;
+                case 'q' -> Promotion.QUEEN;
+                default -> throw new IllegalArgumentException(uciMove);
+            };
+        }
+
+        makeMove(new Move(Square.fromString(start), Square.fromString(destination), board[Square.fromString(destination)], promotion));
     }
 
     /**
@@ -196,6 +208,7 @@ public class Board {
 
         var movedPiece = board[move.start()];
         boolean isPromotion = move.promotion() != null;
+        boolean isCapture = move.capturedPiece() != null;
 
         // The right to capture en passant has been lost because another move has been made
         enPassantTargetSquare = -1;
@@ -243,11 +256,29 @@ public class Board {
         }
 
         // Update castling rights if rook has moved
-        if (movedPiece instanceof Rook || board[move.destination()] instanceof Rook) {
+        if (movedPiece instanceof Rook || move.capturedPiece() instanceof Rook) {
             // Rook has either moved or been captured, so castling from this side is no longer possible
-            var rookPosition = movedPiece instanceof Rook ? movedPiece.getPosition() : move.destination();
-            CastlingDirection castlingDirection = rookPosition == 0 || rookPosition == 56 ? CastlingDirection.LONG : CastlingDirection.SHORT;
-            castlingRights.removeForSide(board[rookPosition].getColor(), castlingDirection);
+            if (!isCapture) {
+                if (movedPiece.getPosition() == 0) {
+                    castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.LONG);
+                } else if (movedPiece.getPosition() == 7) {
+                    castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.SHORT);
+                } else if (movedPiece.getPosition() == 56) {
+                    castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.LONG);
+                } else if (movedPiece.getPosition() == 63) {
+                    castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.SHORT);
+                }
+            } else {
+                if (move.destination() == 0) {
+                    castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.LONG);
+                } else if (move.destination() == 7) {
+                    castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.SHORT);
+                } else if (move.destination() == 56) {
+                    castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.LONG);
+                } else if (move.destination() == 63) {
+                    castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.SHORT);
+                }
+            }
         }
 
         board[move.start()] = null;
@@ -274,6 +305,10 @@ public class Board {
     public void unmakeMove() {
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
+
+        if (board[13] instanceof Pawn && board[13].getColor() == Piece.Color.WHITE) {
+            getFen();
+        }
 
         enPassantTargetSquare = boardState.enPassantTargetSquare();
         whiteKingPos = boardState.whiteKingPos();
