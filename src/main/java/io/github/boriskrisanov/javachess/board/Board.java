@@ -256,9 +256,10 @@ public class Board {
         }
 
         // Update castling rights if rook has moved
-        if (movedPiece instanceof Rook || move.capturedPiece() instanceof Rook) {
-            // Rook has either moved or been captured, so castling from this side is no longer possible
-            if (!isCapture) {
+        boolean rookWasCaptured = move.capturedPiece() instanceof Rook && (move.capturedPiece().getPosition() == 0 || move.capturedPiece().getPosition() == 7 || move.capturedPiece().getPosition() == 56 || move.capturedPiece().getPosition() == 63);
+        if (movedPiece instanceof Rook || rookWasCaptured) {
+            if (!rookWasCaptured) {
+                // Rook has moved
                 if (movedPiece.getPosition() == 0) {
                     castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.LONG);
                 } else if (movedPiece.getPosition() == 7) {
@@ -269,6 +270,7 @@ public class Board {
                     castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.SHORT);
                 }
             } else {
+                // Rook was captured
                 if (move.destination() == 0) {
                     castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.LONG);
                 } else if (move.destination() == 7) {
