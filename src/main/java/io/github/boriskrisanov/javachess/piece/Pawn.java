@@ -71,18 +71,32 @@ public class Pawn extends Piece {
         }
 
         // En passant
+        // The current pin detection method doesn't work for en passant, so isSideInCheckAfterMove is being used for this purpose.
+        // This isn't very efficient, but en passant is rarely possible, so it's fine for now.
         if (enPassantTargetSquare != -1) {
             if (this.color == Color.WHITE) {
-                if (enPassantTargetSquare == position - 8 - 1 && (pinDirection == null || pinDirection == PinDirection.NEGATIVE_DIAGONAL) && edgeDist.left > 0 && edgeDist.top > 0) {
-                    legalMoves.add(new Move(position, enPassantTargetSquare, board.getPieceOn(position - 1)));
-                } else if (enPassantTargetSquare == position - 8 + 1 && (pinDirection == null || pinDirection == PinDirection.POSITIVE_DIAGONAL) && edgeDist.right > 0 && edgeDist.top > 0) {
-                    legalMoves.add(new Move(position, enPassantTargetSquare, board.getPieceOn(position + 1)));
+                if (enPassantTargetSquare == position - 8 - 1 && edgeDist.left > 0 && edgeDist.top > 0) {
+                    Move move = new Move(position, enPassantTargetSquare, board.getPieceOn(position - 1));
+                    if (!board.isSideInCheckAfterMove(this.color, move)) {
+                        legalMoves.add(move);
+                    }
+                } else if (enPassantTargetSquare == position - 8 + 1 && edgeDist.right > 0 && edgeDist.top > 0) {
+                    Move move = new Move(position, enPassantTargetSquare, board.getPieceOn(position + 1));
+                    if (!board.isSideInCheckAfterMove(this.color, move)) {
+                        legalMoves.add(move);
+                    }
                 }
             } else {
-                if (enPassantTargetSquare == position + 8 - 1 && (pinDirection == null || pinDirection == PinDirection.POSITIVE_DIAGONAL) && edgeDist.left > 0 && edgeDist.bottom > 0) {
-                    legalMoves.add(new Move(position, enPassantTargetSquare, board.getPieceOn(position - 1)));
-                } else if (enPassantTargetSquare == position + 8 + 1 && (pinDirection == null || pinDirection == PinDirection.NEGATIVE_DIAGONAL) && edgeDist.right > 0 && edgeDist.bottom > 0) {
-                    legalMoves.add(new Move(position, enPassantTargetSquare, board.getPieceOn(position + 1)));
+                if (enPassantTargetSquare == position + 8 - 1 && edgeDist.left > 0 && edgeDist.bottom > 0) {
+                    Move move = new Move(position, enPassantTargetSquare, board.getPieceOn(position - 1));
+                    if (!board.isSideInCheckAfterMove(this.color, move)) {
+                        legalMoves.add(move);
+                    }
+                } else if (enPassantTargetSquare == position + 8 + 1 && edgeDist.right > 0 && edgeDist.bottom > 0) {
+                    Move move = new Move(position, enPassantTargetSquare, board.getPieceOn(position + 1));
+                    if (!board.isSideInCheckAfterMove(this.color, move)) {
+                        legalMoves.add(move);
+                    }
                 }
             }
         }
@@ -126,7 +140,7 @@ public class Pawn extends Piece {
             var legalResolutionMoves = new ArrayList<Move>();
 
             for (Move move : legalMoves) {
-                if (board.getCheckResolutions().contains(move.destination())) {
+                if (board.getCheckResolutions().contains(move.destination()) || (move.capturedPiece() != null && board.getCheckResolutions().contains(move.capturedPiece().getPosition()))) {
                     legalResolutionMoves.add(move);
                 }
             }

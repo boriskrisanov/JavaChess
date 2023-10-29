@@ -125,7 +125,7 @@ public class Board {
 
         fen.append(sideToMove == Piece.Color.WHITE ? " w " : " b ");
         fen.append(castlingRights).append(" ");
-        fen.append(enPassantTargetSquare == -1 ? "-" : enPassantTargetSquare);
+        fen.append(enPassantTargetSquare == -1 ? "-" : new Square(enPassantTargetSquare).toString());
         fen.append(" ").append(halfMoveClock);
         fen.append(" ").append(moveNumber);
 
@@ -283,6 +283,10 @@ public class Board {
             }
         }
 
+        if (move.capturedPiece() != null) {
+            board[move.capturedPiece().getPosition()] = null;
+        }
+
         board[move.start()] = null;
 
         if (!isPromotion) {
@@ -307,10 +311,6 @@ public class Board {
     public void unmakeMove() {
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
-
-        if (board[13] instanceof Pawn && board[13].getColor() == Piece.Color.WHITE) {
-            getFen();
-        }
 
         enPassantTargetSquare = boardState.enPassantTargetSquare();
         whiteKingPos = boardState.whiteKingPos();
@@ -417,17 +417,22 @@ public class Board {
         {
             int p1;
             int p2;
+            boolean edgeDistanceRequirement1, edgeDistanceRequirement2;
             if (sideInCheck == Piece.Color.WHITE) {
                 p1 = kingPosition + Direction.TOP_LEFT.offset;
                 p2 = kingPosition + Direction.TOP_RIGHT.offset;
+                edgeDistanceRequirement1 = EdgeDistance.get(kingPosition, TOP_LEFT) > 0;
+                edgeDistanceRequirement2 = EdgeDistance.get(kingPosition, TOP_RIGHT) > 0;
             } else {
                 p1 = kingPosition + Direction.BOTTOM_LEFT.offset;
                 p2 = kingPosition + Direction.BOTTOM_RIGHT.offset;
+                edgeDistanceRequirement1 = EdgeDistance.get(kingPosition, BOTTOM_LEFT) > 0;
+                edgeDistanceRequirement2 = EdgeDistance.get(kingPosition, BOTTOM_RIGHT) > 0;
             }
-            if (board[p1] instanceof Pawn && board[p1].getColor() == sideInCheck.getOpposite()) {
+            if (edgeDistanceRequirement1 && board[p1] instanceof Pawn && board[p1].getColor() == sideInCheck.getOpposite()) {
                 checkResolutionBuffer.add(p1);
                 checkFromNonSlidingPiece = true;
-            } else if (board[p2] instanceof Pawn && board[p2].getColor() == sideInCheck.getOpposite()) {
+            } else if (edgeDistanceRequirement2 && board[p2] instanceof Pawn && board[p2].getColor() == sideInCheck.getOpposite()) {
                 checkResolutionBuffer.add(p2);
                 checkFromNonSlidingPiece = true;
             }

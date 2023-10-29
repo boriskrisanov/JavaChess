@@ -80,9 +80,13 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition1() {
-        runTest(4, "r3k2r/p1ppqPb1/bn3np1/4N3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R b KQkq - 0 1");
 //        runTest(5, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0");
-//        runTest(4, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0", "d5e6");
-//        assertEquals(4085603, runTest(4, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
+//        runTest(3, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0", "d5e6 a6b7");
+        assertEquals(4085603, runTest(4, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
+    }
+
+    @Test
+    void testPosition3() {
+        assertEquals(674624, runTest(5, "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - - 0 0"));
     }
 }
