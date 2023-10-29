@@ -207,6 +207,7 @@ public class Board {
         boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights)));
 
         var movedPiece = board[move.start()];
+
         boolean isPromotion = move.promotion() != null;
         boolean isCapture = move.capturedPiece() != null;
 
@@ -398,7 +399,7 @@ public class Board {
 
                 if (board[targetSquare] == null) {
                     squares.add(targetSquare);
-                } else if (board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() != sideInCheck) {
+                } else if (((board[targetSquare] instanceof Rook && (direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT)) || (board[targetSquare] instanceof Bishop && (direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT)) || board[targetSquare] instanceof Queen) && board[targetSquare].getColor() != sideInCheck) {
                     // In check from this direction
                     checkResolutionBuffer.addAll(squares);
                     checkResolutionBuffer.add(targetSquare);
