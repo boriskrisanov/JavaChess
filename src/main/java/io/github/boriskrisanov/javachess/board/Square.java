@@ -1,7 +1,7 @@
 package io.github.boriskrisanov.javachess.board;
 
 public class Square {
-    int index;
+    final int index;
     int rank;
 
     public Square(int index) {
