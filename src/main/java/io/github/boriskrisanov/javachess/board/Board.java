@@ -522,11 +522,16 @@ public class Board {
             for (int i = 0; i < EdgeDistance.get(kingPosition, direction); i++) {
                 int targetSquare = kingPosition + direction.offset * (i + 1);
 
+                boolean kingCanBeAttackedByRook = direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT;
+                boolean kingCanBeAttackedByBishop = direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT;
+                boolean targetPieceCanAttackKing = board[targetSquare] instanceof Queen || (board[targetSquare] instanceof Rook && kingCanBeAttackedByRook) || (board[targetSquare] instanceof Bishop && kingCanBeAttackedByBishop);
+
+
                 if (board[targetSquare] == null) {
                     continue;
                 }
 
-                if (!board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() == side.getOpposite() && lastFriendlyPieceSeen == null) {
+                if (!targetPieceCanAttackKing && board[targetSquare].getColor() == side.getOpposite() && lastFriendlyPieceSeen == null) {
                     // Not in check from this direction
                     break;
                 }
@@ -544,7 +549,7 @@ public class Board {
                     break;
                 }
                 if (lastFriendlyPieceSeen != null && board[targetSquare] != null) {
-                    // There are more than 2 friendly pieces in front of the king, therefore none of them are pinned
+                    // There are more than 2 pieces in front of the king, therefore none of them are pinned
                     break;
                 }
                 if (board[targetSquare].getColor() == side) {

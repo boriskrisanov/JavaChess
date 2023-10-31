@@ -92,7 +92,6 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition4() {
-//        runTest(1, "r3k2r/Pppp1ppp/5nbN/nPb5/BB2P3/5P2/Pp1P3P/R2Q1RK1 w kq - 0 3");
         assertEquals(15833292, runTest(5, "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1"));
     }
 }
