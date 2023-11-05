@@ -160,4 +160,9 @@ public class Pawn extends Piece {
     public char getChar() {
         return color == Color.WHITE ? 'P' : 'p';
     }
+
+    @Override
+    public int getValue() {
+        return 100;
+    }
 }

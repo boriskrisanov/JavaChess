@@ -15,12 +15,9 @@ public class Main {
             String[] line = scanner.nextLine().split(" ");
             command = line[0];
 
-
             switch (command) {
                 case "get_position" -> System.out.println(board.getFen());
-                case "make_move" -> {
-                    board.makeMove(line[1]);
-                }
+                case "make_move" -> board.makeMove(line[1]);
                 case "unmake_move" -> board.unmakeMove();
                 case "get_legal_moves" -> {
                     board.getLegalMovesForSideToMove().forEach(move -> {

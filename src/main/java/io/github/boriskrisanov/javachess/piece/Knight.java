@@ -61,4 +61,9 @@ public class Knight extends Piece {
     public char getChar() {
         return color == Color.WHITE ? 'N' : 'n';
     }
+
+    @Override
+    public int getValue() {
+        return 300;
+    }
 }

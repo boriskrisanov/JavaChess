@@ -118,4 +118,9 @@ public class King extends Piece {
     public char getChar() {
         return color == Color.WHITE ? 'K' : 'k';
     }
+
+    @Override
+    public int getValue() {
+        return 0;
+    }
 }

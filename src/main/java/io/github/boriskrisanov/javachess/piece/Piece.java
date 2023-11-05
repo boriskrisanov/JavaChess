@@ -111,6 +111,8 @@ public abstract class Piece {
         return this instanceof Rook || this instanceof Bishop || this instanceof Queen;
     }
 
+    public abstract int getValue();
+
     public enum Color {
         WHITE,
         BLACK;

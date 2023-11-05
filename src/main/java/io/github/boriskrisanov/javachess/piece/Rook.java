@@ -48,4 +48,9 @@ public class Rook extends Piece {
     public char getChar() {
         return color == Color.WHITE ? 'R' : 'r';
     }
+
+    @Override
+    public int getValue() {
+        return 500;
+    }
 }

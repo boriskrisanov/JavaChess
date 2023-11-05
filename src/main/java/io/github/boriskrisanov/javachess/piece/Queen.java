@@ -47,4 +47,9 @@ public class Queen extends Piece {
     public char getChar() {
         return color == Color.WHITE ? 'Q' : 'q';
     }
+
+    @Override
+    public int getValue() {
+        return 900;
+    }
 }
