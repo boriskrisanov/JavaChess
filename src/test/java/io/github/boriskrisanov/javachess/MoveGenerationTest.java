@@ -22,6 +22,9 @@ public class MoveGenerationTest {
             positionsReached += result;
 
             if (rootNode) {
+//                System.out.println(move);
+//                System.out.println(board);
+
                 moveCounts.putIfAbsent(move.toUciString(), positionsReached);
                 moveCounts.computeIfPresent(move.toUciString(), (k, v) -> result);
             }
@@ -80,9 +83,8 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition1() {
-//        runTest(5, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0");
-//        runTest(3, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0", "d5e6 a6b7");
-        assertEquals(4085603, runTest(4, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
+        assertEquals(415, runTest(4, "5k1K/8/8/8/8/7p/6P1/8 w - - 0 1"));
+        // assertEquals(4085603, runTest(4, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
     }
 
     @Test

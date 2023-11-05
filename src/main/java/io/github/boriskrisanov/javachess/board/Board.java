@@ -211,6 +211,10 @@ public class Board {
         boolean isPromotion = move.promotion() != null;
         boolean isCapture = move.capturedPiece() != null;
 
+        if (isPromotion) {
+            getFen();
+        }
+
         // The right to capture en passant has been lost because another move has been made
         enPassantTargetSquare = -1;
 
@@ -302,6 +306,10 @@ public class Board {
             };
         }
 
+        if (isPromotion) {
+            getFen();
+        }
+
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
@@ -310,8 +318,13 @@ public class Board {
     }
 
     public void unmakeMove() {
+
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
+
+        if (move.promotion() != null) {
+            getFen();
+        }
 
         enPassantTargetSquare = boardState.enPassantTargetSquare();
         whiteKingPos = boardState.whiteKingPos();
@@ -368,6 +381,10 @@ public class Board {
         sideToMove = sideToMove.getOpposite();
 
         computePinLines();
+
+        if (move.promotion() != null) {
+            getFen();
+        }
 
         checkResolutions = boardState.checkResolutions();
     }
@@ -683,5 +700,16 @@ public class Board {
 
     public ArrayList<Integer> getCheckResolutions() {
         return checkResolutions;
+    }
+
+    public String getMoveHistory() {
+        StringBuilder s = new StringBuilder();
+
+        for (Move m : moveHistory) {
+            s.append(m.toString());
+            s.append(" ");
+        }
+
+        return s.toString();
     }
 }

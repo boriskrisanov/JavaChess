@@ -2,13 +2,35 @@ package io.github.boriskrisanov.javachess.board;
 
 import io.github.boriskrisanov.javachess.piece.*;
 
-public record Move(
-        int start,
-        int destination,
-        Piece capturedPiece,
-        CastlingDirection castlingDirection,
-        Promotion promotion
-) {
+
+public final class Move {
+    // Move data layout:
+    // 0 | 6 bits start | 6 bits destination | 3 bits move flags
+    private short move = 0;
+    private final int start;
+    private final int destination;
+    private final Piece capturedPiece;
+    private final CastlingDirection castlingDirection;
+    private final Promotion promotion;
+
+    public Move(
+            int start,
+            int destination,
+            Piece capturedPiece,
+            CastlingDirection castlingDirection,
+            Promotion promotion
+    ) {
+        this.start = start;
+        this.destination = destination;
+        this.capturedPiece = capturedPiece;
+        this.castlingDirection = castlingDirection;
+        this.promotion = promotion;
+
+        this.move |= (short) ((byte) start << 15);
+        this.move |= (short) ((byte) destination << 15 - 6);
+        this.move |= (short) ((byte) destination << 15 - 6);
+    }
+
     @Override
     public String toString() {
         return toUciString();
@@ -49,5 +71,25 @@ public record Move(
             case BISHOP -> "b";
             case KNIGHT -> "n";
         };
+    }
+
+    public int start() {
+        return start;
+    }
+
+    public int destination() {
+        return destination;
+    }
+
+    public Piece capturedPiece() {
+        return capturedPiece;
+    }
+
+    public CastlingDirection castlingDirection() {
+        return castlingDirection;
+    }
+
+    public Promotion promotion() {
+        return promotion;
     }
 }
