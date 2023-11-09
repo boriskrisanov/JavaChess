@@ -1,69 +1,52 @@
 package io.github.boriskrisanov.javachess;
 
 import io.github.boriskrisanov.javachess.board.*;
-import io.github.boriskrisanov.javachess.piece.*;
+
+import java.util.*;
 
 public class Search {
-    public static int evaluate(Board position, int depth, Piece.Color maximizingPlayer) {
+    private static long debugPositionsEvaluated;
+
+    public static SearchResult bestMove(Board position, int depth) {
+        debugPositionsEvaluated = 0;
+
+        Move bestMove = null;
+        int bestEval = Integer.MIN_VALUE;
+
+        for (Move move : position.getLegalMovesForSideToMove()) {
+            position.makeMove(move);
+            int eval = -evaluate(position, depth - 1);
+            if (eval > bestEval) {
+                bestEval = eval;
+                bestMove = move;
+            }
+            position.unmakeMove();
+        }
+
+        return new SearchResult(bestMove, bestEval, debugPositionsEvaluated);
+    }
+
+    public static int evaluate(Board position, int depth) {
         if (depth == 0) {
             return StaticEval.evaluate(position);
         }
 
-        if (maximizingPlayer == Piece.Color.WHITE) {
-            int maxEval = Integer.MIN_VALUE;
-            for (Move move : position.getLegalMovesForSideToMove()) {
-                position.makeMove(move);
-
-                int evalAfterMove = evaluate(position, depth - 1, Piece.Color.BLACK);
-                maxEval = Math.max(maxEval, evalAfterMove);
-
-                position.unmakeMove();
-            }
-            return maxEval;
-        } else {
-            int minEval = Integer.MAX_VALUE;
-            for (Move move : position.getLegalMovesForSideToMove()) {
-                position.makeMove(move);
-
-                int evalAfterMove = evaluate(position, depth - 1, Piece.Color.WHITE);
-                minEval = Math.min(minEval, evalAfterMove);
-
-                position.unmakeMove();
-            }
-            return minEval;
+        ArrayList<Move> moves = position.getLegalMovesForSideToMove();
+        if (position.isCheckmate(position.getSideToMove())) {
+            return Integer.MIN_VALUE;
         }
-    }
+        // TODO: Draw detection
 
-    public static Move bestMove(Board position, int depth, Piece.Color maximizingPlayer) {
-        Move bestMove = null;
-        int bestEval = maximizingPlayer == Piece.Color.WHITE ? Integer.MIN_VALUE : Integer.MAX_VALUE;
+        int bestEval = Integer.MIN_VALUE;
 
-        if (maximizingPlayer == Piece.Color.WHITE) {
-            for (Move move : position.getLegalMovesForSideToMove()) {
-                position.makeMove(move);
-
-                int evalAfterMove = evaluate(position, depth - 1, Piece.Color.BLACK);
-                if (evalAfterMove > bestEval) {
-                    bestEval = evalAfterMove;
-                    bestMove = move;
-                }
-
-                position.unmakeMove();
-            }
-        } else {
-            for (Move move : position.getLegalMovesForSideToMove()) {
-                position.makeMove(move);
-
-                int evalAfterMove = evaluate(position, depth - 1, Piece.Color.WHITE);
-                if (evalAfterMove < bestEval) {
-                    bestEval = evalAfterMove;
-                    bestMove = move;
-                }
-
-                position.unmakeMove();
-            }
+        for (Move move : moves) {
+            position.makeMove(move);
+            int evalAfterMove = -evaluate(position, depth - 1);
+            debugPositionsEvaluated++;
+            bestEval = Math.max(evalAfterMove, bestEval);
+            position.unmakeMove();
         }
 
-        return bestMove;
+        return bestEval;
     }
 }

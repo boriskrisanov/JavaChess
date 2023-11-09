@@ -3,8 +3,14 @@ package io.github.boriskrisanov.javachess;
 import io.github.boriskrisanov.javachess.board.*;
 import io.github.boriskrisanov.javachess.piece.*;
 
+import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
+
 public class StaticEval {
-    private static int countMaterial(Piece[] position) {
+    private static int getPieceValue(Piece piece) {
+        return piece.getValue();
+    }
+
+    private static int countMaterialDifference(Piece[] position) {
         int materialDifference = 0;
 
         for (Piece piece : position) {
@@ -12,10 +18,10 @@ public class StaticEval {
                 continue;
             }
 
-            if (piece.getColor() == Piece.Color.WHITE) {
-                materialDifference += piece.getValue();
+            if (piece.getColor() == WHITE) {
+                materialDifference += getPieceValue(piece);
             } else {
-                materialDifference -= piece.getValue();
+                materialDifference -= getPieceValue(piece);
             }
         }
 
@@ -25,8 +31,9 @@ public class StaticEval {
     public static int evaluate(Board position) {
         int eval = 0;
 
-        eval += countMaterial(position.getBoard());
+        eval += countMaterialDifference(position.getBoard());
 
-        return eval;
+        return eval * (position.getSideToMove() == WHITE ? 1 : -1);
+//        return eval;
     }
 }

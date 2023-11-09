@@ -621,6 +621,10 @@ public class Board {
         return isInCheck;
     }
 
+    public boolean isCheckmate(Piece.Color side) {
+        return isSideInCheck(side) && getAllLegalMovesForSide(side).isEmpty();
+    }
+
     public int getKingPosition(Piece.Color color) {
         return color == Piece.Color.WHITE ? whiteKingPos : blackKingPos;
     }

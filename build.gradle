@@ -1,10 +1,20 @@
 plugins {
-    id 'java'
+    id 'application'
 }
 
 group = 'io.github.boriskrisanov.javachess'
 version = '1.0-SNAPSHOT'
 sourceCompatibility = '20'
+
+application {
+    mainClass = "io.github.boriskrisanov.javachess.Main"
+}
+
+jar {
+    manifest {
+        attributes 'Main-Class': application.mainClass
+    }
+}
 
 repositories {
     mavenCentral()

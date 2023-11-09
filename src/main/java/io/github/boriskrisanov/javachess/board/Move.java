@@ -4,9 +4,6 @@ import io.github.boriskrisanov.javachess.piece.*;
 
 
 public final class Move {
-    // Move data layout:
-    // 0 | 6 bits start | 6 bits destination | 3 bits move flags
-    private short move = 0;
     private final int start;
     private final int destination;
     private final Piece capturedPiece;
@@ -25,10 +22,6 @@ public final class Move {
         this.capturedPiece = capturedPiece;
         this.castlingDirection = castlingDirection;
         this.promotion = promotion;
-
-        this.move |= (short) ((byte) start << 15);
-        this.move |= (short) ((byte) destination << 15 - 6);
-        this.move |= (short) ((byte) destination << 15 - 6);
     }
 
     @Override
