@@ -4,7 +4,7 @@ import io.github.boriskrisanov.javachess.board.*;
 
 public class Main {
     public static void main(String[] args) {
-        Board board = new Board("rnb1kbnr/pppp1ppp/8/4p1q1/4P3/3P4/PPP2PPP/RNBQKBNR w KQkq - 1 3");
-        System.out.println(Search.bestMove(board, 4));
+        Board board = new Board("rnbqkbnr/ppp1pppp/3p4/8/4P1Q1/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2");
+        System.out.println(Search.bestMove(board, 5));
     }
 }
