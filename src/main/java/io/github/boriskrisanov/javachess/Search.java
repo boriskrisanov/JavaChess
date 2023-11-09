@@ -3,8 +3,23 @@ package io.github.boriskrisanov.javachess;
 import io.github.boriskrisanov.javachess.board.*;
 import io.github.boriskrisanov.javachess.piece.*;
 
+import java.util.*;
+
 public class Search {
     private static long debugPositionsEvaluated = 0;
+
+    private static int moveScore(Board board, Move move) {
+        int score = 0;
+        Piece piece = board.getPieceOn(move.start());
+        Piece capturedPiece = move.capturedPiece();
+
+        // Capturing a high value piece with a low value piece is likely to be a good move
+        if (capturedPiece != null) {
+            score += (capturedPiece.getValue() - piece.getValue());
+        }
+
+        return score;
+    }
 
     public static SearchResult bestMove(Board board, int depth) {
         debugPositionsEvaluated = 0;
@@ -17,6 +32,8 @@ public class Search {
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
+            var moves = board.getLegalMovesForSideToMove();
+            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
             for (Move move : board.getLegalMovesForSideToMove()) {
                 board.makeMove(move);
                 int eval = evaluate(board, depth - 1, false, alpha, beta);
@@ -38,7 +55,9 @@ public class Search {
             bestEval = maxEval;
         } else {
             int minEval = Integer.MAX_VALUE;
-            for (Move move : board.getLegalMovesForSideToMove()) {
+            var moves = board.getLegalMovesForSideToMove();
+            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
+            for (Move move : moves) {
                 board.makeMove(move);
                 int eval = evaluate(board, depth - 1, true, alpha, beta);
 
@@ -96,7 +115,9 @@ public class Search {
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
-            for (Move move : board.getLegalMovesForSideToMove()) {
+            var moves = board.getLegalMovesForSideToMove();
+            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
+            for (Move move : moves) {
                 board.makeMove(move);
                 debugPositionsEvaluated++;
                 int eval = evaluate(board, depth - 1, false, alpha, beta);
@@ -111,7 +132,9 @@ public class Search {
             return maxEval;
         } else {
             int minEval = Integer.MAX_VALUE;
-            for (Move move : board.getLegalMovesForSideToMove()) {
+            var moves = board.getLegalMovesForSideToMove();
+            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
+            for (Move move : moves) {
                 board.makeMove(move);
                 debugPositionsEvaluated++;
                 int eval = evaluate(board, depth - 1, true, alpha, beta);
