@@ -54,7 +54,7 @@ public abstract class Piece {
                     // Check if this piece can move to the resolution square
                     // TODO: Some of this might be redundant
 
-                    if (resolution != attackingSquare) {
+                    if (resolution != attackingSquare || board.getPieceOn(resolution) instanceof King) {
                         continue;
                     }
 
