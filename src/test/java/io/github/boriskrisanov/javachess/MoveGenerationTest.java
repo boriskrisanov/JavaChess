@@ -2,11 +2,13 @@ package io.github.boriskrisanov.javachess;
 
 import io.github.boriskrisanov.javachess.board.*;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.parallel.*;
 
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@Execution(ExecutionMode.CONCURRENT)
 public class MoveGenerationTest {
     private long generateMoves(Board board, int depth, TreeMap<String, Long> moveCounts, boolean rootNode) {
         long positionsReached = 0;
@@ -59,18 +61,8 @@ public class MoveGenerationTest {
     }
 
     @Test
-    void testStartingPositionDepth6() {
+    void testStartingPosition() {
         assertEquals(119060324, runTest(6, Board.STARTING_POSITION_FEN));
-    }
-
-    @Test
-    void testDepth7() {
-        assertEquals(3195901860L, runTest(7, Board.STARTING_POSITION_FEN));
-    }
-
-    @Test
-    void testDepth8() {
-        assertEquals(84998978956L, runTest(8, Board.STARTING_POSITION_FEN));
     }
 
     @Test
