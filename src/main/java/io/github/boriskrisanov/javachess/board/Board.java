@@ -209,6 +209,82 @@ public class Board {
 
         var movedPiece = board[move.start()];
 
+        boolean isPromotion = move.promotion() != null;
+        boolean isCapture = move.capturedPiece() != null;
+
+        // The right to capture en passant has been lost because another move has been made
+        enPassantTargetSquare = -1;
+
+        if (movedPiece instanceof Pawn) {
+            // Set the en passant target square if a pawn moved 2 squares forward
+            if (move.destination() == move.start() - 8 * 2) {
+                enPassantTargetSquare = move.start() - 8;
+            } else if (move.destination() == move.start() + 8 * 2) {
+                enPassantTargetSquare = move.start() + 8;
+            }
+        }
+
+        // Update king position and castling
+        if (movedPiece instanceof King) {
+            // Castling
+            if (move.castlingDirection() != null) {
+                // Move rook
+                switch (move.castlingDirection()) {
+                    case SHORT -> {
+                        var rook = movedPiece.getColor() == Piece.Color.WHITE ? board[63] : board[7];
+                        board[rook.getPosition()] = null;
+                        board[move.destination() - 1] = rook;
+                        rook.setPosition(move.destination() - 1);
+                    }
+                    case LONG -> {
+                        var rook = movedPiece.getColor() == Piece.Color.WHITE ? board[56] : board[0];
+                        board[rook.getPosition()] = null;
+                        board[move.destination() + 1] = rook;
+                        rook.setPosition(move.destination() + 1);
+                    }
+                }
+
+                // This side has just castled so castling is no longer possible
+                castlingRights.removeForSide(movedPiece.getColor());
+            }
+
+            if (movedPiece.getColor() == Piece.Color.WHITE) {
+                whiteKingPos = move.destination();
+            } else {
+                blackKingPos = move.destination();
+            }
+            // King has moved, so castling is no longer possible
+            castlingRights.removeForSide(movedPiece.getColor());
+        }
+
+        // Update castling rights if rook has moved
+        boolean rookWasCaptured = move.capturedPiece() instanceof Rook && (move.capturedPiece().getPosition() == 0 || move.capturedPiece().getPosition() == 7 || move.capturedPiece().getPosition() == 56 || move.capturedPiece().getPosition() == 63);
+        if (movedPiece instanceof Rook || rookWasCaptured) {
+            if (!rookWasCaptured) {
+                // Rook has moved
+                if (movedPiece.getPosition() == 0) {
+                    castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.LONG);
+                } else if (movedPiece.getPosition() == 7) {
+                    castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.SHORT);
+                } else if (movedPiece.getPosition() == 56) {
+                    castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.LONG);
+                } else if (movedPiece.getPosition() == 63) {
+                    castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.SHORT);
+                }
+            } else {
+                // Rook was captured
+                if (move.destination() == 0) {
+                    castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.LONG);
+                } else if (move.destination() == 7) {
+                    castlingRights.removeForSide(Piece.Color.BLACK, CastlingDirection.SHORT);
+                } else if (move.destination() == 56) {
+                    castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.LONG);
+                } else if (move.destination() == 63) {
+                    castlingRights.removeForSide(Piece.Color.WHITE, CastlingDirection.SHORT);
+                }
+            }
+        }
+
         board[move.start()] = null;
 
         if (move.promotion() == null) {
@@ -258,6 +334,34 @@ public class Board {
             } else {
                 board[move.destination()] = move.capturedPiece();
                 board[move.destination()].setPosition(move.destination());
+            }
+        }
+
+        // Undo castling
+        var movedPiece = board[move.destination()];
+        if (move.castlingDirection() == CastlingDirection.SHORT) {
+            if (movedPiece.getColor() == Piece.Color.WHITE) {
+                var rook = board[61];
+                board[61] = null;
+                board[63] = rook;
+                rook.setPosition(63);
+            } else {
+                var rook = board[5];
+                board[5] = null;
+                board[7] = rook;
+                rook.setPosition(7);
+            }
+        } else if (move.castlingDirection() == CastlingDirection.LONG) {
+            if (movedPiece.getColor() == Piece.Color.WHITE) {
+                var rook = board[59];
+                board[59] = null;
+                board[56] = rook;
+                rook.setPosition(56);
+            } else {
+                var rook = board[3];
+                board[3] = null;
+                board[0] = rook;
+                rook.setPosition(0);
             }
         }
 
