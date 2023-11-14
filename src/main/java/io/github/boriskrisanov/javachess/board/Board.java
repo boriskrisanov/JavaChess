@@ -209,6 +209,7 @@ public class Board {
         var movedPiece = board[move.start()];
 
         boolean isPromotion = move.promotion() != null;
+        boolean isEnPassant = move.destination() == enPassantTargetSquare;
         boolean isCapture = move.capturedPiece() != null;
 
         // The right to capture en passant has been lost because another move has been made
@@ -284,11 +285,11 @@ public class Board {
             }
         }
 
-        if (move.destination() == enPassantTargetSquare) {
+        if (isEnPassant && movedPiece instanceof Pawn) {
             if (sideToMove == Piece.Color.WHITE) {
-                board[enPassantTargetSquare - 8] = null;
+                board[move.destination() + 8] = null;
             } else {
-                board[enPassantTargetSquare + 8] = null;
+                board[move.destination() - 8] = null;
             }
         }
 
@@ -324,6 +325,7 @@ public class Board {
 
         boolean isPromotion = move.promotion() != null;
         boolean isCapture = move.capturedPiece() != null;
+        boolean isEnPassant = move.destination() == enPassantTargetSquare;
         // If this was a promotion, the piece at the destination square (movedPiece) would be the piece that the pawn
         // promoted to, rather than the pawn itself, which is why this special case is needed.
         Piece movedPiece = isPromotion ? new Pawn(sideToMove.getOpposite(), move.destination(), this) : board[move.destination()];
@@ -357,11 +359,12 @@ public class Board {
 
         board[move.destination()] = null;
         board[move.start()] = movedPiece;
+        movedPiece.setPosition(move.start());
 
         if (isCapture) {
             // In the case of en passant, the position of the captured piece will not be the destination of the move,
             // so board[move.destination()] can't be used.
-            if (enPassantTargetSquare == move.destination()) {
+            if (isEnPassant) {
                 if (sideToMove == Piece.Color.WHITE) {
                     board[move.destination() - 8] = move.capturedPiece();
                     move.capturedPiece().setPosition(move.destination() - 8);
@@ -374,8 +377,6 @@ public class Board {
                 move.capturedPiece().setPosition(move.destination());
             }
         }
-
-        movedPiece.setPosition(move.start());
 
         squaresAttackedByWhite = boardState.whiteAttackingSquares();
         squaresAttackedByBlack = boardState.blackAttackingSquares();
