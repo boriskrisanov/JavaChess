@@ -384,8 +384,7 @@ public class Board {
         sideToMove = sideToMove.getOpposite();
 
         computePinLines();
-
-        checkResolutions = boardState.checkResolutions();
+        computeCheckResolutions();
     }
 
     private void computeAttackingSquares() {
