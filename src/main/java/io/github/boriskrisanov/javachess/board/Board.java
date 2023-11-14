@@ -196,7 +196,6 @@ public class Board {
             };
         }
 
-        // TODO: Allow en passant in UCI moves
         makeMove(new Move(Square.fromString(start), Square.fromString(destination), board[Square.fromString(destination)], promotion));
     }
 
@@ -285,17 +284,21 @@ public class Board {
             }
         }
 
+        if (move.capturedPiece() != null) {
+            board[move.capturedPiece().getPosition()] = null;
+        }
+
         board[move.start()] = null;
 
-        if (move.promotion() == null) {
+        if (!isPromotion) {
             board[move.destination()] = movedPiece;
-            board[move.destination()].setPosition(move.destination());
+            movedPiece.setPosition(move.destination());
         } else {
             board[move.destination()] = switch (move.promotion()) {
-                case QUEEN -> new Queen(movedPiece.getColor(), move.destination(), this);
-                case ROOK -> new Rook(movedPiece.getColor(), move.destination(), this);
-                case BISHOP -> new Bishop(movedPiece.getColor(), move.destination(), this);
-                case KNIGHT -> new Knight(movedPiece.getColor(), move.destination(), this);
+                case QUEEN -> new Queen(sideToMove, move.destination(), this);
+                case ROOK -> new Rook(sideToMove, move.destination(), this);
+                case BISHOP -> new Bishop(sideToMove, move.destination(), this);
+                case KNIGHT -> new Knight(sideToMove, move.destination(), this);
             };
         }
 
@@ -315,30 +318,13 @@ public class Board {
         blackKingPos = boardState.blackKingPos();
         castlingRights = boardState.castlingRights();
 
-        if (move.promotion() == null) {
-            var movedPiece = board[move.destination()];
-
-            if (move.capturedPiece() == null) {
-                board[move.destination()] = null;
-            } else {
-                board[move.destination()] = move.capturedPiece();
-                board[move.destination()].setPosition(move.destination());
-            }
-
-            board[move.start()] = movedPiece;
-            board[move.start()].setPosition(move.start());
-        } else {
-            board[move.start()] = new Pawn(sideToMove.getOpposite(), move.start(), this);
-            if (move.capturedPiece() == null) {
-                board[move.destination()] = null;
-            } else {
-                board[move.destination()] = move.capturedPiece();
-                board[move.destination()].setPosition(move.destination());
-            }
-        }
+        boolean isPromotion = move.promotion() != null;
+        boolean isCapture = move.capturedPiece() != null;
+        // If this was a promotion, the piece at the destination square (movedPiece) would be the piece that the pawn
+        // promoted to, rather than the pawn itself, which is why this special case is needed.
+        Piece movedPiece = isPromotion ? new Pawn(sideToMove.getOpposite(), move.destination(), this) : board[move.destination()];
 
         // Undo castling
-        var movedPiece = board[move.destination()];
         if (move.castlingDirection() == CastlingDirection.SHORT) {
             if (movedPiece.getColor() == Piece.Color.WHITE) {
                 var rook = board[61];
@@ -364,6 +350,28 @@ public class Board {
                 rook.setPosition(0);
             }
         }
+
+        board[move.destination()] = null;
+        board[move.start()] = movedPiece;
+
+        if (isCapture) {
+            // In the case of en passant, the position of the captured piece will not be the destination of the move,
+            // so board[move.destination()] can't be used.
+            if (enPassantTargetSquare == move.destination()) {
+                if (sideToMove == Piece.Color.WHITE) {
+                    board[move.destination() - 8] = move.capturedPiece();
+                    move.capturedPiece().setPosition(move.destination() - 8);
+                } else {
+                    board[move.destination() + 8] = move.capturedPiece();
+                    move.capturedPiece().setPosition(move.destination() + 8);
+                }
+            } else {
+                board[move.destination()] = move.capturedPiece();
+                move.capturedPiece().setPosition(move.destination());
+            }
+        }
+
+        movedPiece.setPosition(move.start());
 
         squaresAttackedByWhite = boardState.whiteAttackingSquares();
         squaresAttackedByBlack = boardState.blackAttackingSquares();
@@ -706,10 +714,9 @@ public class Board {
 
     public String getMoveHistory() {
         StringBuilder s = new StringBuilder();
-        var iterator = moveHistory.descendingIterator();
 
-        while (iterator.hasNext()) {
-            s.append(iterator.next().toString());
+        for (Move m : moveHistory) {
+            s.append(m.toString());
             s.append(" ");
         }
 
