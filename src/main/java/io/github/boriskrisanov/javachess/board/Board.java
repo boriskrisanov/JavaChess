@@ -284,8 +284,12 @@ public class Board {
             }
         }
 
-        if (move.capturedPiece() != null) {
-            board[move.capturedPiece().getPosition()] = null;
+        if (move.destination() == enPassantTargetSquare) {
+            if (sideToMove == Piece.Color.WHITE) {
+                board[enPassantTargetSquare - 8] = null;
+            } else {
+                board[enPassantTargetSquare + 8] = null;
+            }
         }
 
         board[move.start()] = null;
