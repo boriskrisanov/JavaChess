@@ -22,8 +22,8 @@ public class Board {
     private int enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
-    private int halfMoveClock;
-    private int moveNumber;
+    private int halfMoveClock = 0;
+    private int moveNumber = 0;
 
     public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -206,6 +206,10 @@ public class Board {
         moveHistory.push(move);
         boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights)));
 
+        if (move.capturedPiece() == null) {
+            halfMoveClock++;
+        }
+
         var movedPiece = board[move.start()];
 
         boolean isPromotion = move.promotion() != null;
@@ -317,6 +321,10 @@ public class Board {
     public void unmakeMove() {
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
+
+        if (sideToMove == Piece.Color.BLACK) {
+            halfMoveClock--;
+        }
 
         enPassantTargetSquare = boardState.enPassantTargetSquare();
         whiteKingPos = boardState.whiteKingPos();
@@ -621,6 +629,15 @@ public class Board {
 
     public boolean isCheckmate(Piece.Color side) {
         return isSideInCheck(side) && getAllLegalMovesForSide(side).isEmpty();
+    }
+
+    public boolean isCheck() {
+        return isSideInCheck(Piece.Color.WHITE) || isSideInCheck(Piece.Color.BLACK);
+    }
+
+    public boolean isDraw() {
+        // TODO: Insufficient material detection
+        return halfMoveClock >= 50 || (isCheck() && getLegalMovesForSideToMove().isEmpty());
     }
 
     public int getKingPosition(Piece.Color color) {

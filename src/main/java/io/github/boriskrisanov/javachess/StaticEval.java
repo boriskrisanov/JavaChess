@@ -19,10 +19,10 @@ public class StaticEval {
 
     private final static int[] blackPawnOpeningScores = {
             0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
             0, 1, 1, 2, 2, 1, 1, 0,
             0, 0, 1, 3, 3, 2, 1, 0,
             0, 0, 0, 4, 4, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
             0, 0, 0, 0, 0, 0, 0, 0,
@@ -56,9 +56,9 @@ public class StaticEval {
 
         int openingScore = 0;
         if (piece instanceof Pawn) {
-            openingScore = piece.getColor() == WHITE ? whitePawnOpeningScores[piece.getPosition()] : blackPawnOpeningScores[piece.getPosition()];
+            openingScore = piece.getColor() == WHITE ? whitePawnOpeningScores[position] : blackPawnOpeningScores[position];
         } else if (piece instanceof Knight) {
-            openingScore = piece.getColor() == WHITE ? whiteKnightOpeningScores[piece.getPosition()] : blackKnightOpeningScores[piece.getPosition()];
+            openingScore = piece.getColor() == WHITE ? whiteKnightOpeningScores[position] : blackKnightOpeningScores[position];
         }
 
         value += openingScore * openingWeight;
@@ -73,7 +73,7 @@ public class StaticEval {
                 totalMaterial += piece.getValue();
             }
         }
-        return (totalMaterial / 1024) - 2;
+        return Math.max((totalMaterial / 1024) - 2, 0);
     }
 
     public static int evaluate(Board position) {
