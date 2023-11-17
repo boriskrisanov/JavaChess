@@ -3,6 +3,7 @@ package io.github.boriskrisanov.javachess;
 import io.github.boriskrisanov.javachess.board.*;
 import io.github.boriskrisanov.javachess.piece.*;
 
+import static io.github.boriskrisanov.javachess.board.Direction.*;
 import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
 
 public class StaticEval {
@@ -50,18 +51,76 @@ public class StaticEval {
             0, 0, 0, 0, 0, 0, 0, 0,
     };
 
-    private static int getPieceValue(Piece piece, int openingWeight) {
+    private final static int[] whiteKingOpeningScores = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            2, 1, 0, 0, 0, 0, 1, 2,
+    };
+
+    private final static int[] blackKingOpeningScores = {
+            2, 1, 0, 0, 0, 0, 1, 2,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+    };
+
+    private final static int[] whiteBishopOpeningScores = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 3, 0, 0, 0, 0, 3, 0,
+            0, 1, 3, 1, 1, 3, 1, 0,
+            0, 0, 1, 2, 2, 1, 0, 0,
+            0, 2, 0, 0, 0, 0, 2, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+    };
+
+    private final static int[] blackBishopOpeningScores = {
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 2, 0, 0, 0, 0, 2, 0,
+            0, 0, 1, 2, 2, 1, 0, 0,
+            0, 1, 3, 1, 1, 3, 1, 0,
+            0, 3, 0, 0, 0, 0, 3, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, 0,
+    };
+
+    private final static int MAX_OPENING_WEIGHT = getOpeningWeight(new Board());
+
+    private static int getPieceValue(Piece piece, int openingWeight, int endgameWeight) {
         int value = piece.getValue();
         int position = piece.getPosition();
 
         int openingScore = 0;
         if (piece instanceof Pawn) {
             openingScore = piece.getColor() == WHITE ? whitePawnOpeningScores[position] : blackPawnOpeningScores[position];
+            openingScore *= 2;
         } else if (piece instanceof Knight) {
             openingScore = piece.getColor() == WHITE ? whiteKnightOpeningScores[position] : blackKnightOpeningScores[position];
+        } else if (piece instanceof Bishop) {
+            openingScore = piece.getColor() == WHITE ? whiteBishopOpeningScores[position] : blackBishopOpeningScores[position];
+        } else if (piece instanceof King) {
+            openingScore = piece.getColor() == WHITE ? whiteKingOpeningScores[position] : blackKingOpeningScores[position];
+            openingScore *= 8;
         }
 
         value += openingScore * openingWeight;
+
+        if (piece instanceof Pawn) {
+            Direction pawnDirection = piece.getColor() == WHITE ? UP : DOWN;
+            int distanceToPromotion = EdgeDistance.get(position, pawnDirection);
+            value += (7 - distanceToPromotion) * 2 * (endgameWeight + 1);
+        }
 
         return value;
     }
@@ -76,9 +135,14 @@ public class StaticEval {
         return Math.max((totalMaterial / 1024) - 2, 0);
     }
 
+    public static int getEndgameWeight(Board position, int openingWeight) {
+        return MAX_OPENING_WEIGHT - openingWeight;
+    }
+
     public static int evaluate(Board position) {
         int eval = 0;
         int openingWeight = getOpeningWeight(position);
+        int endgameWeight = getEndgameWeight(position, openingWeight);
 
         for (Piece piece : position.getBoard()) {
             if (piece == null) {
@@ -86,13 +150,12 @@ public class StaticEval {
             }
 
             if (piece.getColor() == WHITE) {
-                eval += getPieceValue(piece, openingWeight);
+                eval += getPieceValue(piece, openingWeight, endgameWeight);
             } else {
-                eval -= getPieceValue(piece, openingWeight);
+                eval -= getPieceValue(piece, openingWeight, endgameWeight);
             }
         }
 
         return eval;
-//        return eval;
     }
 }

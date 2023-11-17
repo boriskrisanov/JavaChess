@@ -207,7 +207,7 @@ public class Board {
         boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights)));
 
         if (move.capturedPiece() == null) {
-            halfMoveClock++;
+//            halfMoveClock++;
         }
 
         var movedPiece = board[move.start()];
@@ -323,7 +323,7 @@ public class Board {
         var boardState = boardHistory.pop();
 
         if (sideToMove == Piece.Color.BLACK) {
-            halfMoveClock--;
+//            halfMoveClock--;
         }
 
         enPassantTargetSquare = boardState.enPassantTargetSquare();
@@ -735,9 +735,10 @@ public class Board {
 
     public String getMoveHistory() {
         StringBuilder s = new StringBuilder();
+        Iterator<Move> it = moveHistory.descendingIterator();
 
-        for (Move m : moveHistory) {
-            s.append(m.toString());
+        while (it.hasNext()) {
+            s.append(it.next().toString());
             s.append(" ");
         }
 
