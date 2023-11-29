@@ -10,7 +10,7 @@ import static io.github.boriskrisanov.javachess.board.Direction.*;
  * Holds the current state of the game (piece positions, side to move, check, checkmate and en passant target square)
  */
 public class Board {
-    private final Piece[] board = new Piece[64];
+    private Piece[] board = new Piece[64];
     private ArrayList<Integer> squaresAttackedByWhite = new ArrayList<>();
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
