@@ -1,5 +1,6 @@
 package io.github.boriskrisanov.javachess.piece;
 
+import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
@@ -33,6 +34,30 @@ public class Pawn extends Piece {
         }
 
         return moveIndexes;
+    }
+
+    public long getAttackingSquaresBitboard() {
+        long bitboard = 0;
+
+        var edgeDistance = new EdgeDistance(position);
+
+        if (this.color == Color.WHITE) {
+            if (edgeDistance.top > 0 && edgeDistance.right > 0) {
+                bitboard |= BitboardUtils.withSquare(position - 8 + 1);
+            }
+            if (edgeDistance.top > 0 && edgeDistance.left > 0) {
+                bitboard |= BitboardUtils.withSquare(position - 8 - 1);
+            }
+        } else {
+            if (edgeDistance.bottom > 0 && edgeDistance.right > 0) {
+                bitboard |= BitboardUtils.withSquare(position + 8 + 1);
+            }
+            if (edgeDistance.bottom > 0 && edgeDistance.left > 0) {
+                bitboard |= BitboardUtils.withSquare(position + 8 - 1);
+            }
+        }
+
+        return bitboard;
     }
 
     @Override
@@ -154,6 +179,10 @@ public class Pawn extends Piece {
     @Override
     protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
         return getAttackingSquares();
+    }
+
+    protected long getAttackingSquaresIncludingPinsBitboard() {
+        return getAttackingSquaresBitboard();
     }
 
     @Override

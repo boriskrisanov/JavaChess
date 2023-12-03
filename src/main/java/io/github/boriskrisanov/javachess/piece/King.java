@@ -1,5 +1,6 @@
 package io.github.boriskrisanov.javachess.piece;
 
+import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
@@ -41,6 +42,38 @@ public class King extends Piece {
         }
 
         return moves;
+    }
+
+    public long getAttackingSquaresBitboard() {
+        long bitboard = 0;
+        var edgeDist = new EdgeDistance(position);
+
+        if (edgeDist.left >= 1) {
+            bitboard |= BitboardUtils.withSquare(position - 1);
+        }
+        if (edgeDist.right >= 1) {
+            bitboard |= BitboardUtils.withSquare(position + 1);
+        }
+        if (edgeDist.top >= 1) {
+            bitboard |= BitboardUtils.withSquare(position - 8);
+        }
+        if (edgeDist.bottom >= 1) {
+            bitboard |= BitboardUtils.withSquare(position + 8);
+        }
+        if (edgeDist.left >= 1 && edgeDist.top >= 1) {
+            bitboard |= BitboardUtils.withSquare(position - 8 - 1);
+        }
+        if (edgeDist.right >= 1 && edgeDist.top >= 1) {
+            bitboard |= BitboardUtils.withSquare(position - 8 + 1);
+        }
+        if (edgeDist.left >= 1 && edgeDist.bottom >= 1) {
+            bitboard |= BitboardUtils.withSquare(position + 8 - 1);
+        }
+        if (edgeDist.right >= 1 && edgeDist.bottom >= 1) {
+            bitboard |= BitboardUtils.withSquare(position + 8 + 1);
+        }
+
+        return bitboard;
     }
 
     @Override
@@ -112,6 +145,10 @@ public class King extends Piece {
     @Override
     protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
         return getAttackingSquares();
+    }
+
+    protected long getAttackingSquaresIncludingPinsBitboard() {
+        return getAttackingSquaresBitboard();
     }
 
     @Override

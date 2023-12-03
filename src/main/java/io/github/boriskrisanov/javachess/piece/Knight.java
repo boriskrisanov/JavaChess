@@ -1,5 +1,6 @@
 package io.github.boriskrisanov.javachess.piece;
 
+import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
@@ -44,6 +45,39 @@ public class Knight extends Piece {
         return moves;
     }
 
+    public long getAttackingSquaresBitboard() {
+        long squares = 0;
+
+        var edgeDistance = new EdgeDistance(position);
+
+        if (edgeDistance.left >= 2 && edgeDistance.top >= 1) {
+            squares |= BitboardUtils.withSquare(position - 8 - 2);
+        }
+        if (edgeDistance.left >= 1 && edgeDistance.top >= 2) {
+            squares |= BitboardUtils.withSquare(position - 8 * -1);
+        }
+        if (edgeDistance.right >= 1 && edgeDistance.top >= 2) {
+            squares |= BitboardUtils.withSquare(position - 8 * 2 + 1);
+        }
+        if (edgeDistance.left >= 2 && edgeDistance.bottom >= 1) {
+            squares |= BitboardUtils.withSquare(position - 2 + 8);
+        }
+        if (edgeDistance.right >= 2 && edgeDistance.bottom >= 1) {
+            squares |= BitboardUtils.withSquare(position + 2 + 8);
+        }
+        if (edgeDistance.left >= 1 && edgeDistance.bottom >= 2) {
+            squares |= BitboardUtils.withSquare(position + 8 * 2 - 1);
+        }
+        if (edgeDistance.right >= 1 && edgeDistance.bottom >= 2) {
+            squares |= BitboardUtils.withSquare(position + 8 * 2 + 2);
+        }
+        if (edgeDistance.right >= 2 && edgeDistance.top >= 1) {
+            squares |= BitboardUtils.withSquare(position - 8 + 2);
+        }
+
+        return squares;
+    }
+
     @Override
     protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
         ArrayList<Integer> moves = new ArrayList<>();
@@ -55,6 +89,14 @@ public class Knight extends Piece {
         }
 
         return getAttackingSquares();
+    }
+
+    protected long getAttackingSquaresIncludingPinsBitboard() {
+        if (pinDirection != null) {
+            return 0;
+        }
+
+        return getAttackingSquaresBitboard();
     }
 
     @Override

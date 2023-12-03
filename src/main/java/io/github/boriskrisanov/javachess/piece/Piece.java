@@ -43,7 +43,11 @@ public abstract class Piece {
 
     public abstract ArrayList<Integer> getAttackingSquares();
 
+    public abstract long getAttackingSquaresBitboard();
+
     protected abstract ArrayList<Integer> getAttackingSquaresIncludingPins();
+
+    protected abstract long getAttackingSquaresIncludingPinsBitboard();
 
     public ArrayList<Move> getLegalMoves() {
         ArrayList<Move> moves = new ArrayList<>();

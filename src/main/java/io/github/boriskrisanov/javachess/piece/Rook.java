@@ -1,5 +1,6 @@
 package io.github.boriskrisanov.javachess.piece;
 
+import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
@@ -24,6 +25,22 @@ public class Rook extends Piece {
         return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
 
+    public long getAttackingSquaresBitboard() {
+        long bitboard = 0;
+        var directions = new ArrayList<Direction>();
+
+        directions.add(UP);
+        directions.add(DOWN);
+        directions.add(LEFT);
+        directions.add(RIGHT);
+
+        for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
+            bitboard |= BitboardUtils.withSquare(square);
+        }
+
+        return bitboard;
+    }
+
     @Override
     protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
         var directions = new ArrayList<Direction>();
@@ -42,6 +59,31 @@ public class Rook extends Piece {
         }
 
         return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+    }
+
+    @Override
+    protected long getAttackingSquaresIncludingPinsBitboard() {
+        long bitboard = 0;
+        var directions = new ArrayList<Direction>();
+
+        if (pinDirection == null) {
+            directions.add(UP);
+            directions.add(DOWN);
+            directions.add(LEFT);
+            directions.add(RIGHT);
+        } else if (pinDirection == PinDirection.VERTICAL) {
+            directions.add(UP);
+            directions.add(DOWN);
+        } else if (pinDirection == PinDirection.HORIZONTAL) {
+            directions.add(LEFT);
+            directions.add(RIGHT);
+        }
+
+        for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
+            bitboard |= BitboardUtils.withSquare(square);
+        }
+
+        return bitboard;
     }
 
     @Override
