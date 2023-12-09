@@ -13,7 +13,6 @@ public class Rook extends Piece {
     }
 
     public long getAttackingSquares() {
-        long bitboard = 0;
         var directions = new ArrayList<Direction>();
 
         directions.add(UP);
