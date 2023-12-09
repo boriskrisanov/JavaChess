@@ -12,31 +12,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public ArrayList<Integer> getAttackingSquares() {
-        ArrayList<Integer> moveIndexes = new ArrayList<>();
-
-        var edgeDistance = new EdgeDistance(position);
-
-        if (this.color == Color.WHITE) {
-            if (edgeDistance.top > 0 && edgeDistance.right > 0) {
-                moveIndexes.add(position - 8 + 1);
-            }
-            if (edgeDistance.top > 0 && edgeDistance.left > 0) {
-                moveIndexes.add(position - 8 - 1);
-            }
-        } else {
-            if (edgeDistance.bottom > 0 && edgeDistance.right > 0) {
-                moveIndexes.add(position + 8 + 1);
-            }
-            if (edgeDistance.bottom > 0 && edgeDistance.left > 0) {
-                moveIndexes.add(position + 8 - 1);
-            }
-        }
-
-        return moveIndexes;
-    }
-
-    public long getAttackingSquaresBitboard() {
+    public long getAttackingSquares() {
         long bitboard = 0;
 
         var edgeDistance = new EdgeDistance(position);
@@ -69,7 +45,7 @@ public class Pawn extends Piece {
         var edgeDist = new EdgeDistance(position);
 
         // Captures
-        for (int targetSquare : attackingSquares) {
+        for (int targetSquare : BitboardUtils.squaresOf(attackingSquares)) {
             if (board.getBoard()[targetSquare] == null || board.getBoard()[targetSquare].getColor() == this.color) {
                 continue;
             }
@@ -177,12 +153,8 @@ public class Pawn extends Piece {
     }
 
     @Override
-    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
+    protected long getAttackingSquaresIncludingPins() {
         return getAttackingSquares();
-    }
-
-    protected long getAttackingSquaresIncludingPinsBitboard() {
-        return getAttackingSquaresBitboard();
     }
 
     @Override

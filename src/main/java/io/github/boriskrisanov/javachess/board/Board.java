@@ -1,5 +1,6 @@
 package io.github.boriskrisanov.javachess.board;
 
+import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.piece.*;
 
 import java.util.*;
@@ -24,6 +25,18 @@ public class Board {
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
     private int halfMoveClock = 0;
     private int moveNumber = 0;
+    private long whitePawns = 0;
+    private long whiteKnights = 0;
+    private long whiteBishops = 0;
+    private long whiteRooks = 0;
+    private long whiteQueens = 0;
+    private long whiteKing = 0;
+    private long blackPawns = 0;
+    private long blackKnights = 0;
+    private long blackBishops = 0;
+    private long blackRooks = 0;
+    private long blackQueens = 0;
+    private long blackKing = 0;
 
     public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -64,6 +77,35 @@ public class Board {
                 i += n - 1;
             } else {
                 board[i] = Piece.fromChar(c, i, this);
+                if (board[i].getColor() == Piece.Color.WHITE) {
+                    if (board[i] instanceof Pawn) {
+                        whitePawns |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof Knight) {
+                        whiteKnights |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof Bishop) {
+                        whiteBishops |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof Rook) {
+                        whiteRooks |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof Queen) {
+                        whiteQueens |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof King) {
+                        whiteKing |= BitboardUtils.withSquare(i);
+                    }
+                } else {
+                    if (board[i] instanceof Pawn) {
+                        blackPawns |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof Knight) {
+                        blackKnights |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof Bishop) {
+                        blackBishops |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof Rook) {
+                        blackRooks |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof Queen) {
+                        blackQueens |= BitboardUtils.withSquare(i);
+                    } else if (board[i] instanceof King) {
+                        blackKing |= BitboardUtils.withSquare(i);
+                    }
+                }
                 if (board[i] instanceof King) {
                     if (board[i].getColor() == Piece.Color.WHITE) {
                         whiteKingPos = i;
@@ -637,7 +679,8 @@ public class Board {
 
     public boolean isDraw() {
         // TODO: Insufficient material detection
-        return halfMoveClock >= 50 || (isCheck() && getLegalMovesForSideToMove().isEmpty());
+        boolean isStalemate = isCheck() && getLegalMovesForSideToMove().isEmpty();
+        return halfMoveClock >= 50 || isStalemate;
     }
 
     public int getKingPosition(Piece.Color color) {
@@ -649,15 +692,15 @@ public class Board {
     }
 
     private ArrayList<Integer> computeAttackingSquaresForSide(Piece.Color side) {
-        var squares = new ArrayList<Integer>();
+        long bitboard = 0;
 
         for (Piece piece : board) {
             if (piece != null && piece.getColor() == side) {
-                squares.addAll(piece.getAttackingSquares());
+                bitboard |= piece.getAttackingSquares();
             }
         }
 
-        return squares;
+        return BitboardUtils.squaresOf(bitboard);
     }
 
     public ArrayList<Move> getAllLegalMoves() {

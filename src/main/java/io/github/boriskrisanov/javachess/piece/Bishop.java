@@ -10,19 +10,8 @@ import static io.github.boriskrisanov.javachess.board.PinDirection.*;
 
 
 public class Bishop extends Piece {
-    @Override
-    public ArrayList<Integer> getAttackingSquares() {
-        var directions = new ArrayList<Direction>();
 
-        directions.add(TOP_RIGHT);
-        directions.add(BOTTOM_LEFT);
-        directions.add(TOP_LEFT);
-        directions.add(BOTTOM_RIGHT);
-
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
-    }
-
-    public long getAttackingSquaresBitboard() {
+    public long getAttackingSquares() {
         long bitboard = 0;
         var directions = new ArrayList<Direction>();
 
@@ -38,27 +27,7 @@ public class Bishop extends Piece {
         return bitboard;
     }
 
-    @Override
-    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
-        var directions = new ArrayList<Direction>();
-
-        if (pinDirection == null) {
-            directions.add(TOP_RIGHT);
-            directions.add(BOTTOM_LEFT);
-            directions.add(TOP_LEFT);
-            directions.add(BOTTOM_RIGHT);
-        } else if (pinDirection == POSITIVE_DIAGONAL) {
-            directions.add(TOP_RIGHT);
-            directions.add(BOTTOM_LEFT);
-        } else if (pinDirection == NEGATIVE_DIAGONAL) {
-            directions.add(TOP_LEFT);
-            directions.add(BOTTOM_RIGHT);
-        }
-
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
-    }
-
-    protected long getAttackingSquaresIncludingPinsBitboard() {
+    protected long getAttackingSquaresIncludingPins() {
         long bitboard = 0;
         var directions = new ArrayList<Direction>();
 

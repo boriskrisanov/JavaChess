@@ -15,7 +15,7 @@ public class BitboardUtils {
 
         for (int i = 0; i < 64; i++) {
             if ((bitboard & 1) == 1) {
-                squares.add(i);
+                squares.add(63 - i);
             }
             bitboard >>= 1;
         }

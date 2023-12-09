@@ -14,45 +14,16 @@ public class Queen extends Piece {
         super(color, position, board);
     }
 
-    @Override
-    public ArrayList<Integer> getAttackingSquares() {
-        var directions = new ArrayList<>(List.of(Direction.values()));
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
-    }
-
-    public long getAttackingSquaresBitboard() {
+    public long getAttackingSquares() {
         long bitboard = 0;
         var directions = new ArrayList<>(List.of(Direction.values()));
         for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
-            bitboard |= square;
+            bitboard |= BitboardUtils.withSquare(square);
         }
         return bitboard;
     }
 
-    @Override
-    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
-        var directions = new ArrayList<Direction>();
-
-        if (pinDirection == null) {
-            directions.addAll(List.of(Direction.values()));
-        } else if (pinDirection == VERTICAL) {
-            directions.add(UP);
-            directions.add(DOWN);
-        } else if (pinDirection == HORIZONTAL) {
-            directions.add(LEFT);
-            directions.add(RIGHT);
-        } else if (pinDirection == POSITIVE_DIAGONAL) {
-            directions.add(TOP_RIGHT);
-            directions.add(BOTTOM_LEFT);
-        } else if (pinDirection == NEGATIVE_DIAGONAL) {
-            directions.add(TOP_LEFT);
-            directions.add(BOTTOM_RIGHT);
-        }
-
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
-    }
-
-    protected long getAttackingSquaresIncludingPinsBitboard() {
+    protected long getAttackingSquaresIncludingPins() {
         long bitboard = 0;
         var directions = new ArrayList<Direction>();
 

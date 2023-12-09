@@ -1,5 +1,6 @@
 package io.github.boriskrisanov.javachess.piece;
 
+import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
@@ -41,18 +42,14 @@ public abstract class Piece {
     }
 
 
-    public abstract ArrayList<Integer> getAttackingSquares();
+    public abstract long getAttackingSquares();
 
-    public abstract long getAttackingSquaresBitboard();
-
-    protected abstract ArrayList<Integer> getAttackingSquaresIncludingPins();
-
-    protected abstract long getAttackingSquaresIncludingPinsBitboard();
+    protected abstract long getAttackingSquaresIncludingPins();
 
     public ArrayList<Move> getLegalMoves() {
         ArrayList<Move> moves = new ArrayList<>();
 
-        for (int attackingSquare : getAttackingSquaresIncludingPins()) {
+        for (int attackingSquare : BitboardUtils.squaresOf(getAttackingSquaresIncludingPins())) {
             if (board.isSideInCheck(this.color)) {
                 for (int resolution : board.getCheckResolutions()) {
                     // Check if this piece can move to the resolution square

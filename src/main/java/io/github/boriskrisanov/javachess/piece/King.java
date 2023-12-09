@@ -11,40 +11,7 @@ public class King extends Piece {
         super(color, position, board);
     }
 
-    @Override
-    public ArrayList<Integer> getAttackingSquares() {
-        var moves = new ArrayList<Integer>();
-        var edgeDist = new EdgeDistance(position);
-
-        if (edgeDist.left >= 1) {
-            moves.add(position - 1);
-        }
-        if (edgeDist.right >= 1) {
-            moves.add(position + 1);
-        }
-        if (edgeDist.top >= 1) {
-            moves.add(position - 8);
-        }
-        if (edgeDist.bottom >= 1) {
-            moves.add(position + 8);
-        }
-        if (edgeDist.left >= 1 && edgeDist.top >= 1) {
-            moves.add(position - 8 - 1);
-        }
-        if (edgeDist.right >= 1 && edgeDist.top >= 1) {
-            moves.add(position - 8 + 1);
-        }
-        if (edgeDist.left >= 1 && edgeDist.bottom >= 1) {
-            moves.add(position + 8 - 1);
-        }
-        if (edgeDist.right >= 1 && edgeDist.bottom >= 1) {
-            moves.add(position + 8 + 1);
-        }
-
-        return moves;
-    }
-
-    public long getAttackingSquaresBitboard() {
+    public long getAttackingSquares() {
         long bitboard = 0;
         var edgeDist = new EdgeDistance(position);
 
@@ -82,7 +49,7 @@ public class King extends Piece {
         var castlingRights = board.getCastlingRights();
         var moves = new ArrayList<Move>();
 
-        for (int targetSquare : getAttackingSquares()) {
+        for (int targetSquare : BitboardUtils.squaresOf(getAttackingSquares())) {
             if (opponentAttackingSquares.contains(targetSquare) || (!board.isSquareEmpty(targetSquare) && board.getPieceOn(targetSquare).getColor() == this.color)) {
                 continue;
             }
@@ -142,13 +109,8 @@ public class King extends Piece {
         return moves;
     }
 
-    @Override
-    protected ArrayList<Integer> getAttackingSquaresIncludingPins() {
+    protected long getAttackingSquaresIncludingPins() {
         return getAttackingSquares();
-    }
-
-    protected long getAttackingSquaresIncludingPinsBitboard() {
-        return getAttackingSquaresBitboard();
     }
 
     @Override
