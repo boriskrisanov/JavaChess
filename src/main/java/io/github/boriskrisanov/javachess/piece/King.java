@@ -45,16 +45,15 @@ public class King extends Piece {
 
     @Override
     public ArrayList<Move> getLegalMoves() {
-        // TODO: Use bitboards
-        ArrayList<Integer> opponentAttackingSquares = BitboardUtils.squaresOf(board.getSquaresAttackedBySide(color.getOpposite()));
+        long opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
         var castlingRights = board.getCastlingRights();
+        var attackingSquares = getAttackingSquares();
         var moves = new ArrayList<Move>();
 
-        for (int targetSquare : BitboardUtils.squaresOf(getAttackingSquares())) {
-            if (opponentAttackingSquares.contains(targetSquare) || (!board.isSquareEmpty(targetSquare) && board.getPieceOn(targetSquare).getColor() == this.color)) {
-                continue;
-            }
+        // Ignore squares occupied by friendly pieces and squares attacked by enemy pieces
+        attackingSquares &= ~(opponentAttackingSquares | board.getPieces(this.color));
 
+        for (int targetSquare : BitboardUtils.squaresOf(attackingSquares)) {
             Piece capturedPiece = board.getPieceOn(targetSquare);
             Move move = new Move(position, targetSquare, capturedPiece);
 
@@ -70,16 +69,16 @@ public class King extends Piece {
         if (!board.isSideInCheck(this.color)) {
             if (color == Color.WHITE) {
                 if (castlingRights.canWhiteShortCastle()
-                        && !opponentAttackingSquares.contains(position + 1)
-                        && !opponentAttackingSquares.contains(position + 2)
+                        && (opponentAttackingSquares & BitboardUtils.withSquare(position + 1)) == 0
+                        && (opponentAttackingSquares & BitboardUtils.withSquare(position + 2)) == 0
                         && board.isSquareEmpty(position + 1)
                         && board.isSquareEmpty(position + 2)
                 ) {
                     moves.add(new Move(position, position + 2, null, CastlingDirection.SHORT));
                 }
                 if (castlingRights.canWhiteLongCastle()
-                        && !opponentAttackingSquares.contains(position - 1)
-                        && !opponentAttackingSquares.contains(position - 2)
+                        && (opponentAttackingSquares & BitboardUtils.withSquare(position - 1)) == 0
+                        && (opponentAttackingSquares & BitboardUtils.withSquare(position - 2)) == 0
                         && board.isSquareEmpty(position - 1)
                         && board.isSquareEmpty(position - 2)
                         && board.isSquareEmpty(position - 3)
@@ -88,16 +87,16 @@ public class King extends Piece {
                 }
             } else {
                 if (castlingRights.canBlackShortCastle()
-                        && !opponentAttackingSquares.contains(position + 1)
-                        && !opponentAttackingSquares.contains(position + 2)
+                        && (opponentAttackingSquares & BitboardUtils.withSquare(position + 1)) == 0
+                        && (opponentAttackingSquares & BitboardUtils.withSquare(position + 2)) == 0
                         && board.isSquareEmpty(position + 1)
                         && board.isSquareEmpty(position + 2)
                 ) {
                     moves.add(new Move(position, position + 2, null, CastlingDirection.SHORT));
                 }
                 if (castlingRights.canBlackLongCastle()
-                        && !opponentAttackingSquares.contains(position - 1)
-                        && !opponentAttackingSquares.contains(position - 2)
+                        && (opponentAttackingSquares & BitboardUtils.withSquare(position - 1)) == 0
+                        && (opponentAttackingSquares & BitboardUtils.withSquare(position - 2)) == 0
                         && board.isSquareEmpty(position - 1)
                         && board.isSquareEmpty(position - 2)
                         && board.isSquareEmpty(position - 3)
