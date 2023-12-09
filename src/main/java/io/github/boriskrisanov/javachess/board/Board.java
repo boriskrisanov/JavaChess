@@ -248,6 +248,7 @@ public class Board {
     public void makeMove(Move move) {
         moveHistory.push(move);
         boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights)));
+        boolean wasCheckBeforeMove = isCheck();
 
         if (move.capturedPiece() == null) {
 //            halfMoveClock++;
@@ -381,13 +382,16 @@ public class Board {
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
-        computePinLines();
+        if (movedPiece.isSlidingPiece() || movedPiece instanceof Queen || wasCheckBeforeMove) {
+            computePinLines();
+        }
         computeCheckResolutions();
     }
 
     public void unmakeMove() {
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
+        boolean wasCheckBeforeMove = isCheck();
 
         if (sideToMove == BLACK) {
 //            halfMoveClock--;
@@ -499,7 +503,9 @@ public class Board {
 
         sideToMove = sideToMove.getOpposite();
 
-        computePinLines();
+        if (movedPiece.isSlidingPiece() || movedPiece instanceof King || wasCheckBeforeMove) {
+            computePinLines();
+        }
         computeCheckResolutions();
     }
 
