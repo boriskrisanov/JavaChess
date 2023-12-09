@@ -77,10 +77,7 @@ public abstract class Piece {
             } else {
                 Piece capturedPiece = board.getPieceOn(attackingSquare);
                 Move move = new Move(position, attackingSquare, capturedPiece);
-
-                if (board.isSquareEmpty(attackingSquare) || board.getPieceOn(attackingSquare).getColor() == this.color.getOpposite()) {
-                    moves.add(move);
-                }
+                moves.add(move);
             }
         }
 
