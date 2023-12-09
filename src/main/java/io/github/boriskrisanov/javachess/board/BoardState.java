@@ -4,8 +4,8 @@ import java.util.*;
 
 public record BoardState(
         int enPassantTargetSquare,
-        ArrayList<Integer> whiteAttackingSquares,
-        ArrayList<Integer> blackAttackingSquares,
+        long whiteAttackingSquares,
+        long blackAttackingSquares,
         ArrayList<Integer> checkResolutions,
         int whiteKingPos,
         int blackKingPos,

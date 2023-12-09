@@ -13,11 +13,11 @@ import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
  */
 public class Board {
     private Piece[] board = new Piece[64];
-    private ArrayList<Integer> squaresAttackedByWhite = new ArrayList<>();
+    private long squaresAttackedByWhite = 0;
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
     private final Deque<BoardState> boardHistory = new ArrayDeque<>();
-    private ArrayList<Integer> squaresAttackedByBlack = new ArrayList<>();
+    private long squaresAttackedByBlack = 0;
     private ArrayList<Integer> checkResolutions = new ArrayList<>();
     private int whiteKingPos = 0;
     private int blackKingPos = 0;
@@ -718,11 +718,9 @@ public class Board {
     }
 
     public boolean isSideInCheck(Piece.Color side) {
-        int kingPos = getKingPosition(side);
-
-        ArrayList<Integer> squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
-
-        return squaresAttackedBySide.contains(kingPos);
+        long kingBitboard = side == WHITE ? whiteKing : blackKing;
+        long squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
+        return (squaresAttackedBySide & kingBitboard) != 0;
     }
 
     public boolean isSideInCheckAfterMove(Piece.Color side, Move move) {
@@ -753,11 +751,11 @@ public class Board {
         return color == WHITE ? whiteKingPos : blackKingPos;
     }
 
-    public ArrayList<Integer> getSquaresAttackedBySide(Piece.Color side) {
+    public long getSquaresAttackedBySide(Piece.Color side) {
         return side == WHITE ? squaresAttackedByWhite : squaresAttackedByBlack;
     }
 
-    private ArrayList<Integer> computeAttackingSquaresForSide(Piece.Color side) {
+    private long computeAttackingSquaresForSide(Piece.Color side) {
         long bitboard = 0;
 
         for (Piece piece : board) {
@@ -766,7 +764,7 @@ public class Board {
             }
         }
 
-        return BitboardUtils.squaresOf(bitboard);
+        return bitboard;
     }
 
     public ArrayList<Move> getAllLegalMoves() {

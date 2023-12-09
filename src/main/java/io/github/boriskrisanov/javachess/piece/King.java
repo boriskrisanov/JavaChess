@@ -45,7 +45,8 @@ public class King extends Piece {
 
     @Override
     public ArrayList<Move> getLegalMoves() {
-        ArrayList<Integer> opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
+        // TODO: Use bitboards
+        ArrayList<Integer> opponentAttackingSquares = BitboardUtils.squaresOf(board.getSquaresAttackedBySide(color.getOpposite()));
         var castlingRights = board.getCastlingRights();
         var moves = new ArrayList<Move>();
 
