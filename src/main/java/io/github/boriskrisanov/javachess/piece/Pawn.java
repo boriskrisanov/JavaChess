@@ -44,6 +44,9 @@ public class Pawn extends Piece {
         var attackingSquares = getAttackingSquares();
         var edgeDist = new EdgeDistance(position);
 
+        // Ignore squares that are occupied by friendly pieces
+        attackingSquares &= ~board.getPieces(this.color);
+
         // Captures
         for (int targetSquare : BitboardUtils.squaresOf(attackingSquares)) {
             if (board.getBoard()[targetSquare] == null || board.getBoard()[targetSquare].getColor() == this.color) {
