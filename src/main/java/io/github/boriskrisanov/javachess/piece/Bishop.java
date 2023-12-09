@@ -1,6 +1,5 @@
 package io.github.boriskrisanov.javachess.piece;
 
-import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
@@ -20,11 +19,7 @@ public class Bishop extends Piece {
         directions.add(TOP_LEFT);
         directions.add(BOTTOM_RIGHT);
 
-        for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
-            bitboard |= BitboardUtils.withSquare(square);
-        }
-
-        return bitboard;
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
 
     protected long getAttackingSquaresIncludingPins() {
@@ -44,11 +39,7 @@ public class Bishop extends Piece {
             directions.add(BOTTOM_RIGHT);
         }
 
-        for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
-            bitboard |= BitboardUtils.withSquare(square);
-        }
-
-        return bitboard;
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
 
     public Bishop(Color color, int position, Board board) {

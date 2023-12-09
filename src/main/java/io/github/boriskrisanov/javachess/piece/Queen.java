@@ -1,6 +1,5 @@
 package io.github.boriskrisanov.javachess.piece;
 
-import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
@@ -17,10 +16,7 @@ public class Queen extends Piece {
     public long getAttackingSquares() {
         long bitboard = 0;
         var directions = new ArrayList<>(List.of(Direction.values()));
-        for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
-            bitboard |= BitboardUtils.withSquare(square);
-        }
-        return bitboard;
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
 
     protected long getAttackingSquaresIncludingPins() {
@@ -43,11 +39,7 @@ public class Queen extends Piece {
             directions.add(BOTTOM_RIGHT);
         }
 
-        for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
-            bitboard |= BitboardUtils.withSquare(square);
-        }
-
-        return bitboard;
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
 
     @Override

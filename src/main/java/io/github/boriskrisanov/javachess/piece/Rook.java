@@ -1,6 +1,5 @@
 package io.github.boriskrisanov.javachess.piece;
 
-import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
@@ -22,11 +21,7 @@ public class Rook extends Piece {
         directions.add(LEFT);
         directions.add(RIGHT);
 
-        for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
-            bitboard |= BitboardUtils.withSquare(square);
-        }
-
-        return bitboard;
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
 
     protected long getAttackingSquaresIncludingPins() {
@@ -46,11 +41,7 @@ public class Rook extends Piece {
             directions.add(RIGHT);
         }
 
-        for (int square : SlidingPiece.getAttackingSquares(board.getBoard(), this, directions)) {
-            bitboard |= BitboardUtils.withSquare(square);
-        }
-
-        return bitboard;
+        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
 
     @Override
