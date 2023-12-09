@@ -11,7 +11,6 @@ import static io.github.boriskrisanov.javachess.board.PinDirection.*;
 public class Bishop extends Piece {
 
     public long getAttackingSquares() {
-        long bitboard = 0;
         var directions = new ArrayList<Direction>();
 
         directions.add(TOP_RIGHT);

@@ -24,7 +24,6 @@ public class Rook extends Piece {
     }
 
     protected long getAttackingSquaresIncludingPins() {
-        long bitboard = 0;
         var directions = new ArrayList<Direction>();
 
         if (pinDirection == null) {

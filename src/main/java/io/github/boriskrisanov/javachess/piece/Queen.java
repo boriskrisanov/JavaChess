@@ -14,7 +14,6 @@ public class Queen extends Piece {
     }
 
     public long getAttackingSquares() {
-        long bitboard = 0;
         var directions = new ArrayList<>(List.of(Direction.values()));
         return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
     }
