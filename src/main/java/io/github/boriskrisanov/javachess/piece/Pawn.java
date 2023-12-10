@@ -140,16 +140,11 @@ public class Pawn extends Piece {
             }
         }
 
-        if (board.isSideInCheck(this.color)) {
-            var legalResolutionMoves = new ArrayList<Move>();
-
-            for (Move move : legalMoves) {
-                if (board.getCheckResolutions().contains(move.destination()) || (move.capturedPiece() != null && board.getCheckResolutions().contains(move.capturedPiece().getPosition()))) {
-                    legalResolutionMoves.add(move);
-                }
+        for (int i = 0; i < legalMoves.size(); i++) {
+            if (board.isSideInCheckAfterMove(color, legalMoves.get(i))) {
+                legalMoves.remove(i);
+                i--;
             }
-
-            return legalResolutionMoves;
         }
 
         return legalMoves;

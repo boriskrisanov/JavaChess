@@ -54,29 +54,9 @@ public abstract class Piece {
         attackingSquares &= ~board.getPieces(this.color);
 
         for (int attackingSquare : BitboardUtils.squaresOf(attackingSquares)) {
-            if (board.isSideInCheck(this.color)) {
-                for (int resolution : board.getCheckResolutions()) {
-                    // Check if this piece can move to the resolution square
-                    // TODO: Some of this might be redundant
-
-                    if (resolution != attackingSquare || board.getPieceOn(resolution) instanceof King) {
-                        continue;
-                    }
-
-                    if ((pinDirection == PinDirection.HORIZONTAL && Square.getRank(position) != Square.getRank(resolution))
-                            || (pinDirection == PinDirection.VERTICAL && Square.getFile(position) != Square.getFile(resolution))) {
-                        continue;
-                    }
-
-                    // No need to check whether the square is empty because either the king is in check from a sliding
-                    // piece, in which case the resolution squares must be empty, or the king is in check from a pawn or
-                    // a knight, in which case it can be captured. A resolution square can never contain a friendly piece.
-
-                    moves.add(new Move(position, resolution, board.getBoard()[resolution]));
-                }
-            } else {
-                Piece capturedPiece = board.getPieceOn(attackingSquare);
-                Move move = new Move(position, attackingSquare, capturedPiece);
+            Piece capturedPiece = board.getPieceOn(attackingSquare);
+            Move move = new Move(position, attackingSquare, capturedPiece);
+            if (!board.isSideInCheckAfterMove(color, move)) {
                 moves.add(move);
             }
         }
