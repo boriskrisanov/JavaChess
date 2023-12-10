@@ -336,9 +336,11 @@ public class Board {
 
         if (isEnPassant && movedPiece instanceof Pawn) {
             if (sideToMove == WHITE) {
-                whitePawns &= ~BitboardUtils.withSquare(move.destination() + 8);
+                blackPawns &= ~BitboardUtils.withSquare(move.destination() + 8);
+                board[move.destination() + 8] = null;
             } else {
-                blackPawns &= ~BitboardUtils.withSquare(move.destination() - 8);
+                whitePawns &= ~BitboardUtils.withSquare(move.destination() - 8);
+                board[move.destination() - 8] = null;
             }
         }
 
