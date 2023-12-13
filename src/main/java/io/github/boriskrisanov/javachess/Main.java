@@ -6,10 +6,11 @@ import java.util.concurrent.*;
 
 public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
-        BitboardUtils.squaresOf(
-                0b10000000_00000000_00000000_00000000_00000000_00000000_00000000_00000000L
-        ).stream().map(Square::new).forEach(System.out::println);
-//        Board board = new Board("rnbqkbnr/ppp1pppp/3p4/8/4P1Q1/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2");
-//        System.out.println(Search.bestMove(board, 9));
+        Board board = new Board("rnbqkbnr/ppp1pppp/3p4/8/4P1Q1/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2");
+        System.out.println(Search.bestMove(board, 5));
+//        System.out.println("Hits: " + EvalCache.getDebugHits());
+//        System.out.println("Misses: " + EvalCache.getDebugMisses());
+//        System.out.println("Insertions: " + EvalCache.getDebugInsertions());
+//        System.out.println("Evictions: " + EvalCache.getDebugEvictions());
     }
 }

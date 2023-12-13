@@ -9,6 +9,7 @@ import java.util.concurrent.*;
 public class Search {
     private static long debugPositionsEvaluated = 0;
     private static final ExecutorService threadPool = Executors.newFixedThreadPool(12);
+    public static final boolean USE_CACHE = true;
 
     private static int moveScore(Board board, Move move) {
         int score = 0;
@@ -70,10 +71,19 @@ public class Search {
         return new SearchResult(bestMove, bestEval, debugPositionsEvaluated);
     }
 
-    public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta) {
+    public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta, EvalCache cache) {
         if (depth == 0) {
-            debugPositionsEvaluated++;
-            return StaticEval.evaluate(board);
+            long hash = Hash.hash(board);
+            if (cache.hasEntry(hash) && USE_CACHE) {
+                return cache.get(hash);
+            } else {
+                debugPositionsEvaluated++;
+                int eval = StaticEval.evaluate(board);
+                if (USE_CACHE) {
+                    cache.put(hash, eval);
+                }
+                return eval;
+            }
 //            return evaluateCaptures(board, maximizingPlayer, alpha, beta);
         }
 
@@ -96,7 +106,7 @@ public class Search {
 
             for (Move move : moves) {
                 board.makeMove(move);
-                int eval = evaluate(board, depth - 1, false, alpha, beta);
+                int eval = evaluate(board, depth - 1, false, alpha, beta, cache);
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
                 if (beta <= alpha) {
@@ -111,7 +121,7 @@ public class Search {
 
             for (Move move : moves) {
                 board.makeMove(move);
-                int eval = evaluate(board, depth - 1, true, alpha, beta);
+                int eval = evaluate(board, depth - 1, true, alpha, beta, cache);
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
                 if (beta <= alpha) {
