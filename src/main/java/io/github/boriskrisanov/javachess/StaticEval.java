@@ -98,6 +98,7 @@ public class StaticEval {
     private final static int MAX_OPENING_WEIGHT = getOpeningWeight(new Board());
 
     private static int getPieceValue(Piece piece, int openingWeight, int endgameWeight) {
+        // TODO: Use popcount on bitboard
         int value = piece.getValue();
         int position = piece.getPosition();
 

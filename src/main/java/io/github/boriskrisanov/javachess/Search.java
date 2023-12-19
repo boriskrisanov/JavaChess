@@ -4,12 +4,10 @@ import io.github.boriskrisanov.javachess.board.*;
 import io.github.boriskrisanov.javachess.piece.*;
 
 import java.util.*;
-import java.util.concurrent.*;
 
 public class Search {
     private static long debugPositionsEvaluated = 0;
-    private static final ExecutorService threadPool = Executors.newFixedThreadPool(12);
-    public static final boolean USE_CACHE = true;
+    private final static boolean USE_CACHE = true;
 
     private static int moveScore(Board board, Move move) {
         int score = 0;
@@ -28,64 +26,84 @@ public class Search {
         return score;
     }
 
-    public static SearchResult bestMove(Board board, int depth) throws InterruptedException, ExecutionException {
+    public static SearchResult bestMove(Board board, int depth) {
         debugPositionsEvaluated = 0;
+        EvalCache.clearDebugStats();
 
         Move bestMove = null;
         int bestEval;
         boolean maximizingPlayer = board.getSideToMove() == Piece.Color.WHITE;
+        int alpha = Integer.MIN_VALUE;
+        int beta = Integer.MAX_VALUE;
 
         var moves = board.getLegalMovesForSideToMove();
-        // moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
-
-        var executors = new ArrayList<SearchExecutor>();
-
-        for (Move move : moves) {
-            Board boardCopy = new Board(board.getFen());
-            var executor = new SearchExecutor(boardCopy, move, depth - 1, !maximizingPlayer);
-            executors.add(executor);
-        }
-
-        List<Future<MoveEval>> evaluations = threadPool.invokeAll(executors);
+        moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
-            for (Future<MoveEval> eval : evaluations) {
-                if (eval.get().eval() > maxEval) {
-                    maxEval = eval.get().eval();
-                    bestMove = eval.get().move();
+            for (Move move : moves) {
+                board.makeMove(move);
+                int eval = evaluate(board, depth - 1, false, alpha, beta);
+
+                if (eval > maxEval) {
+                    maxEval = eval;
+                    bestMove = move;
                 }
+
+                alpha = Math.max(alpha, eval);
+                if (beta <= alpha) {
+                    board.unmakeMove();
+                    break;
+                }
+
+                board.unmakeMove();
             }
+
             bestEval = maxEval;
         } else {
             int minEval = Integer.MAX_VALUE;
-            for (Future<MoveEval> eval : evaluations) {
-                if (eval.get().eval() < minEval) {
-                    minEval = eval.get().eval();
-                    bestMove = eval.get().move();
+            for (Move move : moves) {
+                board.makeMove(move);
+                int eval = evaluate(board, depth - 1, true, alpha, beta);
+
+                if (eval < minEval) {
+                    minEval = eval;
+                    bestMove = move;
                 }
+
+                beta = Math.min(beta, eval);
+                if (beta <= alpha) {
+                    board.unmakeMove();
+                    break;
+                }
+
+                board.unmakeMove();
             }
+
             bestEval = minEval;
         }
 
         return new SearchResult(bestMove, bestEval, debugPositionsEvaluated);
     }
 
-    public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta, EvalCache cache) {
+    public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta) {
+        boolean cacheEval = false;
+        var hash = Hash.hash(board);
+
+        if (USE_CACHE) {
+            var cachedEval = EvalCache.get(hash);
+            if (cachedEval.isPresent() && cachedEval.get().depth() == depth) {
+                return cachedEval.get().eval();
+            } else if (cachedEval.isEmpty() || cachedEval.get().depth() < depth) {
+                cacheEval = true;
+            }
+        }
+
         if (depth == 0) {
-            long hash = Hash.hash(board);
-            if (cache.hasEntry(hash) && USE_CACHE) {
-                return cache.get(hash);
-            } else {
-                debugPositionsEvaluated++;
-                int eval = StaticEval.evaluate(board);
-                if (USE_CACHE) {
-                    cache.put(hash, eval);
-                }
-                return eval;
+            debugPositionsEvaluated++;
+            return StaticEval.evaluate(board);
             }
 //            return evaluateCaptures(board, maximizingPlayer, alpha, beta);
-        }
 
         var moves = board.getLegalMovesForSideToMove();
 
@@ -106,7 +124,7 @@ public class Search {
 
             for (Move move : moves) {
                 board.makeMove(move);
-                int eval = evaluate(board, depth - 1, false, alpha, beta, cache);
+                int eval = evaluate(board, depth - 1, false, alpha, beta);
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
                 if (beta <= alpha) {
@@ -115,13 +133,16 @@ public class Search {
                 }
                 board.unmakeMove();
             }
+            if (cacheEval) {
+                EvalCache.put(hash, depth, maxEval);
+            }
             return maxEval;
         } else {
             int minEval = Integer.MAX_VALUE;
 
             for (Move move : moves) {
                 board.makeMove(move);
-                int eval = evaluate(board, depth - 1, true, alpha, beta, cache);
+                int eval = evaluate(board, depth - 1, true, alpha, beta);
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
                 if (beta <= alpha) {
@@ -129,6 +150,10 @@ public class Search {
                     break;
                 }
                 board.unmakeMove();
+            }
+
+            if (cacheEval) {
+                EvalCache.put(hash, depth, minEval);
             }
             return minEval;
         }

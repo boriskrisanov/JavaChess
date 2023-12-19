@@ -7,10 +7,10 @@ import java.util.concurrent.*;
 public class Main {
     public static void main(String[] args) throws ExecutionException, InterruptedException {
         Board board = new Board("rnbqkbnr/ppp1pppp/3p4/8/4P1Q1/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2");
-        System.out.println(Search.bestMove(board, 5));
-//        System.out.println("Hits: " + EvalCache.getDebugHits());
-//        System.out.println("Misses: " + EvalCache.getDebugMisses());
-//        System.out.println("Insertions: " + EvalCache.getDebugInsertions());
-//        System.out.println("Evictions: " + EvalCache.getDebugEvictions());
+        System.out.println(Search.bestMove(board, 7));
+        System.out.println("Hits: " + EvalCache.getDebugHits());
+        System.out.println("Misses: " + EvalCache.getDebugMisses());
+        System.out.println("Insertions: " + EvalCache.getDebugInsertions());
+        System.out.println("Evictions: " + EvalCache.getDebugEvictions());
     }
 }
