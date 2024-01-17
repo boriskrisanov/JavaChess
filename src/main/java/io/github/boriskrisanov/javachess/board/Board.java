@@ -440,7 +440,28 @@ public class Board {
 
         board[move.destination()] = null;
         board[move.start()] = movedPiece;
-        movePiece(movedPiece, null, move.destination(), move.start());
+        if (move.promotion() == null) {
+            movePiece(movedPiece, null, move.destination(), move.start()); // ?
+        } else {
+//            board[move.start()].setPosition(move.start());
+            if (movedPiece.getColor() == WHITE) {
+                whitePawns |= move.destination() + 8;
+                switch (move.promotion()) {
+                    case QUEEN -> whiteQueens &= ~BitboardUtils.withSquare(move.destination());
+                    case ROOK -> whiteRooks &= ~BitboardUtils.withSquare(move.destination());
+                    case BISHOP -> whiteBishops &= ~BitboardUtils.withSquare(move.destination());
+                    case KNIGHT -> whiteKnights &= ~BitboardUtils.withSquare(move.destination());
+                }
+            } else {
+                blackPawns |= move.destination() - 8;
+                switch (move.promotion()) {
+                    case QUEEN -> blackQueens &= ~BitboardUtils.withSquare(move.destination());
+                    case ROOK -> blackRooks &= ~BitboardUtils.withSquare(move.destination());
+                    case BISHOP -> blackBishops &= ~BitboardUtils.withSquare(move.destination());
+                    case KNIGHT -> blackKnights &= ~BitboardUtils.withSquare(move.destination());
+                }
+            }
+        }
         movedPiece.setPosition(move.start());
 
         if (isCapture) {
@@ -461,6 +482,7 @@ public class Board {
             } else {
                 board[move.destination()] = move.capturedPiece();
                 move.capturedPiece().setPosition(move.destination());
+//                board[move.destination()].setPosition(move.destination());
                 long capturedPiecePositionBitboard = BitboardUtils.withSquare(move.destination());
                 if (move.capturedPiece().getColor() == WHITE) {
                     if (move.capturedPiece() instanceof Pawn) {

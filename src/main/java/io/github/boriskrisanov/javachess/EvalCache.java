@@ -38,7 +38,7 @@ public class EvalCache {
             if (cache.get(positionHash) != null) {
                 // This position is in the cache but the eval is from a lower depth, so we can remove the lower depth eval
                 // This assumes that new entries will always have a higher depth than older ones (this is checked in the search before inserting a new entry)
-                cache.remove(positionHash);
+//                cache.remove(positionHash);
             } else {
                 // TODO: Replacement policy
             }

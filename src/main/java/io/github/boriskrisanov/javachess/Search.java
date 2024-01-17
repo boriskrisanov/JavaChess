@@ -9,7 +9,19 @@ public class Search {
     private static long debugPositionsEvaluated = 0;
     private final static boolean USE_CACHE = true;
 
-    private static int moveScore(Board board, Move move) {
+    private static int moveScore(Board board, Move move, Piece.Color side) {
+        if (USE_CACHE) {
+            // If the position is in the cache, return its evaluation as the score
+            // The exact values don't matter, only the relative order, as this determines which moves will be searched first
+            board.makeMove(move);
+            long hash = Hash.hash(board);
+            var cachedEval = EvalCache.get(hash);
+            board.unmakeMove();
+            if (cachedEval.isPresent()) {
+                return cachedEval.get().eval() * (side == Piece.Color.BLACK ? -1 : 1);
+            }
+        }
+
         int score = 0;
         Piece piece = board.getPieceOn(move.start());
         Piece capturedPiece = move.capturedPiece();
@@ -37,7 +49,7 @@ public class Search {
         int beta = Integer.MAX_VALUE;
 
         var moves = board.getLegalMovesForSideToMove();
-        moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
+        moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
@@ -92,9 +104,9 @@ public class Search {
 
         if (USE_CACHE) {
             var cachedEval = EvalCache.get(hash);
-            if (cachedEval.isPresent() && cachedEval.get().depth() == depth) {
+            if (cachedEval.isPresent() && cachedEval.get().depth() >= depth) {
                 return cachedEval.get().eval();
-            } else if (cachedEval.isEmpty() || cachedEval.get().depth() < depth) {
+            } else {
                 cacheEval = true;
             }
         }
@@ -102,7 +114,7 @@ public class Search {
         if (depth == 0) {
             debugPositionsEvaluated++;
             return StaticEval.evaluate(board);
-            }
+        }
 //            return evaluateCaptures(board, maximizingPlayer, alpha, beta);
 
         var moves = board.getLegalMovesForSideToMove();
@@ -117,7 +129,7 @@ public class Search {
             }
         }
 
-        moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
+        moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
@@ -170,7 +182,7 @@ public class Search {
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
             var moves = board.getCapturesForSideToMove();
-            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
+            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
             for (Move move : moves) {
                 board.makeMove(move);
                 int eval = evaluateCaptures(board, false, alpha, beta);
@@ -186,7 +198,7 @@ public class Search {
         } else {
             int minEval = Integer.MAX_VALUE;
             var moves = board.getCapturesForSideToMove();
-            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move)).reversed());
+            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
             for (Move move : moves) {
                 board.makeMove(move);
                 int eval = evaluateCaptures(board, true, alpha, beta);

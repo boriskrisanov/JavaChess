@@ -2,15 +2,42 @@ package io.github.boriskrisanov.javachess;
 
 import io.github.boriskrisanov.javachess.board.*;
 
-import java.util.concurrent.*;
+import java.util.*;
 
 public class Main {
-    public static void main(String[] args) throws ExecutionException, InterruptedException {
-        Board board = new Board("rnbqkbnr/ppp1pppp/3p4/8/4P1Q1/8/PPPP1PPP/RNB1KBNR b KQkq - 1 2");
-        System.out.println(Search.bestMove(board, 7));
-        System.out.println("Hits: " + EvalCache.getDebugHits());
-        System.out.println("Misses: " + EvalCache.getDebugMisses());
-        System.out.println("Insertions: " + EvalCache.getDebugInsertions());
-        System.out.println("Evictions: " + EvalCache.getDebugEvictions());
+    public static void main(String[] args) {
+        Board board = new Board();
+        var scanner = new Scanner(System.in);
+        String[] command;
+        String commandString;
+        System.out.println("JavaChess version 0.0.1");
+        do {
+            commandString = scanner.nextLine();
+            command = commandString.split(" ");
+            if (command.length == 0) {
+                continue;
+            }
+
+            switch (command[0]) {
+                case "position" -> {
+                    String type = command[1];
+                    if (type.equals("fen")) {
+                        board.loadFen(commandString.split("fen")[1].trim());
+                    } else if (type.equals("startpos")) {
+                        board.loadStartingPosition();
+                    }
+                }
+                case "go" -> {
+                    int depth = 5;
+                    if (command.length > 1) {
+                        if (command[1].equals("depth")) {
+                            depth = Integer.parseInt(command[2]);
+                        }
+                    }
+                    System.out.println("bestmove " + Search.bestMove(board, depth).bestMove());
+                }
+            }
+
+        } while (!command[0].equals("quit"));
     }
 }
