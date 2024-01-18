@@ -20,7 +20,7 @@ public class Rook extends Piece {
         directions.add(LEFT);
         directions.add(RIGHT);
 
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+        return SlidingPiece.getAttackingSquares(board, this, directions);
     }
 
     protected long getAttackingSquaresIncludingPins() {
@@ -39,7 +39,7 @@ public class Rook extends Piece {
             directions.add(RIGHT);
         }
 
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+        return SlidingPiece.getAttackingSquares(board, this, directions);
     }
 
     @Override

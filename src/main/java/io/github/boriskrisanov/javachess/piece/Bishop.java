@@ -18,7 +18,7 @@ public class Bishop extends Piece {
         directions.add(TOP_LEFT);
         directions.add(BOTTOM_RIGHT);
 
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+        return SlidingPiece.getAttackingSquares(board, this, directions);
     }
 
     protected long getAttackingSquaresIncludingPins() {
@@ -37,7 +37,7 @@ public class Bishop extends Piece {
             directions.add(BOTTOM_RIGHT);
         }
 
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+        return SlidingPiece.getAttackingSquares(board, this, directions);
     }
 
     public Bishop(Color color, int position, Board board) {

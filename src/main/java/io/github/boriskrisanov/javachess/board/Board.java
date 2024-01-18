@@ -12,7 +12,6 @@ import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
  * Holds the current state of the game (piece positions, side to move, check, checkmate and en passant target square)
  */
 public class Board {
-    private Piece[] board = new Piece[64];
     private long squaresAttackedByWhite = 0;
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
@@ -38,6 +37,7 @@ public class Board {
     private long blackRooks = 0;
     private long blackQueens = 0;
     private long blackKing = 0;
+    private PinDirection[] pinDirections = new PinDirection[64];
 
     public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -77,38 +77,38 @@ public class Board {
                 int n = Integer.parseInt(String.valueOf(c));
                 i += n - 1;
             } else {
-                board[i] = Piece.fromChar(c, i, this);
-                if (board[i].getColor() == WHITE) {
-                    if (board[i] instanceof Pawn) {
+                Piece piece = Piece.fromChar(c, i, this);
+                if (piece.getColor() == WHITE) {
+                    if (piece instanceof Pawn) {
                         whitePawns |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Knight) {
+                    } else if (piece instanceof Knight) {
                         whiteKnights |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Bishop) {
+                    } else if (piece instanceof Bishop) {
                         whiteBishops |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Rook) {
+                    } else if (piece instanceof Rook) {
                         whiteRooks |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Queen) {
+                    } else if (piece instanceof Queen) {
                         whiteQueens |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof King) {
+                    } else if (piece instanceof King) {
                         whiteKing |= BitboardUtils.withSquare(i);
                     }
                 } else {
-                    if (board[i] instanceof Pawn) {
+                    if (piece instanceof Pawn) {
                         blackPawns |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Knight) {
+                    } else if (piece instanceof Knight) {
                         blackKnights |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Bishop) {
+                    } else if (piece instanceof Bishop) {
                         blackBishops |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Rook) {
+                    } else if (piece instanceof Rook) {
                         blackRooks |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Queen) {
+                    } else if (piece instanceof Queen) {
                         blackQueens |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof King) {
+                    } else if (piece instanceof King) {
                         blackKing |= BitboardUtils.withSquare(i);
                     }
                 }
-                if (board[i] instanceof King) {
-                    if (board[i].getColor() == WHITE) {
+                if (piece instanceof King) {
+                    if (piece.getColor() == WHITE) {
                         whiteKingPos = i;
                     } else {
                         blackKingPos = i;
@@ -142,6 +142,7 @@ public class Board {
     public String getFen() {
         var fen = new StringBuilder();
         int skippedSquaresCount = 0;
+        Piece[] board = getBoardArray();
 
         for (int i = 0; i < 64; i++) {
             boolean goingToNextRank = i % 8 == 0 && i != 0;
@@ -179,6 +180,7 @@ public class Board {
     public String toString() {
         var boardString = new StringBuilder();
         int j = 0;
+        Piece[] board = getBoardArray();
         for (int i = 0; i < 64; i++) {
             // New line
             if (j == 8) {
@@ -202,21 +204,54 @@ public class Board {
         return boardString.toString();
     }
 
-    public boolean isSquareEmpty(Square square) {
-        return board[square.getIndex()] == null;
-    }
-
     public boolean isSquareEmpty(int index) {
-        return board[index] == null;
+        return Long.bitCount(getAllPieces() & BitboardUtils.withSquare(index)) == 0;
     }
 
     public Piece getPieceOn(int index) {
-        return board[index];
-    }
+        if (Long.bitCount(whitePawns & BitboardUtils.withSquare(index)) == 1) {
+            return new Pawn(WHITE, index, this);
+        }
+        if (Long.bitCount(blackPawns & BitboardUtils.withSquare(index)) == 1) {
+            return new Pawn(BLACK, index, this);
+        }
 
+        if (Long.bitCount(whiteKnights & BitboardUtils.withSquare(index)) == 1) {
+            return new Knight(WHITE, index, this);
+        }
+        if (Long.bitCount(blackKnights & BitboardUtils.withSquare(index)) == 1) {
+            return new Knight(BLACK, index, this);
+        }
 
-    public Piece getPieceOn(Square square) {
-        return board[square.getIndex()];
+        if (Long.bitCount(whiteBishops & BitboardUtils.withSquare(index)) == 1) {
+            return new Bishop(WHITE, index, this);
+        }
+        if (Long.bitCount(blackBishops & BitboardUtils.withSquare(index)) == 1) {
+            return new Bishop(BLACK, index, this);
+        }
+
+        if (Long.bitCount(whiteRooks & BitboardUtils.withSquare(index)) == 1) {
+            return new Rook(WHITE, index, this);
+        }
+        if (Long.bitCount(blackRooks & BitboardUtils.withSquare(index)) == 1) {
+            return new Rook(BLACK, index, this);
+        }
+
+        if (Long.bitCount(whiteQueens & BitboardUtils.withSquare(index)) == 1) {
+            return new Queen(WHITE, index, this);
+        }
+        if (Long.bitCount(blackQueens & BitboardUtils.withSquare(index)) == 1) {
+            return new Queen(BLACK, index, this);
+        }
+
+        if (Long.bitCount(whiteKing & BitboardUtils.withSquare(index)) == 1) {
+            return new King(WHITE, index, this);
+        }
+        if (Long.bitCount(blackKing & BitboardUtils.withSquare(index)) == 1) {
+            return new King(BLACK, index, this);
+        }
+
+        return null;
     }
 
     public void makeMove(String uciMove) {
@@ -239,7 +274,7 @@ public class Board {
             };
         }
 
-        makeMove(new Move(Square.fromString(start), Square.fromString(destination), board[Square.fromString(destination)], promotion));
+        makeMove(new Move(Square.fromString(start), Square.fromString(destination), getPieceOn(Square.fromString(destination)), promotion));
     }
 
     /**
@@ -253,11 +288,10 @@ public class Board {
 //            halfMoveClock++;
         }
 
-        var movedPiece = board[move.start()];
+        var movedPiece = getPieceOn(move.start());
 
         boolean isPromotion = move.promotion() != null;
         boolean isEnPassant = move.destination() == enPassantTargetSquare;
-        boolean isCapture = move.capturedPiece() != null;
 
         // The right to capture en passant has been lost because another move has been made
         enPassantTargetSquare = -1;
@@ -278,16 +312,12 @@ public class Board {
                 // Move rook
                 switch (move.castlingDirection()) {
                     case SHORT -> {
-                        var rook = movedPiece.getColor() == WHITE ? board[63] : board[7];
-                        board[rook.getPosition()] = null;
-                        board[move.destination() - 1] = rook;
+                        var rook = movedPiece.getColor() == WHITE ? getPieceOn(63) : getPieceOn(7);
                         movePiece(rook, null, rook.getPosition(), move.destination() - 1);
                         rook.setPosition(move.destination() - 1);
                     }
                     case LONG -> {
-                        var rook = movedPiece.getColor() == WHITE ? board[56] : board[0];
-                        board[rook.getPosition()] = null;
-                        board[move.destination() + 1] = rook;
+                        var rook = movedPiece.getColor() == WHITE ? getPieceOn(56) : getPieceOn(0);
                         movePiece(rook, null, rook.getPosition(), move.destination() + 1);
                         rook.setPosition(move.destination() + 1);
                     }
@@ -337,18 +367,13 @@ public class Board {
         if (isEnPassant && movedPiece instanceof Pawn) {
             if (sideToMove == WHITE) {
                 blackPawns &= ~BitboardUtils.withSquare(move.destination() + 8);
-                board[move.destination() + 8] = null;
             } else {
                 whitePawns &= ~BitboardUtils.withSquare(move.destination() - 8);
-                board[move.destination() - 8] = null;
             }
         }
 
-        board[move.start()] = null;
-
         if (!isPromotion) {
-            movePiece(movedPiece, board[move.destination()], move.start(), move.destination());
-            board[move.destination()] = movedPiece;
+            movePiece(movedPiece, getPieceOn(move.destination()), move.start(), move.destination());
             movedPiece.setPosition(move.destination());
         } else {
             if (sideToMove == WHITE) {
@@ -356,12 +381,6 @@ public class Board {
             } else {
                 blackPawns &= ~BitboardUtils.withSquare(move.start());
             }
-            board[move.destination()] = switch (move.promotion()) {
-                case QUEEN -> new Queen(sideToMove, move.destination(), this);
-                case ROOK -> new Rook(sideToMove, move.destination(), this);
-                case BISHOP -> new Bishop(sideToMove, move.destination(), this);
-                case KNIGHT -> new Knight(sideToMove, move.destination(), this);
-            };
             long moveDestinationBitboard = BitboardUtils.withSquare(move.destination());
             if (sideToMove == WHITE) {
                 switch (move.promotion()) {
@@ -405,45 +424,34 @@ public class Board {
         boolean isEnPassant = move.destination() == enPassantTargetSquare;
         // If this was a promotion, the piece at the destination square (movedPiece) would be the piece that the pawn
         // promoted to, rather than the pawn itself, which is why this special case is needed.
-        Piece movedPiece = isPromotion ? new Pawn(sideToMove.getOpposite(), move.destination(), this) : board[move.destination()];
+        Piece movedPiece = isPromotion ? new Pawn(sideToMove.getOpposite(), move.destination(), this) : getPieceOn(move.destination());
 
         // Undo castling
         if (move.castlingDirection() == CastlingDirection.SHORT) {
             if (movedPiece.getColor() == WHITE) {
-                var rook = board[61];
-                board[61] = null;
-                board[63] = rook;
+                var rook = getPieceOn(61);
                 movePiece(rook, null, 61, 63);
                 rook.setPosition(63);
             } else {
-                var rook = board[5];
-                board[5] = null;
-                board[7] = rook;
+                var rook = getPieceOn(5);
                 movePiece(rook, null, 5, 7);
                 rook.setPosition(7);
             }
         } else if (move.castlingDirection() == CastlingDirection.LONG) {
             if (movedPiece.getColor() == WHITE) {
-                var rook = board[59];
-                board[59] = null;
-                board[56] = rook;
+                var rook = getPieceOn(59);
                 movePiece(rook, null, 59, 56);
                 rook.setPosition(56);
             } else {
-                var rook = board[3];
-                board[3] = null;
-                board[0] = rook;
+                var rook = getPieceOn(3);
                 movePiece(rook, null, 3, 0);
                 rook.setPosition(0);
             }
         }
 
-        board[move.destination()] = null;
-        board[move.start()] = movedPiece;
         if (move.promotion() == null) {
             movePiece(movedPiece, null, move.destination(), move.start()); // ?
         } else {
-//            board[move.start()].setPosition(move.start());
             if (movedPiece.getColor() == WHITE) {
                 whitePawns |= move.destination() + 8;
                 switch (move.promotion()) {
@@ -469,18 +477,15 @@ public class Board {
             // so board[move.destination()] can't be used.
             if (isEnPassant) {
                 if (sideToMove == WHITE) {
-                    board[move.destination() - 8] = move.capturedPiece();
                     move.capturedPiece().setPosition(move.destination() - 8);
                     // If the move is an en passant capture, the captured piece must be a pawn
                     whitePawns |= BitboardUtils.withSquare(move.destination() - 8);
                 } else {
-                    board[move.destination() + 8] = move.capturedPiece();
                     move.capturedPiece().setPosition(move.destination() + 8);
                     // If the move is an en passant capture, the captured piece must be a pawn
                     blackPawns |= BitboardUtils.withSquare(move.destination() + 8);
                 }
             } else {
-                board[move.destination()] = move.capturedPiece();
                 move.capturedPiece().setPosition(move.destination());
 //                board[move.destination()].setPosition(move.destination());
                 long capturedPiecePositionBitboard = BitboardUtils.withSquare(move.destination());
@@ -552,15 +557,15 @@ public class Board {
             for (int i = 0; i < EdgeDistance.get(kingPosition, direction); i++) {
                 int targetSquare = kingPosition + direction.offset * (i + 1);
 
-                if (board[targetSquare] == null) {
+                if (isSquareEmpty(targetSquare)) {
                     squares.add(targetSquare);
-                } else if (((board[targetSquare] instanceof Rook && (direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT)) || (board[targetSquare] instanceof Bishop && (direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT)) || board[targetSquare] instanceof Queen) && board[targetSquare].getColor() != sideInCheck) {
+                } else if (((getPieceOn(targetSquare) instanceof Rook && (direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT)) || (getPieceOn(targetSquare) instanceof Bishop && (direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT)) || getPieceOn(targetSquare) instanceof Queen) && getPieceOn(targetSquare).getColor() != sideInCheck) {
                     // In check from this direction
                     checkResolutionBuffer.addAll(squares);
                     checkResolutionBuffer.add(targetSquare);
                     numSlidingCheckDirections++;
                     break;
-                } else if (board[targetSquare] != null) {
+                } else if (!isSquareEmpty(targetSquare)) {
                     // Piece is in the way, not in check from this direction
                     break;
                 }
@@ -585,10 +590,10 @@ public class Board {
                 edgeDistanceRequirement1 = EdgeDistance.get(kingPosition, BOTTOM_LEFT) > 0;
                 edgeDistanceRequirement2 = EdgeDistance.get(kingPosition, BOTTOM_RIGHT) > 0;
             }
-            if (edgeDistanceRequirement1 && board[p1] instanceof Pawn && board[p1].getColor() == sideInCheck.getOpposite()) {
+            if (edgeDistanceRequirement1 && getPieceOn(p1) instanceof Pawn && getPieceOn(p1).getColor() == sideInCheck.getOpposite()) {
                 checkResolutionBuffer.add(p1);
                 checkFromNonSlidingPiece = true;
-            } else if (edgeDistanceRequirement2 && board[p2] instanceof Pawn && board[p2].getColor() == sideInCheck.getOpposite()) {
+            } else if (edgeDistanceRequirement2 && getPieceOn(p2) instanceof Pawn && getPieceOn(p2).getColor() == sideInCheck.getOpposite()) {
                 checkResolutionBuffer.add(p2);
                 checkFromNonSlidingPiece = true;
             }
@@ -625,7 +630,7 @@ public class Board {
             }
 
             for (int position : knightPositions) {
-                if (board[position] instanceof Knight && board[position].getColor() == sideInCheck.getOpposite()) {
+                if (getPieceOn(position) instanceof Knight && getPieceOn(position).getColor() == sideInCheck.getOpposite()) {
                     checkResolutionBuffer.add(position);
                     checkFromNonSlidingPiece = true;
                     // There cannot be a check from 2 knights at once, so there is no need to check other possible knight positions
@@ -654,11 +659,7 @@ public class Board {
         int kingPosition = getKingPosition(side);
 
         // Reset pin directions
-        for (Piece piece : board) {
-            if (piece != null && piece.getColor() == side) {
-                piece.setPinDirection(null);
-            }
-        }
+        pinDirections = new PinDirection[64];
 
         for (Direction direction : Direction.values()) {
             Piece lastFriendlyPieceSeen = null;
@@ -679,21 +680,21 @@ public class Board {
 
                 boolean kingCanBeAttackedByRook = direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT;
                 boolean kingCanBeAttackedByBishop = direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT;
-                boolean targetPieceCanAttackKing = board[targetSquare] instanceof Queen || (board[targetSquare] instanceof Rook && kingCanBeAttackedByRook) || (board[targetSquare] instanceof Bishop && kingCanBeAttackedByBishop);
+                boolean targetPieceCanAttackKing = getPieceOn(targetSquare) instanceof Queen || (getPieceOn(targetSquare) instanceof Rook && kingCanBeAttackedByRook) || (getPieceOn(targetSquare) instanceof Bishop && kingCanBeAttackedByBishop);
 
 
-                if (board[targetSquare] == null) {
+                if (getPieceOn(targetSquare) == null) {
                     continue;
                 }
 
-                if (!targetPieceCanAttackKing && board[targetSquare].getColor() == side.getOpposite() && lastFriendlyPieceSeen == null) {
+                if (!targetPieceCanAttackKing && getPieceOn(targetSquare).getColor() == side.getOpposite() && lastFriendlyPieceSeen == null) {
                     // Not in check from this direction
                     break;
                 }
 
-                if (board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() != side
-                        && (((direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT) && (board[targetSquare] instanceof Rook || board[targetSquare] instanceof Queen))
-                        || ((direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT) && (board[targetSquare] instanceof Bishop || board[targetSquare] instanceof Queen)))
+                if (getPieceOn(targetSquare).isSlidingPiece() && getPieceOn(targetSquare).getColor() != side
+                        && (((direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT) && (getPieceOn(targetSquare) instanceof Rook || getPieceOn(targetSquare) instanceof Queen))
+                        || ((direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT) && (getPieceOn(targetSquare) instanceof Bishop || getPieceOn(targetSquare) instanceof Queen)))
                 ) {
                     if (lastFriendlyPieceSeen == null) {
                         // King is in check from this direction
@@ -703,12 +704,12 @@ public class Board {
                     lastFriendlyPieceSeen.setPinDirection(pinDirection);
                     break;
                 }
-                if (lastFriendlyPieceSeen != null && board[targetSquare] != null) {
+                if (lastFriendlyPieceSeen != null && getPieceOn(targetSquare) != null) {
                     // There are more than 2 pieces in front of the king, therefore none of them are pinned
                     break;
                 }
-                if (board[targetSquare].getColor() == side) {
-                    lastFriendlyPieceSeen = board[targetSquare];
+                if (getPieceOn(targetSquare).getColor() == side) {
+                    lastFriendlyPieceSeen = getPieceOn(targetSquare);
                 }
             }
         }
@@ -781,6 +782,7 @@ public class Board {
 
     private long computeAttackingSquaresForSide(Piece.Color side) {
         long bitboard = 0;
+        List<Piece> board = bitboardsToPieceArray();
 
         for (Piece piece : board) {
             if (piece != null && piece.getColor() == side) {
@@ -791,20 +793,11 @@ public class Board {
         return bitboard;
     }
 
-    public ArrayList<Move> getAllLegalMoves() {
-        var legalMoves = new ArrayList<Move>();
-
-        Arrays.stream(board)
-                .filter(Objects::nonNull)
-                .forEach(piece -> legalMoves.addAll(piece.getLegalMoves()));
-
-        return legalMoves;
-    }
-
     public ArrayList<Move> getAllLegalMovesForSide(Piece.Color side) {
         var legalMoves = new ArrayList<Move>();
+        List<Piece> pieces = bitboardsToPieceArray();
 
-        Arrays.stream(board)
+        pieces.stream()
                 .filter(Objects::nonNull)
                 .filter(piece -> piece.getColor() == side)
                 .forEach(piece -> legalMoves.addAll(piece.getLegalMoves()));
@@ -814,8 +807,9 @@ public class Board {
 
     public ArrayList<Move> getLegalMovesForSideToMove() {
         var moves = new ArrayList<Move>();
+        List<Piece> pieces = bitboardsToPieceArray();
 
-        for (Piece piece : board) {
+        for (Piece piece : pieces) {
             if (piece != null && piece.getColor() == sideToMove) {
                 moves.addAll(piece.getLegalMoves());
             }
@@ -834,10 +828,6 @@ public class Board {
         }
 
         return moves;
-    }
-
-    public Piece[] getBoard() {
-        return board;
     }
 
     public int getEnPassantTargetSquare() {
@@ -982,6 +972,73 @@ public class Board {
             return whitePawns | whiteKnights | whiteBishops | whiteRooks | whiteQueens | whiteKing;
         }
         return blackPawns | blackKnights | blackBishops | blackRooks | blackQueens | blackKing;
+    }
+
+    public List<Piece> bitboardsToPieceArray() {
+        ArrayList<Piece> pieces = new ArrayList<>();
+
+        for (int i : BitboardUtils.squaresOf(whitePawns)) {
+            pieces.add(new Pawn(WHITE, i, this));
+        }
+        for (int i : BitboardUtils.squaresOf(blackPawns)) {
+            pieces.add(new Pawn(BLACK, i, this));
+        }
+
+        for (int i : BitboardUtils.squaresOf(whiteKnights)) {
+            pieces.add(new Knight(WHITE, i, this));
+        }
+        for (int i : BitboardUtils.squaresOf(blackKnights)) {
+            pieces.add(new Knight(BLACK, i, this));
+        }
+
+        for (int i : BitboardUtils.squaresOf(whiteBishops)) {
+            pieces.add(new Bishop(WHITE, i, this));
+        }
+        for (int i : BitboardUtils.squaresOf(blackBishops)) {
+            pieces.add(new Bishop(BLACK, i, this));
+        }
+
+        for (int i : BitboardUtils.squaresOf(whiteRooks)) {
+            pieces.add(new Rook(WHITE, i, this));
+        }
+        for (int i : BitboardUtils.squaresOf(blackRooks)) {
+            pieces.add(new Rook(BLACK, i, this));
+        }
+
+        for (int i : BitboardUtils.squaresOf(whiteQueens)) {
+            pieces.add(new Queen(WHITE, i, this));
+        }
+        for (int i : BitboardUtils.squaresOf(blackQueens)) {
+            pieces.add(new Queen(BLACK, i, this));
+        }
+
+        for (int i : BitboardUtils.squaresOf(whiteKing)) {
+            pieces.add(new King(WHITE, i, this));
+        }
+        for (int i : BitboardUtils.squaresOf(blackKing)) {
+            pieces.add(new King(BLACK, i, this));
+        }
+
+        return pieces;
+    }
+
+    public Piece[] getBoardArray() {
+        List<Piece> pieces = bitboardsToPieceArray();
+        Piece[] board = new Piece[64];
+
+        for (int i = 0; i < 64; i++) {
+            final int pieceIndex = i;
+            if (pieces.stream().anyMatch(p -> p.getPosition() == pieceIndex)) {
+                board[i] = pieces.stream()
+                        .filter(p -> p.getPosition() == pieceIndex)
+                        .findAny()
+                        .orElseThrow();
+            } else {
+                board[i] = null;
+            }
+        }
+
+        return board;
     }
 
     public long getWhitePawns() {

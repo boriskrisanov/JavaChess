@@ -72,7 +72,7 @@ public abstract class Piece {
                     // piece, in which case the resolution squares must be empty, or the king is in check from a pawn or
                     // a knight, in which case it can be captured. A resolution square can never contain a friendly piece.
 
-                    moves.add(new Move(position, resolution, board.getBoard()[resolution]));
+                    moves.add(new Move(position, resolution, board.getPieceOn(resolution)));
                 }
             } else {
                 Piece capturedPiece = board.getPieceOn(attackingSquare);

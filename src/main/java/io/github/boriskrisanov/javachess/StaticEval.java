@@ -128,7 +128,7 @@ public class StaticEval {
 
     public static int getOpeningWeight(Board position) {
         int totalMaterial = 0;
-        for (Piece piece : position.getBoard()) {
+        for (Piece piece : position.getBoardArray()) {
             if (piece != null) {
                 totalMaterial += piece.getValue();
             }
@@ -141,11 +141,12 @@ public class StaticEval {
     }
 
     public static int evaluate(Board position) {
+        // TODO: Use bitcount to count material
         int eval = 0;
         int openingWeight = getOpeningWeight(position);
         int endgameWeight = getEndgameWeight(position, openingWeight);
 
-        for (Piece piece : position.getBoard()) {
+        for (Piece piece : position.getBoardArray()) {
             if (piece == null) {
                 continue;
             }

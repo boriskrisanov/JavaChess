@@ -15,7 +15,7 @@ public class Queen extends Piece {
 
     public long getAttackingSquares() {
         var directions = new ArrayList<>(List.of(Direction.values()));
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+        return SlidingPiece.getAttackingSquares(board, this, directions);
     }
 
     protected long getAttackingSquaresIncludingPins() {
@@ -37,7 +37,7 @@ public class Queen extends Piece {
             directions.add(BOTTOM_RIGHT);
         }
 
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+        return SlidingPiece.getAttackingSquares(board, this, directions);
     }
 
     @Override

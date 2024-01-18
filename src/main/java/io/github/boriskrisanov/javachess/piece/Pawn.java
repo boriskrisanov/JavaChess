@@ -49,7 +49,7 @@ public class Pawn extends Piece {
 
         // Captures
         for (int targetSquare : BitboardUtils.squaresOf(attackingSquares)) {
-            if (board.getBoard()[targetSquare] == null || board.getBoard()[targetSquare].getColor() == this.color) {
+            if (board.isSquareEmpty(targetSquare) || board.getPieceOn(targetSquare).getColor() == this.color) {
                 continue;
             }
 
