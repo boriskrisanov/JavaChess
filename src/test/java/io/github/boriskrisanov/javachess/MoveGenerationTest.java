@@ -72,7 +72,7 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition1() {
-        assertEquals(4085603, runTest(4, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
+        assertEquals(193690690, runTest(5, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
     }
 
     @Test
@@ -93,5 +93,41 @@ public class MoveGenerationTest {
     @Test
     void testPosition5() {
         assertEquals(164075551, runTest(5, "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 "));
+    }
+
+    @Test
+    void realTestPosition1() {
+        // https://lichess.org/QR5UbqUY#16
+        assertEquals(108181315, runTest(5, "r1bqk2r/ppp2ppp/2n1pn2/8/QbBP4/2N2N2/PP3PPP/R1B2RK1 w kq - 4 9"));
+    }
+
+    @Test
+    void realTestPosition2() {
+        // https://lichess.org/INY3KINN#51
+        assertEquals(406683732, runTest(6, "2rr2k1/5np1/1pp1pn1p/p4p2/P1PP4/3NP1P1/5PP1/2RRB1K1 b - - 0 26"));
+    }
+
+    @Test
+    void realTestPosition3() {
+        // https://lichess.org/INY3KINN#115
+        assertEquals(85338565, runTest(6, "6k1/6p1/7p/2N3P1/PR6/5PK1/r5P1/6n1 b - - 2 58"));
+    }
+
+    @Test
+    void realTestPosition4() {
+        // https://lichess.org/751DRMPG#29
+        assertEquals(63507755, runTest(5, "r2q1rk1/4bppp/1p2pn2/3pP3/2p2B2/4P2P/1PPNQPP1/R4RK1 b - - 0 15"));
+    }
+
+    @Test
+    void realTestPosition5() {
+        // https://lichess.org/751DRMPG#89
+        assertEquals(509977948, runTest(6, "3Q4/5k1N/4q1p1/3pB3/8/5P2/r5P1/6K1 b - - 4 45"));
+    }
+
+    @Test
+    void realTestPosition6() {
+        // https://lichess.org/I5iGXY21#108
+        assertEquals(234461080, runTest(7, "8/8/8/p6p/P3R1r1/2k5/4K3/8 w - - 1 55"));
     }
 }
