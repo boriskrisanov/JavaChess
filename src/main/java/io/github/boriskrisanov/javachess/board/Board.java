@@ -220,13 +220,26 @@ public class Board {
     }
 
     public void makeMove(String uciMove) {
-        // TODO: Support castling
         if (uciMove.length() != 4 && uciMove.length() != 5) {
             throw new IllegalArgumentException(uciMove);
         }
 
-        String start = String.valueOf(uciMove.charAt(0)) + uciMove.charAt(1);
-        String destination = String.valueOf(uciMove.charAt(2)) + uciMove.charAt(3);
+
+        int start = Square.fromString(String.valueOf(uciMove.charAt(0)) + uciMove.charAt(1));
+        int destination = Square.fromString(String.valueOf(uciMove.charAt(2)) + uciMove.charAt(3));
+
+        CastlingDirection castlingDirection = null;
+        if (board[start] instanceof King) {
+            if (board[start].getColor() == BLACK && destination == 6 && castlingRights.blackCanShortCastle) {
+                castlingDirection = CastlingDirection.SHORT;
+            } else if (board[start].getColor() == BLACK && destination == 1 && castlingRights.blackCanLongCastle) {
+                castlingDirection = CastlingDirection.LONG;
+            } else if (board[start].getColor() == WHITE && destination == 62 && castlingRights.whiteCanShortCastle) {
+                castlingDirection = CastlingDirection.SHORT;
+            } else if (board[start].getColor() == WHITE && destination == 58 && castlingRights.whiteCanLongCastle) {
+                castlingDirection = CastlingDirection.LONG;
+            }
+        }
 
         Promotion promotion = null;
         if (uciMove.length() == 5) {
@@ -238,8 +251,11 @@ public class Board {
                 default -> throw new IllegalArgumentException(uciMove);
             };
         }
-
-        makeMove(new Move(Square.fromString(start), Square.fromString(destination), board[Square.fromString(destination)], promotion));
+        if (castlingDirection != null) {
+            makeMove(new Move(start, destination, board[destination], castlingDirection));
+            return;
+        }
+        makeMove(new Move(start, destination, board[destination], promotion));
     }
 
     /**
@@ -991,7 +1007,9 @@ public class Board {
             if (move.capturedPiece() != null) {
                 moveString.append("x");
             }
-            moveString.append(new Square(move.destination()));
+            if (move.castlingDirection() == null) {
+                moveString.append(new Square(move.destination()));
+            }
             if (move.promotion() != null) {
                 moveString.append("=").append(switch (move.promotion()) {
                     case QUEEN -> 'q';
