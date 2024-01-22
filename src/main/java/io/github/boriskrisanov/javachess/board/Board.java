@@ -378,6 +378,34 @@ public class Board {
                     case KNIGHT -> blackKnights |= moveDestinationBitboard;
                 }
             }
+            // Remove captured piece from bitboards
+            if (move.capturedPiece() != null) {
+                if (move.capturedPiece().getColor() == WHITE) {
+                    if (move.capturedPiece() instanceof Pawn) {
+                        whitePawns &= ~BitboardUtils.withSquare(move.destination());
+                    } else if (move.capturedPiece() instanceof Knight) {
+                        whiteKnights &= ~BitboardUtils.withSquare(move.destination());
+                    } else if (move.capturedPiece() instanceof Bishop) {
+                        whiteBishops &= ~BitboardUtils.withSquare(move.destination());
+                    } else if (move.capturedPiece() instanceof Rook) {
+                        whiteRooks &= ~BitboardUtils.withSquare(move.destination());
+                    } else if (move.capturedPiece() instanceof Queen) {
+                        whiteQueens &= ~BitboardUtils.withSquare(move.destination());
+                    }
+                } else {
+                    if (move.capturedPiece() instanceof Pawn) {
+                        blackPawns &= ~BitboardUtils.withSquare(move.destination());
+                    } else if (move.capturedPiece() instanceof Knight) {
+                        blackKnights &= ~BitboardUtils.withSquare(move.destination());
+                    } else if (move.capturedPiece() instanceof Bishop) {
+                        blackBishops &= ~BitboardUtils.withSquare(move.destination());
+                    } else if (move.capturedPiece() instanceof Rook) {
+                        blackRooks &= ~BitboardUtils.withSquare(move.destination());
+                    } else if (move.capturedPiece() instanceof Queen) {
+                        blackQueens &= ~BitboardUtils.withSquare(move.destination());
+                    }
+                }
+            }
         }
 
         sideToMove = sideToMove.getOpposite();
@@ -766,7 +794,7 @@ public class Board {
     }
 
     public boolean isDraw() {
-        // TODO: Insufficient material detection
+        // TODO: Improve Insufficient material detection
         boolean isStalemate = isCheck() && getLegalMovesForSideToMove().isEmpty();
         return halfMoveClock >= 50 || isStalemate;
     }
