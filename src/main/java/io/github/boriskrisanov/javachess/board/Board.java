@@ -948,17 +948,23 @@ public class Board {
                 moveString.append(Character.toUpperCase(movedPiece.getChar()));
 
                 /*
-                Resolve ambiguous moves where multiple pieces can move to the same square. This is done by first
-                generating all the legal moves in that position and checking if there are any moves with the same
+                Resolve ambiguous moves where multiple pieces of the same type can move to the same square. This is done
+                by first generating all the legal moves in that position and checking if there are any moves with the same
                 destination square. If there are, we iterate over them to check which position component (file or rank)
                 is different, and add it to the move. If both the file and rank are the same (Such as in the position
                 8/k7/8/8/7Q/8/8/4Q1KQ, where 3 queens can move to e4, we append the full square after the letter of the
                 moving piece.
                  */
                 var moves = board2.getLegalMovesForSideToMove();
-                List<Move> movesToDestinationSquare = moves.stream().filter(m -> m.destination() == move.destination()).toList();
+                List<Move> movesToDestinationSquare = moves.stream()
+                        .filter(m -> board2.getPieceOn(m.start()).getChar() == movedPiece.getChar())
+                        .filter(m -> m.destination() == move.destination())
+                        .toList();
                 if (movesToDestinationSquare.size() > 1) {
-                    List<Integer> otherStartPositions = movesToDestinationSquare.stream().map(Move::start).filter(start -> start != move.start()).toList();
+                    List<Integer> otherStartPositions = movesToDestinationSquare.stream()
+                            .map(Move::start)
+                            .filter(start -> start != move.start())
+                            .toList();
                     boolean hasDifferentStartingRank = true;
                     boolean hasDifferentStartingFile = true;
                     for (int start : otherStartPositions) {
