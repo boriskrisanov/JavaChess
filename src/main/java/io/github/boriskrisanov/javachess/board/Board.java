@@ -794,9 +794,23 @@ public class Board {
     }
 
     public boolean isDraw() {
-        // TODO: Improve Insufficient material detection
+        // TODO: Update material count on make and unmake move
+        int whitePawnCount = Long.bitCount(whitePawns);
+        int whiteKnightCount = Long.bitCount(whiteKnights);
+        int whiteBishopCount = Long.bitCount(whiteBishops);
+        int whiteRookCount = Long.bitCount(whiteRooks);
+        int whiteQueenCount = Long.bitCount(whiteQueens);
+
+        int blackPawnCount = Long.bitCount(blackPawns);
+        int blackKnightCount = Long.bitCount(blackKnights);
+        int blackBishopCount = Long.bitCount(blackBishops);
+        int blackRookCount = Long.bitCount(blackRooks);
+        int blackQueenCount = Long.bitCount(blackQueens);
+
+        // TODO: Improve insufficient material detection
+        boolean isInsufficientMaterial = whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
         boolean isStalemate = isCheck() && getLegalMovesForSideToMove().isEmpty();
-        return halfMoveClock >= 50 || isStalemate;
+        return halfMoveClock >= 50 || isStalemate || isInsufficientMaterial;
     }
 
     public int getKingPosition(Piece.Color color) {
