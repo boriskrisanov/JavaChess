@@ -7,7 +7,7 @@ import java.util.*;
 
 public class Search {
     private static long debugPositionsEvaluated = 0;
-    private final static boolean USE_CACHE = true;
+    private final static boolean USE_CACHE = false;
 
     private static int moveScore(Board board, Move move, Piece.Color side) {
         if (USE_CACHE) {
@@ -124,9 +124,11 @@ public class Search {
                 return Integer.MIN_VALUE;
             } else if (board.isCheckmate(Piece.Color.BLACK)) {
                 return Integer.MAX_VALUE;
-            } else {
-                return 0;
             }
+        }
+
+        if (board.isDraw()) {
+            return 0;
         }
 
         moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());

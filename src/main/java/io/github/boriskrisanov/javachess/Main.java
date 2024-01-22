@@ -26,7 +26,7 @@ public class Main {
                         // TODO: Support moves after FEN
                     } else if (type.equals("startpos")) {
                         board.loadStartingPosition();
-                        if (command[2].equals("moves")) {
+                        if (command.length > 3 && command[2].equals("moves")) {
                             String[] moves = commandString.split("moves")[1].trim().split(" ");
                             for (String move : moves) {
                                 board.makeMove(move);

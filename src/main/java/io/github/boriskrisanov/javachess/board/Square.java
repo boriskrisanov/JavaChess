@@ -91,4 +91,8 @@ public class Square {
     public static int getFile(int index) {
         return new EdgeDistance(index).left + 1;
     }
+
+    public static char getFileChar(int index) {
+        return (char) ('a' + getFile(index) - 1);
+    }
 }

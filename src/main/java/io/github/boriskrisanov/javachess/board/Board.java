@@ -603,13 +603,13 @@ public class Board {
             int p2;
             boolean edgeDistanceRequirement1, edgeDistanceRequirement2;
             if (sideInCheck == WHITE) {
-                p1 = kingPosition + Direction.TOP_LEFT.offset;
-                p2 = kingPosition + Direction.TOP_RIGHT.offset;
+                p1 = kingPosition + TOP_LEFT.offset;
+                p2 = kingPosition + TOP_RIGHT.offset;
                 edgeDistanceRequirement1 = EdgeDistance.get(kingPosition, TOP_LEFT) > 0;
                 edgeDistanceRequirement2 = EdgeDistance.get(kingPosition, TOP_RIGHT) > 0;
             } else {
-                p1 = kingPosition + Direction.BOTTOM_LEFT.offset;
-                p2 = kingPosition + Direction.BOTTOM_RIGHT.offset;
+                p1 = kingPosition + BOTTOM_LEFT.offset;
+                p2 = kingPosition + BOTTOM_RIGHT.offset;
                 edgeDistanceRequirement1 = EdgeDistance.get(kingPosition, BOTTOM_LEFT) > 0;
                 edgeDistanceRequirement2 = EdgeDistance.get(kingPosition, BOTTOM_RIGHT) > 0;
             }
@@ -692,13 +692,13 @@ public class Board {
             Piece lastFriendlyPieceSeen = null;
             PinDirection pinDirection = null;
 
-            if (direction == Direction.UP || direction == Direction.DOWN) {
+            if (direction == UP || direction == DOWN) {
                 pinDirection = PinDirection.VERTICAL;
-            } else if (direction == Direction.LEFT || direction == Direction.RIGHT) {
+            } else if (direction == LEFT || direction == RIGHT) {
                 pinDirection = PinDirection.HORIZONTAL;
-            } else if (direction == Direction.BOTTOM_LEFT || direction == Direction.TOP_RIGHT) {
+            } else if (direction == BOTTOM_LEFT || direction == TOP_RIGHT) {
                 pinDirection = PinDirection.POSITIVE_DIAGONAL;
-            } else if (direction == Direction.BOTTOM_RIGHT || direction == Direction.TOP_LEFT) {
+            } else if (direction == BOTTOM_RIGHT || direction == TOP_LEFT) {
                 pinDirection = PinDirection.NEGATIVE_DIAGONAL;
             }
 
@@ -913,6 +913,47 @@ public class Board {
         while (it.hasNext()) {
             s.append(it.next().toString());
             s.append(" ");
+        }
+
+        return s.toString();
+    }
+
+    public String getPgn() {
+        StringBuilder s = new StringBuilder();
+        Iterator<Move> it = moveHistory.descendingIterator();
+        Board board2 = new Board();
+        int moveCount = 1;
+
+        while (it.hasNext()) {
+            StringBuilder moveString = new StringBuilder();
+            Move move = it.next();
+            Piece movedPiece = board2.getPieceOn(move.start());
+            if (movedPiece.getColor() == WHITE) {
+                moveString.append(moveCount).append(". ");
+                moveCount++;
+            }
+            // TODO: Resolve ambiguous moves where multiple pieces can move to the same square
+            if (movedPiece instanceof Pawn) {
+                if (move.capturedPiece() != null) {
+                    moveString.append(Square.getFileChar(move.start()));
+                }
+            } else {
+                moveString.append(Character.toUpperCase(movedPiece.getChar()));
+            }
+            if (move.capturedPiece() != null) {
+                moveString.append("x");
+            }
+            moveString.append(new Square(move.destination()));
+            if (move.promotion() != null) {
+                moveString.append("=").append(switch (move.promotion()) {
+                    case QUEEN -> 'q';
+                    case ROOK -> 'r';
+                    case BISHOP -> 'n';
+                    case KNIGHT -> 'b';
+                });
+            }
+            s.append(moveString).append(" ");
+            board2.makeMove(move);
         }
 
         return s.toString();
