@@ -919,6 +919,13 @@ public class Board {
     }
 
     public String getPgn() {
+        /*
+         This works by first creating a new board from the starting position and then playing each move in the
+         reversed move history. This allows us to simply look at the piece that was on the board at that time
+         to determine its type, rather than storing that information in the move. This method is rarely called, so
+         performance isn't a concern.
+        */
+
         StringBuilder s = new StringBuilder();
         Iterator<Move> it = moveHistory.descendingIterator();
         Board board2 = new Board();
@@ -932,13 +939,44 @@ public class Board {
                 moveString.append(moveCount).append(". ");
                 moveCount++;
             }
-            // TODO: Resolve ambiguous moves where multiple pieces can move to the same square
+
             if (movedPiece instanceof Pawn) {
                 if (move.capturedPiece() != null) {
                     moveString.append(Square.getFileChar(move.start()));
                 }
             } else {
                 moveString.append(Character.toUpperCase(movedPiece.getChar()));
+
+                /*
+                Resolve ambiguous moves where multiple pieces can move to the same square. This is done by first
+                generating all the legal moves in that position and checking if there are any moves with the same
+                destination square. If there are, we iterate over them to check which position component (file or rank)
+                is different, and add it to the move. If both the file and rank are the same (Such as in the position
+                8/k7/8/8/7Q/8/8/4Q1KQ, where 3 queens can move to e4, we append the full square after the letter of the
+                moving piece.
+                 */
+                var moves = board2.getLegalMovesForSideToMove();
+                List<Move> movesToDestinationSquare = moves.stream().filter(m -> m.destination() == move.destination()).toList();
+                if (movesToDestinationSquare.size() > 1) {
+                    List<Integer> otherStartPositions = movesToDestinationSquare.stream().map(Move::start).filter(start -> start != move.start()).toList();
+                    boolean hasDifferentStartingRank = true;
+                    boolean hasDifferentStartingFile = true;
+                    for (int start : otherStartPositions) {
+                        if (Square.getRank(start) == Square.getRank(move.start())) {
+                            hasDifferentStartingRank = false;
+                        }
+                        if (Square.getFile(start) == Square.getFile(move.start())) {
+                            hasDifferentStartingFile = false;
+                        }
+                    }
+                    if (hasDifferentStartingRank) {
+                        moveString.append(Square.getRank(move.start()));
+                    } else if (hasDifferentStartingFile) {
+                        moveString.append(Square.getFileChar(move.start()));
+                    } else {
+                        moveString.append(new Square(move.start()));
+                    }
+                }
             }
             if (move.capturedPiece() != null) {
                 moveString.append("x");
