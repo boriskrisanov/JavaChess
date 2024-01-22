@@ -440,12 +440,12 @@ public class Board {
 
         board[move.destination()] = null;
         board[move.start()] = movedPiece;
-        if (move.promotion() == null) {
-            movePiece(movedPiece, null, move.destination(), move.start()); // ?
-        } else {
-//            board[move.start()].setPosition(move.start());
+
+        movePiece(movedPiece, null, move.destination(), move.start());
+
+        if (move.promotion() != null) {
             if (movedPiece.getColor() == WHITE) {
-                whitePawns |= move.destination() + 8;
+//            whitePawns |= move.destination() + 8;
                 switch (move.promotion()) {
                     case QUEEN -> whiteQueens &= ~BitboardUtils.withSquare(move.destination());
                     case ROOK -> whiteRooks &= ~BitboardUtils.withSquare(move.destination());
@@ -453,7 +453,7 @@ public class Board {
                     case KNIGHT -> whiteKnights &= ~BitboardUtils.withSquare(move.destination());
                 }
             } else {
-                blackPawns |= move.destination() - 8;
+//            blackPawns |= move.destination() - 8;
                 switch (move.promotion()) {
                     case QUEEN -> blackQueens &= ~BitboardUtils.withSquare(move.destination());
                     case ROOK -> blackRooks &= ~BitboardUtils.withSquare(move.destination());

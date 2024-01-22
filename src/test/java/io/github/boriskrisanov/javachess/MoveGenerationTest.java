@@ -62,7 +62,6 @@ public class MoveGenerationTest {
 
     @Test
     void testStartingPositionDepth5() {
-//        assertEquals(4865609, runTest(1, Board.STARTING_POSITION_FEN, "a2a3 a7a5 b2b4 a5b4"));
         assertEquals(4865609, runTest(5, Board.STARTING_POSITION_FEN));
     }
 
@@ -73,7 +72,7 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition1() {
-        assertEquals(4085603, runTest(2, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0", "a1b1 h3g2"));
+        assertEquals(4085603, runTest(4, "r3k2r/p1ppqpb1/bn2pnp1/3PN3/1p2P3/2N2Q1p/PPPBBPPP/R3K2R w KQkq - 0 0"));
     }
 
     @Test
