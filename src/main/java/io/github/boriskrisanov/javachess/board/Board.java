@@ -944,6 +944,10 @@ public class Board {
                 if (move.capturedPiece() != null) {
                     moveString.append(Square.getFileChar(move.start()));
                 }
+            } else if (move.castlingDirection() == CastlingDirection.SHORT) {
+                moveString.append("O-O");
+            } else if (move.castlingDirection() == CastlingDirection.LONG) {
+                moveString.append("O-O-O");
             } else {
                 moveString.append(Character.toUpperCase(movedPiece.getChar()));
 
