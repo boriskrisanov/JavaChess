@@ -1018,6 +1018,11 @@ public class Board {
                     case KNIGHT -> 'b';
                 });
             }
+            if (board2.isCheckmate(WHITE) || board2.isCheckmate(BLACK)) {
+                moveString.append("#");
+            } else if (board2.isCheck()) {
+                moveString.append("+");
+            }
             s.append(moveString).append(" ");
             board2.makeMove(move);
         }
