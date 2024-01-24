@@ -130,4 +130,10 @@ public class MoveGenerationTest {
         // https://lichess.org/I5iGXY21#108
         assertEquals(234461080, runTest(7, "8/8/8/p6p/P3R1r1/2k5/4K3/8 w - - 1 55"));
     }
+
+    @Test
+    void realTestPosition7() {
+        // Played in engine test game
+        assertEquals(101255241, runTest(5, "r2q1rk1/ppp2p1p/1bn5/7R/1P1p2b1/N1P5/P4QP1/R1B1KBN1 b Q - 0 19"));
+    }
 }

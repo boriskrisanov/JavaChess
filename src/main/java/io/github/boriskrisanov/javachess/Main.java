@@ -43,6 +43,10 @@ public class Main {
                     }
                     System.out.println("bestmove " + Search.bestMove(board, depth).bestMove());
                 }
+                case "d" -> {
+                    System.out.println(board);
+                    System.out.println("FEN: " + board.getFen());
+                }
             }
 
         } while (!command[0].equals("quit"));

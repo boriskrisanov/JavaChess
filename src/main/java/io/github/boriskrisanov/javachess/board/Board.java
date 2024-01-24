@@ -60,6 +60,12 @@ public class Board {
     }
 
     public void loadFen(String fen) {
+        for (int i = 0; i < 64; i++) {
+            board[i] = null;
+        }
+        whitePawns = whiteKnights = whiteBishops = whiteRooks = whiteQueens = whiteKing
+                = blackPawns = blackKnights = blackBishops = blackRooks = blackQueens = blackKing = 0;
+
         // TODO: Allow FEN strings with only some information
         //  (Only placement info is needed, everything else can be set to default)
         String placement = fen.split(" ")[0];
@@ -1021,6 +1027,7 @@ public class Board {
             if (board2.isCheckmate(WHITE) || board2.isCheckmate(BLACK)) {
                 moveString.append("#");
             } else if (board2.isCheck()) {
+                // TODO: Fix + incorrectly being appended at the end of the full move
                 moveString.append("+");
             }
             s.append(moveString).append(" ");
