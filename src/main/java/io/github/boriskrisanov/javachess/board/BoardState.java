@@ -9,7 +9,8 @@ public record BoardState(
         ArrayList<Integer> checkResolutions,
         int whiteKingPos,
         int blackKingPos,
-        CastlingRights castlingRights
+        CastlingRights castlingRights,
+        int halfMoveClock
 ) {
 
 }

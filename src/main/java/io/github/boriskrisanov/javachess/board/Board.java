@@ -38,6 +38,8 @@ public class Board {
     private long blackRooks = 0;
     private long blackQueens = 0;
     private long blackKing = 0;
+    // Stores the number of times a position has occurred (the key is the position hash)
+    private HashMap<Long, Integer> repetitions = new HashMap<>();
 
     public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -60,6 +62,7 @@ public class Board {
     }
 
     public void loadFen(String fen) {
+        repetitions = new HashMap<>();
         for (int i = 0; i < 64; i++) {
             board[i] = null;
         }
@@ -269,13 +272,22 @@ public class Board {
      */
     public void makeMove(Move move) {
         moveHistory.push(move);
-        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights)));
-
-        if (move.capturedPiece() == null) {
-//            halfMoveClock++;
-        }
+        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock));
+        long hash = Hash.hash(this);
 
         var movedPiece = board[move.start()];
+
+        if (repetitions.containsKey(hash)) {
+            repetitions.put(hash, repetitions.get(hash) + 1);
+        } else {
+            repetitions.put(hash, 1);
+        }
+
+        if (move.capturedPiece() == null && (!(movedPiece instanceof Pawn))) {
+            halfMoveClock++;
+        } else {
+            halfMoveClock = 0;
+        }
 
         boolean isPromotion = move.promotion() != null;
         boolean isEnPassant = move.destination() == enPassantTargetSquare;
@@ -449,6 +461,7 @@ public class Board {
         whiteKingPos = boardState.whiteKingPos();
         blackKingPos = boardState.blackKingPos();
         castlingRights = boardState.castlingRights();
+        halfMoveClock = boardState.halfMoveClock();
 
         boolean isPromotion = move.promotion() != null;
         boolean isCapture = move.capturedPiece() != null;
@@ -832,7 +845,8 @@ public class Board {
         // TODO: Improve insufficient material detection
         boolean isInsufficientMaterial = whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
         boolean isStalemate = !isCheck() && getLegalMovesForSideToMove().isEmpty();
-        return halfMoveClock >= 50 || isStalemate || isInsufficientMaterial;
+        boolean isThreefoldRepetition = repetitions.containsValue(3);
+        return halfMoveClock >= 50 || isStalemate || isInsufficientMaterial || isThreefoldRepetition;
     }
 
     public int getKingPosition(Piece.Color color) {
