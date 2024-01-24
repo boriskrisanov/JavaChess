@@ -7,6 +7,7 @@ import java.util.*;
 public class Main {
     public static void main(String[] args) {
         Board board = new Board();
+        Hash.init();
         var scanner = new Scanner(System.in);
         String[] command;
         String commandString;
@@ -46,6 +47,7 @@ public class Main {
                 case "d" -> {
                     System.out.println(board);
                     System.out.println("FEN: " + board.getFen());
+                    System.out.println("Hash: " + HexFormat.of().toHexDigits(Hash.hash(board)));
                 }
             }
 

@@ -273,15 +273,8 @@ public class Board {
     public void makeMove(Move move) {
         moveHistory.push(move);
         boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock));
-        long hash = Hash.hash(this);
 
         var movedPiece = board[move.start()];
-
-        if (repetitions.containsKey(hash)) {
-            repetitions.put(hash, repetitions.get(hash) + 1);
-        } else {
-            repetitions.put(hash, 1);
-        }
 
         if (move.capturedPiece() == null && (!(movedPiece instanceof Pawn))) {
             halfMoveClock++;
@@ -442,6 +435,15 @@ public class Board {
             }
         }
 
+        long hash = Hash.hash(this);
+
+        // TODO: Add starting position to repetition map
+        if (repetitions.containsKey(hash)) {
+            repetitions.put(hash, repetitions.get(hash) + 1);
+        } else {
+            repetitions.put(hash, 1);
+        }
+
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
@@ -453,15 +455,18 @@ public class Board {
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
 
-        if (sideToMove == BLACK) {
-//            halfMoveClock--;
-        }
-
         enPassantTargetSquare = boardState.enPassantTargetSquare();
         whiteKingPos = boardState.whiteKingPos();
         blackKingPos = boardState.blackKingPos();
         castlingRights = boardState.castlingRights();
         halfMoveClock = boardState.halfMoveClock();
+
+        long hash = Hash.hash(this);
+        if (repetitions.get(hash).equals(0)) {
+            repetitions.remove(hash);
+        } else {
+            repetitions.put(hash, repetitions.get(hash) - 1);
+        }
 
         boolean isPromotion = move.promotion() != null;
         boolean isCapture = move.capturedPiece() != null;
