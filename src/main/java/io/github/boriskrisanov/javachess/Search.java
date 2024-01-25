@@ -119,16 +119,12 @@ public class Search {
 
         var moves = board.getLegalMovesForSideToMove();
 
-        if (moves.isEmpty()) {
-            if (board.isCheckmate(Piece.Color.WHITE)) {
-                return Integer.MIN_VALUE;
-            } else if (board.isCheckmate(Piece.Color.BLACK)) {
-                return Integer.MAX_VALUE;
-            }
-        }
-
         if (board.isDraw()) {
             return 0;
+        } else if (board.isCheckmate(Piece.Color.WHITE)) {
+            return Integer.MIN_VALUE;
+        } else if (board.isCheckmate(Piece.Color.BLACK)) {
+            return Integer.MAX_VALUE;
         }
 
         moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());

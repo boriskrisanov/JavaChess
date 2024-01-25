@@ -39,11 +39,11 @@ public class Board {
     private long blackQueens = 0;
     private long blackKing = 0;
     // Stores the number of times a position has occurred (the key is the position hash)
-    private HashMap<Long, Integer> repetitions = new HashMap<>();
 
     public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
     public Board(String fen) {
+        Hash.init();
         loadFen(fen);
     }
 
@@ -51,6 +51,7 @@ public class Board {
      * Creates a board with the starting position
      */
     public Board() {
+        Hash.init();
         loadStartingPosition();
     }
 
@@ -62,7 +63,6 @@ public class Board {
     }
 
     public void loadFen(String fen) {
-        repetitions = new HashMap<>();
         for (int i = 0; i < 64; i++) {
             board[i] = null;
         }
@@ -272,7 +272,9 @@ public class Board {
      */
     public void makeMove(Move move) {
         moveHistory.push(move);
-        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock));
+        // TODO: Only compute hash in one method and reuse it for search
+        long hash = Hash.hash(this);
+        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock, hash));
 
         var movedPiece = board[move.start()];
 
@@ -435,15 +437,6 @@ public class Board {
             }
         }
 
-        long hash = Hash.hash(this);
-
-        // TODO: Add starting position to repetition map
-        if (repetitions.containsKey(hash)) {
-            repetitions.put(hash, repetitions.get(hash) + 1);
-        } else {
-            repetitions.put(hash, 1);
-        }
-
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
@@ -460,13 +453,6 @@ public class Board {
         blackKingPos = boardState.blackKingPos();
         castlingRights = boardState.castlingRights();
         halfMoveClock = boardState.halfMoveClock();
-
-        long hash = Hash.hash(this);
-        if (repetitions.get(hash).equals(0)) {
-            repetitions.remove(hash);
-        } else {
-            repetitions.put(hash, repetitions.get(hash) - 1);
-        }
 
         boolean isPromotion = move.promotion() != null;
         boolean isCapture = move.capturedPiece() != null;
@@ -847,6 +833,17 @@ public class Board {
         int blackRookCount = Long.bitCount(blackRooks);
         int blackQueenCount = Long.bitCount(blackQueens);
 
+        HashMap<Long, Integer> repetitions = new HashMap<>();
+
+        for (BoardState boardState : boardHistory) {
+            long hash = boardState.positionHash();
+            if (repetitions.containsKey(hash)) {
+                repetitions.put(hash, repetitions.get(hash) + 1);
+            } else {
+                repetitions.put(hash, 1);
+            }
+        }
+
         // TODO: Improve insufficient material detection
         boolean isInsufficientMaterial = whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
         boolean isStalemate = !isCheck() && getLegalMovesForSideToMove().isEmpty();
@@ -1039,8 +1036,8 @@ public class Board {
                 moveString.append("=").append(switch (move.promotion()) {
                     case QUEEN -> 'q';
                     case ROOK -> 'r';
-                    case BISHOP -> 'n';
-                    case KNIGHT -> 'b';
+                    case BISHOP -> 'b';
+                    case KNIGHT -> 'n';
                 });
             }
             if (board2.isCheckmate(WHITE) || board2.isCheckmate(BLACK)) {
