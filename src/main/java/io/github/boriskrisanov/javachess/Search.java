@@ -57,7 +57,9 @@ public class Search {
                 board.makeMove(move);
                 int eval = evaluate(board, depth - 1, false, alpha, beta);
 
-                if (eval > maxEval) {
+                // >= is used instead of > because if this is the best move, but it still leads to mate, the eval will be
+                // Integer.MIN_VALUE, which will cause the move to not be set and remain null.
+                if (eval >= maxEval) {
                     maxEval = eval;
                     bestMove = move;
                 }
@@ -78,7 +80,9 @@ public class Search {
                 board.makeMove(move);
                 int eval = evaluate(board, depth - 1, true, alpha, beta);
 
-                if (eval < minEval) {
+                // <= is used instead of < because if this is the best move, but it still leads to mate, the eval will be
+                // Integer.MAX_VALUE, which will cause the move to not be set and remain null.
+                if (eval <= minEval) {
                     minEval = eval;
                     bestMove = move;
                 }

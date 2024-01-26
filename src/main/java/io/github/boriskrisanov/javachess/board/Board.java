@@ -847,7 +847,7 @@ public class Board {
         // TODO: Improve insufficient material detection
         boolean isInsufficientMaterial = whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
         boolean isStalemate = !isCheck() && getLegalMovesForSideToMove().isEmpty();
-        boolean isThreefoldRepetition = repetitions.containsValue(3);
+        boolean isThreefoldRepetition = repetitions.containsValue(3) && false;
         return halfMoveClock >= 50 || isStalemate || isInsufficientMaterial || isThreefoldRepetition;
     }
 
