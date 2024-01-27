@@ -835,6 +835,7 @@ public class Board {
 
         HashMap<Long, Integer> repetitions = new HashMap<>();
 
+        boolean isThreefoldRepetition = false;
         for (BoardState boardState : boardHistory) {
             long hash = boardState.positionHash();
             if (repetitions.containsKey(hash)) {
@@ -842,12 +843,14 @@ public class Board {
             } else {
                 repetitions.put(hash, 1);
             }
+            if (repetitions.get(hash) >= 3) {
+                isThreefoldRepetition = true;
+            }
         }
 
         // TODO: Improve insufficient material detection
         boolean isInsufficientMaterial = whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
         boolean isStalemate = !isCheck() && getLegalMovesForSideToMove().isEmpty();
-        boolean isThreefoldRepetition = repetitions.containsValue(3) && false;
         return halfMoveClock >= 50 || isStalemate || isInsufficientMaterial || isThreefoldRepetition;
     }
 
