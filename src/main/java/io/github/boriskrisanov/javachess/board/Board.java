@@ -174,6 +174,9 @@ public class Board {
                 fen.append(board[i].getChar());
             }
         }
+        if (skippedSquaresCount != 0) {
+            fen.append(skippedSquaresCount);
+        }
 
         fen.append(sideToMove == WHITE ? " w " : " b ");
         fen.append(castlingRights).append(" ");
@@ -957,6 +960,10 @@ public class Board {
         }
 
         return s.toString();
+    }
+
+    public Deque<Move> getMoveHistoryStack() {
+        return moveHistory;
     }
 
     public String getPgn() {
