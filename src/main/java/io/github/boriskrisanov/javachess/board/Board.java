@@ -890,10 +890,11 @@ public class Board {
     public ArrayList<Move> getAllLegalMovesForSide(Piece.Color side) {
         var legalMoves = new ArrayList<Move>();
 
-        Arrays.stream(board)
-                .filter(Objects::nonNull)
-                .filter(piece -> piece.getColor() == side)
-                .forEach(piece -> legalMoves.addAll(piece.getLegalMoves()));
+        for (Piece piece : board) {
+            if (piece != null && piece.getColor() == side) {
+                legalMoves.addAll(piece.getLegalMoves());
+            }
+        }
 
         return legalMoves;
     }
@@ -1063,9 +1064,9 @@ public class Board {
         return s.toString();
     }
 
-    // ********************************************************
-    // Bitboard methods
-    // ********************************************************
+// ********************************************************
+// Bitboard methods
+// ********************************************************
 
     /**
      * Updates the appropriate bitboard to reflect the new position of the piece
