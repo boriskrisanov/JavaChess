@@ -8,6 +8,15 @@ import java.util.*;
 public class Search {
     private static long debugPositionsEvaluated = 0;
     private final static boolean USE_CACHE = false;
+    private static boolean stopSearch = false;
+
+    public static synchronized void stop() {
+        stopSearch = true;
+    }
+
+    public static boolean wasInterrupted() {
+        return stopSearch;
+    }
 
     private static int moveScore(Board board, Move move, Piece.Color side) {
         if (USE_CACHE) {
@@ -39,6 +48,7 @@ public class Search {
     }
 
     public static SearchResult bestMove(Board board, int depth) {
+        stopSearch = false;
         debugPositionsEvaluated = 0;
         EvalCache.clearDebugStats();
 
@@ -103,6 +113,10 @@ public class Search {
     }
 
     public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta) {
+        if (stopSearch) {
+            return 0;
+        }
+
         boolean cacheEval = false;
         var hash = Hash.hash(board);
 

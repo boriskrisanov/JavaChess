@@ -5,7 +5,7 @@ import io.github.boriskrisanov.javachess.board.*;
 import java.util.*;
 
 public class Main {
-    public static void main(String[] args) {
+    public static void main(String[] args) throws InterruptedException {
         Board board = new Board();
         Hash.init();
         var scanner = new Scanner(System.in);
@@ -36,13 +36,23 @@ public class Main {
                     }
                 }
                 case "go" -> {
+                    int searchTimeMilliseconds = -1;
                     int depth = 5;
                     if (command.length > 1) {
                         if (command[1].equals("depth")) {
                             depth = Integer.parseInt(command[2]);
                         }
+                        if (command[1].equals("time")) {
+                            // This is not a standard UCI command, but it will be used for testing
+                            // TODO: Improve iterative deepening
+                            searchTimeMilliseconds = Integer.parseInt(command[2]);
+                        }
                     }
-                    System.out.println("bestmove " + Search.bestMove(board, depth).bestMove());
+                    if (searchTimeMilliseconds != -1) {
+                        System.out.println("bestmove " + TimeLimitedSearch.bestMove(board, searchTimeMilliseconds).bestMove());
+                    } else {
+                        System.out.println("bestmove " + Search.bestMove(board, depth).bestMove());
+                    }
                 }
                 case "d" -> {
                     System.out.println(board);
