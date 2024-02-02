@@ -11,11 +11,17 @@ public class TimeLimitedSearch {
         bestMove = null;
         Thread searchThread = new Thread(() -> {
             int currentDepth = 1;
-            do {
+            while (true) {
                 System.out.println("depth " + currentDepth);
-                bestMove = Search.bestMove(board, currentDepth);
+                SearchResult possibleBestMove = Search.bestMove(board, currentDepth);
+                // This check is needed because if the search was interrupted, the eval for all moves will be zero,
+                // which will cause bad moves to be considered good.
+                if (Search.wasInterrupted()) {
+                    break;
+                }
+                bestMove = possibleBestMove;
                 currentDepth++;
-            } while (!Search.wasInterrupted());
+            }
         });
         searchThread.start();
 
