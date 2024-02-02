@@ -129,21 +129,21 @@ public class Search {
             }
         }
 
-        if (depth == 0) {
-            debugPositionsEvaluated++;
-            return StaticEval.evaluate(board);
-        }
-//            return evaluateCaptures(board, maximizingPlayer, alpha, beta);
-
-        var moves = board.getLegalMovesForSideToMove();
-
         if (board.isDraw()) {
             return 0;
-        } else if (board.isCheckmate(Piece.Color.WHITE)) {
+        }
+        if (board.isCheckmate(Piece.Color.WHITE)) {
             return Integer.MIN_VALUE;
         } else if (board.isCheckmate(Piece.Color.BLACK)) {
             return Integer.MAX_VALUE;
         }
+
+        if (depth == 0) {
+            debugPositionsEvaluated++;
+            return StaticEval.evaluate(board);
+        }
+
+        var moves = board.getLegalMovesForSideToMove();
 
         moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
@@ -155,7 +155,7 @@ public class Search {
                 int eval = evaluate(board, depth - 1, false, alpha, beta);
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
-                if (beta <= alpha) {
+                if (beta < alpha) {
                     board.unmakeMove();
                     break;
                 }
@@ -173,7 +173,7 @@ public class Search {
                 int eval = evaluate(board, depth - 1, true, alpha, beta);
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
-                if (beta <= alpha) {
+                if (beta < alpha) {
                     board.unmakeMove();
                     break;
                 }
@@ -182,49 +182,6 @@ public class Search {
 
             if (cacheEval) {
                 EvalCache.put(hash, depth, minEval);
-            }
-            return minEval;
-        }
-    }
-
-    private static int evaluateCaptures(Board board, boolean maximizingPlayer, int alpha, int beta) {
-        ArrayList<Move> captures = board.getCapturesForSideToMove();
-
-        if (captures.isEmpty()) {
-            debugPositionsEvaluated++;
-            return StaticEval.evaluate(board);
-        }
-
-        if (maximizingPlayer) {
-            int maxEval = Integer.MIN_VALUE;
-            var moves = board.getCapturesForSideToMove();
-            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
-            for (Move move : moves) {
-                board.makeMove(move);
-                int eval = evaluateCaptures(board, false, alpha, beta);
-                maxEval = Math.max(maxEval, eval);
-                alpha = Math.max(alpha, eval);
-                if (beta <= alpha) {
-                    board.unmakeMove();
-                    break;
-                }
-                board.unmakeMove();
-            }
-            return maxEval;
-        } else {
-            int minEval = Integer.MAX_VALUE;
-            var moves = board.getCapturesForSideToMove();
-            moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
-            for (Move move : moves) {
-                board.makeMove(move);
-                int eval = evaluateCaptures(board, true, alpha, beta);
-                minEval = Math.min(minEval, eval);
-                beta = Math.min(beta, eval);
-                if (beta <= alpha) {
-                    board.unmakeMove();
-                    break;
-                }
-                board.unmakeMove();
             }
             return minEval;
         }
