@@ -68,7 +68,7 @@ public class Search {
                     break;
                 }
                 board.makeMove(move);
-                int eval = evaluate(board, depth - 1, false, alpha, beta);
+                int eval = evaluate(board, depth - 1, false, alpha, beta, false);
 
                 // >= is used instead of > because if this is the best move, but it still leads to mate, the eval will be
                 // Integer.MIN_VALUE, which will cause the move to not be set and remain null.
@@ -94,7 +94,7 @@ public class Search {
                     break;
                 }
                 board.makeMove(move);
-                int eval = evaluate(board, depth - 1, true, alpha, beta);
+                int eval = evaluate(board, depth - 1, true, alpha, beta, false);
 
                 // <= is used instead of < because if this is the best move, but it still leads to mate, the eval will be
                 // Integer.MAX_VALUE, which will cause the move to not be set and remain null.
@@ -118,7 +118,7 @@ public class Search {
         return new SearchResult(bestMove, bestEval, debugPositionsEvaluated);
     }
 
-    public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta) {
+    public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta, boolean capturesOnly) {
         boolean cacheEval = false;
         var hash = Hash.hash(board);
 
@@ -140,12 +140,16 @@ public class Search {
             return Integer.MAX_VALUE;
         }
 
-        if (depth == 0) {
+        if (depth == 0 && !capturesOnly) {
             debugPositionsEvaluated++;
-            return StaticEval.evaluate(board);
+            return evaluate(board, 0, !maximizingPlayer, alpha, beta, true);
         }
 
-        var moves = board.getLegalMovesForSideToMove();
+        var moves = capturesOnly ? board.getCapturesForSideToMove() : board.getLegalMovesForSideToMove();
+
+        if (moves.isEmpty() && capturesOnly) {
+            return StaticEval.evaluate(board);
+        }
 
         moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
@@ -157,7 +161,7 @@ public class Search {
                     break;
                 }
                 board.makeMove(move);
-                int eval = evaluate(board, depth - 1, false, alpha, beta);
+                int eval = evaluate(board, depth - 1, false, alpha, beta, capturesOnly);
                 maxEval = Math.max(maxEval, eval);
                 alpha = Math.max(alpha, eval);
                 if (beta < alpha) {
@@ -178,7 +182,7 @@ public class Search {
                     break;
                 }
                 board.makeMove(move);
-                int eval = evaluate(board, depth - 1, true, alpha, beta);
+                int eval = evaluate(board, depth - 1, true, alpha, beta, capturesOnly);
                 minEval = Math.min(minEval, eval);
                 beta = Math.min(beta, eval);
                 if (beta < alpha) {
