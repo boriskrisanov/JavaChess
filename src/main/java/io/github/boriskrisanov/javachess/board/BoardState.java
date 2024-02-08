@@ -10,8 +10,7 @@ public record BoardState(
         int whiteKingPos,
         int blackKingPos,
         CastlingRights castlingRights,
-        int halfMoveClock,
-        long positionHash
+        int halfMoveClock
 ) {
 
 }

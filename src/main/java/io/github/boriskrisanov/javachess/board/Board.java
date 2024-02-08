@@ -17,6 +17,7 @@ public class Board {
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
     public final Deque<BoardState> boardHistory = new ArrayDeque<>();
+    public final Deque<Long> hashHistory = new ArrayDeque<>();
     private long squaresAttackedByBlack = 0;
     private ArrayList<Integer> checkResolutions = new ArrayList<>();
     private int whiteKingPos = 0;
@@ -63,6 +64,7 @@ public class Board {
     }
 
     public void loadFen(String fen) {
+        hashHistory.clear();
         for (int i = 0; i < 64; i++) {
             board[i] = null;
         }
@@ -143,6 +145,7 @@ public class Board {
         computeAttackingSquares();
         computePinLines();
         computeCheckResolutions();
+        hashHistory.push(Hash.hash(this));
     }
 
     /**
@@ -275,9 +278,9 @@ public class Board {
      */
     public void makeMove(Move move) {
         moveHistory.push(move);
+        hashHistory.push(Hash.hash(this));
         // TODO: Only compute hash in one method and reuse it for search
-        long hash = Hash.hash(this);
-        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock, hash));
+        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock));
 
         var movedPiece = board[move.start()];
 
@@ -448,6 +451,7 @@ public class Board {
     }
 
     public void unmakeMove() {
+        hashHistory.pop();
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
 
@@ -839,8 +843,7 @@ public class Board {
         HashMap<Long, Integer> repetitions = new HashMap<>();
 
         boolean isThreefoldRepetition = false;
-        for (BoardState boardState : boardHistory) {
-            long hash = boardState.positionHash();
+        for (long hash : hashHistory) {
             if (repetitions.containsKey(hash)) {
                 repetitions.put(hash, repetitions.get(hash) + 1);
             } else {
@@ -848,6 +851,7 @@ public class Board {
             }
             if (repetitions.get(hash) >= 3) {
                 isThreefoldRepetition = true;
+                break;
             }
         }
 
