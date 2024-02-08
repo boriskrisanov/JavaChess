@@ -3,9 +3,10 @@ package io.github.boriskrisanov.javachess;
 import io.github.boriskrisanov.javachess.board.*;
 
 import java.util.*;
+import java.util.concurrent.*;
 
 public class Main {
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, ExecutionException {
         Board board = new Board();
         Hash.init();
         var scanner = new Scanner(System.in);
@@ -21,6 +22,8 @@ public class Main {
 
             switch (command[0]) {
                 case "position" -> {
+                    board.getMoveHistoryStack().clear();
+                    board.boardHistory.clear();
                     String type = command[1];
                     if (type.equals("fen")) {
                         board.loadFen(commandString.split("fen")[1].trim());

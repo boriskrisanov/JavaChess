@@ -16,7 +16,7 @@ public class Board {
     private long squaresAttackedByWhite = 0;
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
-    private final Deque<BoardState> boardHistory = new ArrayDeque<>();
+    public final Deque<BoardState> boardHistory = new ArrayDeque<>();
     private long squaresAttackedByBlack = 0;
     private ArrayList<Integer> checkResolutions = new ArrayList<>();
     private int whiteKingPos = 0;

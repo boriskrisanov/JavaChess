@@ -8,7 +8,7 @@ import java.util.*;
 public class Search {
     private static long debugPositionsEvaluated = 0;
     private final static boolean USE_CACHE = false;
-    private static boolean stopSearch = false;
+    private static volatile boolean stopSearch = false;
 
     public static synchronized void stop() {
         stopSearch = true;
@@ -64,6 +64,9 @@ public class Search {
         if (maximizingPlayer) {
             int maxEval = Integer.MIN_VALUE;
             for (Move move : moves) {
+                if (stopSearch) {
+                    break;
+                }
                 board.makeMove(move);
                 int eval = evaluate(board, depth - 1, false, alpha, beta);
 
@@ -87,6 +90,9 @@ public class Search {
         } else {
             int minEval = Integer.MAX_VALUE;
             for (Move move : moves) {
+                if (stopSearch) {
+                    break;
+                }
                 board.makeMove(move);
                 int eval = evaluate(board, depth - 1, true, alpha, beta);
 
@@ -113,10 +119,6 @@ public class Search {
     }
 
     public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta) {
-        if (stopSearch) {
-            return 0;
-        }
-
         boolean cacheEval = false;
         var hash = Hash.hash(board);
 
@@ -151,6 +153,9 @@ public class Search {
             int maxEval = Integer.MIN_VALUE;
 
             for (Move move : moves) {
+                if (stopSearch) {
+                    break;
+                }
                 board.makeMove(move);
                 int eval = evaluate(board, depth - 1, false, alpha, beta);
                 maxEval = Math.max(maxEval, eval);
@@ -169,6 +174,9 @@ public class Search {
             int minEval = Integer.MAX_VALUE;
 
             for (Move move : moves) {
+                if (stopSearch) {
+                    break;
+                }
                 board.makeMove(move);
                 int eval = evaluate(board, depth - 1, true, alpha, beta);
                 minEval = Math.min(minEval, eval);
