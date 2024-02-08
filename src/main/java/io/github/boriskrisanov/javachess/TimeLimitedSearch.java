@@ -11,9 +11,6 @@ public class TimeLimitedSearch {
             SearchResult bestMove = null;
             int currentDepth = 1;
             while (true) {
-                if (Search.wasInterrupted()) {
-                    break;
-                }
                 System.out.println("depth " + currentDepth);
                 SearchResult possibleBestMove = Search.bestMove(board, currentDepth);
                 // Search is incomplete, so the results may be incorrect
