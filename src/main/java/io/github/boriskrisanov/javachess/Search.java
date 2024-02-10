@@ -5,8 +5,13 @@ import io.github.boriskrisanov.javachess.piece.*;
 
 import java.util.*;
 
+import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
+
 public class Search {
     private static long debugPositionsEvaluated = 0;
+    // +1 and -1 to avoid overflow when multiplying by -1
+    private static final int POSITIVE_INFINITY = Integer.MAX_VALUE - 1;
+    private static final int NEGATIVE_INFINITY = Integer.MIN_VALUE + 1;
     private final static boolean USE_CACHE = false;
     private static volatile boolean stopSearch = false;
 
@@ -53,149 +58,60 @@ public class Search {
         EvalCache.clearDebugStats();
 
         Move bestMove = null;
-        int bestEval;
-        boolean maximizingPlayer = board.getSideToMove() == Piece.Color.WHITE;
-        int alpha = Integer.MIN_VALUE;
-        int beta = Integer.MAX_VALUE;
+        int bestEval = NEGATIVE_INFINITY;
 
         var moves = board.getLegalMovesForSideToMove();
-        moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
-        if (maximizingPlayer) {
-            int maxEval = Integer.MIN_VALUE;
-            for (Move move : moves) {
-                if (stopSearch) {
-                    break;
-                }
-                board.makeMove(move);
-                int eval = evaluate(board, depth - 1, false, alpha, beta, false);
-
-                // >= is used instead of > because if this is the best move, but it still leads to mate, the eval will be
-                // Integer.MIN_VALUE, which will cause the move to not be set and remain null.
-                if (eval >= maxEval) {
-                    maxEval = eval;
-                    bestMove = move;
-                }
-
-                alpha = Math.max(alpha, eval);
-                if (beta <= alpha) {
-                    board.unmakeMove();
-                    break;
-                }
-
-                board.unmakeMove();
+        // TODO: Use alpha beta pruning at root node
+        for (Move move : moves) {
+            if (stopSearch) {
+                break;
             }
-
-            bestEval = maxEval;
-        } else {
-            int minEval = Integer.MAX_VALUE;
-            for (Move move : moves) {
-                if (stopSearch) {
-                    break;
-                }
-                board.makeMove(move);
-                int eval = evaluate(board, depth - 1, true, alpha, beta, false);
-
-                // <= is used instead of < because if this is the best move, but it still leads to mate, the eval will be
-                // Integer.MAX_VALUE, which will cause the move to not be set and remain null.
-                if (eval <= minEval) {
-                    minEval = eval;
-                    bestMove = move;
-                }
-
-                beta = Math.min(beta, eval);
-                if (beta <= alpha) {
-                    board.unmakeMove();
-                    break;
-                }
-
-                board.unmakeMove();
+            board.makeMove(move);
+            int eval = -evaluate(board, depth - 1, NEGATIVE_INFINITY, POSITIVE_INFINITY);
+            if (eval >= bestEval) {
+                bestEval = eval;
+                bestMove = move;
             }
-
-            bestEval = minEval;
+            board.unmakeMove();
         }
 
         return new SearchResult(bestMove, bestEval, debugPositionsEvaluated);
     }
 
-    public static int evaluate(Board board, int depth, boolean maximizingPlayer, int alpha, int beta, boolean capturesOnly) {
-        boolean cacheEval = false;
-        var hash = Hash.hash(board);
-
-        if (USE_CACHE) {
-            var cachedEval = EvalCache.get(hash);
-            if (cachedEval.isPresent() && cachedEval.get().depth() >= depth) {
-                return cachedEval.get().eval();
-            } else {
-                cacheEval = true;
-            }
-        }
-
-        if (board.isDraw()) {
-            return 0;
-        }
-        if (board.isCheckmate(Piece.Color.WHITE)) {
-            return Integer.MIN_VALUE;
-        } else if (board.isCheckmate(Piece.Color.BLACK)) {
-            return Integer.MAX_VALUE;
-        }
-
-        if (depth == 0 && !capturesOnly) {
+    public static int evaluate(Board board, int depth, int alpha, int beta) {
+        if (depth == 0) {
             debugPositionsEvaluated++;
-            return evaluate(board, 0, !maximizingPlayer, alpha, beta, true);
+            return StaticEval.evaluate(board) * (board.getSideToMove() == WHITE ? 1 : -1);
         }
 
-        var moves = capturesOnly ? board.getCapturesForSideToMove() : board.getLegalMovesForSideToMove();
+        var moves = board.getLegalMovesForSideToMove();
 
-        if (moves.isEmpty() && capturesOnly) {
-            return StaticEval.evaluate(board);
+        if (moves.isEmpty()) {
+            if (board.isDraw()) {
+                return 0;
+            }
+            if (board.isCheck()) {
+                return NEGATIVE_INFINITY;
+            }
         }
 
         moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
-        if (maximizingPlayer) {
-            int maxEval = Integer.MIN_VALUE;
-
-            for (Move move : moves) {
-                if (stopSearch) {
-                    break;
-                }
-                board.makeMove(move);
-                int eval = evaluate(board, depth - 1, false, alpha, beta, capturesOnly);
-                maxEval = Math.max(maxEval, eval);
-                alpha = Math.max(alpha, eval);
-                if (beta < alpha) {
-                    board.unmakeMove();
-                    break;
-                }
+        for (Move move : moves) {
+            if (stopSearch) {
+                break;
+            }
+            board.makeMove(move);
+            int eval = -evaluate(board, depth - 1, -beta, -alpha);
+            if (eval >= beta) {
                 board.unmakeMove();
+                return beta;
             }
-            if (cacheEval) {
-                EvalCache.put(hash, depth, maxEval);
-            }
-            return maxEval;
-        } else {
-            int minEval = Integer.MAX_VALUE;
-
-            for (Move move : moves) {
-                if (stopSearch) {
-                    break;
-                }
-                board.makeMove(move);
-                int eval = evaluate(board, depth - 1, true, alpha, beta, capturesOnly);
-                minEval = Math.min(minEval, eval);
-                beta = Math.min(beta, eval);
-                if (beta < alpha) {
-                    board.unmakeMove();
-                    break;
-                }
-                board.unmakeMove();
-            }
-
-            if (cacheEval) {
-                EvalCache.put(hash, depth, minEval);
-            }
-            return minEval;
+            alpha = Math.max(alpha, eval);
+            board.unmakeMove();
         }
+
+        return alpha;
     }
 }
