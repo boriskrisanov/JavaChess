@@ -12,8 +12,12 @@ import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
  * Holds the current state of the game (piece positions, side to move, check, checkmate and en passant target square)
  */
 public class Board {
-    private Piece[] board = new Piece[64];
+    private final Piece[] board = new Piece[64];
     private long squaresAttackedByWhite = 0;
+
+    // Pawn attacking squares are only used for move ordering
+    private long whitePawnAttackingSquares = 0;
+    private long blackPawnAttackingSquares = 0;
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
     public final Deque<BoardState> boardHistory = new ArrayDeque<>();
@@ -280,7 +284,7 @@ public class Board {
         moveHistory.push(move);
         hashHistory.push(Hash.hash(this));
         // TODO: Only compute hash in one method and reuse it for search
-        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, squaresAttackedByBlack, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock));
+        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, whitePawnAttackingSquares, squaresAttackedByBlack, blackPawnAttackingSquares, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock));
 
         var movedPiece = board[move.start()];
 
@@ -292,7 +296,6 @@ public class Board {
 
         boolean isPromotion = move.promotion() != null;
         boolean isEnPassant = move.destination() == enPassantTargetSquare;
-        boolean isCapture = move.capturedPiece() != null;
 
         // The right to capture en passant has been lost because another move has been made
         enPassantTargetSquare = -1;
@@ -446,6 +449,7 @@ public class Board {
         sideToMove = sideToMove.getOpposite();
 
         computeAttackingSquares();
+        updatePawnAttackingSquares();
         computePinLines();
         computeCheckResolutions();
     }
@@ -460,6 +464,8 @@ public class Board {
         blackKingPos = boardState.blackKingPos();
         castlingRights = boardState.castlingRights();
         halfMoveClock = boardState.halfMoveClock();
+        whitePawnAttackingSquares = boardState.whitePawnAttackingSquares();
+        blackPawnAttackingSquares = boardState.blackPawnAttackingSquares();
 
         boolean isPromotion = move.promotion() != null;
         boolean isCapture = move.capturedPiece() != null;
@@ -869,6 +875,18 @@ public class Board {
         return side == WHITE ? squaresAttackedByWhite : squaresAttackedByBlack;
     }
 
+    public void updatePawnAttackingSquares() {
+        for (Piece piece : board) {
+            if (piece instanceof Pawn) {
+                if (piece.getColor() == WHITE) {
+                    whitePawnAttackingSquares |= piece.getAttackingSquares();
+                } else {
+                    blackPawnAttackingSquares |= piece.getAttackingSquares();
+                }
+            }
+        }
+    }
+
     private long computeAttackingSquaresForSide(Piece.Color side) {
         long bitboard = 0;
 
@@ -1222,5 +1240,13 @@ public class Board {
 
     public long getBlackKing() {
         return blackKing;
+    }
+
+    public long getWhitePawnAttackingSquares() {
+        return whitePawnAttackingSquares;
+    }
+
+    public long getBlackPawnAttackingSquares() {
+        return blackPawnAttackingSquares;
     }
 }

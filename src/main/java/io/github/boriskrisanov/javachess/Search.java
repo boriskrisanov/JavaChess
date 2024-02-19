@@ -40,6 +40,14 @@ public class Search {
         Piece piece = board.getPieceOn(move.start());
         Piece capturedPiece = move.capturedPiece();
 
+        // Moving a piece to an empty square defended by an enemy pawn is likely a bad move
+        if (board.isSquareEmpty(move.destination()) && !(piece instanceof Pawn)) {
+            long pawnAttackingSquares = side == WHITE ? board.getBlackPawnAttackingSquares() : board.getWhitePawnAttackingSquares();
+            if ((pawnAttackingSquares & BitboardUtils.withSquare(move.destination())) == 0) {
+                score -= 1000;
+            }
+        }
+
         // Capturing a high value piece with a low value piece is likely to be a good move
         if (capturedPiece != null) {
             score += (capturedPiece.getValue() - piece.getValue());
@@ -80,11 +88,6 @@ public class Search {
     }
 
     public static int evaluate(Board board, int depth, int alpha, int beta) {
-        if (depth == 0) {
-            debugPositionsEvaluated++;
-            return StaticEval.evaluate(board) * (board.getSideToMove() == WHITE ? 1 : -1);
-        }
-
         var moves = board.getLegalMovesForSideToMove();
 
         if (moves.isEmpty()) {
@@ -96,6 +99,10 @@ public class Search {
             }
         }
 
+        if (depth == 0) {
+            return evaluateCaptures(board, alpha, beta);
+        }
+
         moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
         for (Move move : moves) {
@@ -104,12 +111,40 @@ public class Search {
             }
             board.makeMove(move);
             int eval = -evaluate(board, depth - 1, -beta, -alpha);
+            board.unmakeMove();
             if (eval >= beta) {
-                board.unmakeMove();
                 return beta;
             }
             alpha = Math.max(alpha, eval);
+        }
+
+        return alpha;
+    }
+
+    private static int evaluateCaptures(Board board, int alpha, int beta) {
+        int eval = StaticEval.evaluate(board) * (board.getSideToMove() == WHITE ? 1 : -1);
+        if (eval >= beta) {
+            return beta;
+        }
+        alpha = Math.max(alpha, eval);
+
+        var moves = board.getCapturesForSideToMove();
+
+        moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
+
+        for (Move move : moves) {
+            if (stopSearch) {
+                break;
+            }
+
+            board.makeMove(move);
+            eval = -evaluateCaptures(board, -beta, -alpha);
             board.unmakeMove();
+
+            if (eval >= beta) {
+                return beta;
+            }
+            alpha = Math.max(alpha, eval);
         }
 
         return alpha;
