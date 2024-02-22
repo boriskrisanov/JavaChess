@@ -12,7 +12,7 @@ public class Search {
     // +1 and -1 to avoid overflow when multiplying by -1
     private static final int POSITIVE_INFINITY = Integer.MAX_VALUE - 1;
     private static final int NEGATIVE_INFINITY = Integer.MIN_VALUE + 1;
-    private final static boolean USE_CACHE = false;
+    private final static boolean USE_CACHE = true;
     private static volatile boolean stopSearch = false;
 
     public static synchronized void stop() {
@@ -24,18 +24,6 @@ public class Search {
     }
 
     private static int moveScore(Board board, Move move, Piece.Color side) {
-        if (USE_CACHE) {
-            // If the position is in the cache, return its evaluation as the score
-            // The exact values don't matter, only the relative order, as this determines which moves will be searched first
-            board.makeMove(move);
-            long hash = Hash.hash(board);
-            var cachedEval = EvalCache.get(hash);
-            board.unmakeMove();
-            if (cachedEval.isPresent()) {
-                return cachedEval.get().eval() * (side == Piece.Color.BLACK ? -1 : 1);
-            }
-        }
-
         int score = 0;
         Piece piece = board.getPieceOn(move.start());
         Piece capturedPiece = move.capturedPiece();
@@ -63,7 +51,6 @@ public class Search {
     public static SearchResult bestMove(Board board, int depth) {
         stopSearch = false;
         debugPositionsEvaluated = 0;
-        EvalCache.clearDebugStats();
 
         Move bestMove = null;
         int bestEval = NEGATIVE_INFINITY;
@@ -88,14 +75,45 @@ public class Search {
     }
 
     public static int evaluate(Board board, int depth, int alpha, int beta) {
+        boolean shouldCache = false;
+        EvalCache.NodeKind nodeKind = EvalCache.NodeKind.UPPER;
+        long hash = Hash.hash(board);
+
+        if (USE_CACHE) {
+            var existingEntry = EvalCache.get(hash);
+            if (existingEntry != null && existingEntry.depth() >= depth) {
+                if (existingEntry.kind() == EvalCache.NodeKind.EXACT) {
+                    return existingEntry.eval();
+                }
+                if (existingEntry.kind() == EvalCache.NodeKind.UPPER && existingEntry.eval() <= alpha) {
+                    return alpha;
+                }
+                if (existingEntry.kind() == EvalCache.NodeKind.LOWER && existingEntry.eval() >= beta) {
+                    return beta;
+                }
+            } else {
+                shouldCache = true;
+            }
+        }
+
         var moves = board.getLegalMovesForSideToMove();
 
         if (moves.isEmpty()) {
             if (board.isDraw()) {
+                if (shouldCache) {
+                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, depth, 0);
+                }
                 return 0;
             }
             if (board.isCheck()) {
-                return NEGATIVE_INFINITY;
+                // Checkmates closer to the root are better, so they should have a lower score
+                // Not doing this causes the engine to make draws and not play the best move, even if it knows that it
+                // can be played.
+                int mateEval = NEGATIVE_INFINITY + 255 - depth;
+                if (shouldCache) {
+                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, depth, mateEval);
+                }
+                return mateEval;
             }
         }
 
@@ -113,16 +131,26 @@ public class Search {
             int eval = -evaluate(board, depth - 1, -beta, -alpha);
             board.unmakeMove();
             if (eval >= beta) {
+                if (shouldCache && !stopSearch) {
+                    EvalCache.put(hash, EvalCache.NodeKind.LOWER, depth, beta);
+                }
                 return beta;
             }
-            alpha = Math.max(alpha, eval);
+            if (eval > alpha) {
+                nodeKind = EvalCache.NodeKind.EXACT;
+                alpha = eval;
+            }
+        }
+
+        if (shouldCache && !stopSearch) {
+            EvalCache.put(hash, nodeKind, depth, alpha);
         }
 
         return alpha;
     }
 
     private static int evaluateCaptures(Board board, int alpha, int beta) {
-        int eval = StaticEval.evaluate(board) * (board.getSideToMove() == WHITE ? 1 : -1);
+        int eval = StaticEval.evaluate(board);
         if (eval >= beta) {
             return beta;
         }

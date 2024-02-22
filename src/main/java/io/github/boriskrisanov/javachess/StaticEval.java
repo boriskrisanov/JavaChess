@@ -157,6 +157,6 @@ public class StaticEval {
             }
         }
 
-        return eval;
+        return eval * (position.getSideToMove() == WHITE ? 1 : -1);
     }
 }

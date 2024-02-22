@@ -40,6 +40,7 @@ public class Main {
                     }
                 }
                 case "go" -> {
+                    EvalCache.clearDebugStats();
                     int searchTimeMilliseconds = -1;
                     int depth = 5;
                     if (command.length > 1) {
@@ -52,11 +53,14 @@ public class Main {
                             searchTimeMilliseconds = Integer.parseInt(command[2]);
                         }
                     }
+                    SearchResult bestMove;
                     if (searchTimeMilliseconds != -1) {
-                        System.out.println("bestmove " + TimeLimitedSearch.bestMove(board, searchTimeMilliseconds).bestMove());
+                        bestMove = TimeLimitedSearch.bestMove(board, searchTimeMilliseconds);
                     } else {
-                        System.out.println("bestmove " + Search.bestMove(board, depth).bestMove());
+                        bestMove = Search.bestMove(board, depth);
                     }
+                    System.out.println("bestmove " + bestMove.bestMove());
+                    System.out.println("eval " + bestMove.eval());
                 }
                 case "d" -> {
                     System.out.println(board);

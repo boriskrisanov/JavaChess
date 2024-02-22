@@ -5,48 +5,50 @@ import java.util.concurrent.atomic.*;
 
 public class EvalCache {
     public static final int MAX_ENTRIES = 1_000_000;
-    public static final boolean DEBUG = true;
-    private static final HashMap<Long, CacheEntry> cache = new HashMap<>(MAX_ENTRIES);
-    private final static HashMap<Long, Long> keyUsages = new HashMap<>();
-    private static long lastKey;
+    public static final boolean DEBUG = false;
+    private static final CacheEntry[] cache = new CacheEntry[MAX_ENTRIES];
     private static long debugInsertions = 0;
     private static long debugEvictions = 0;
     private static AtomicLong debugHits = new AtomicLong(0);
     private static AtomicLong debugMisses = new AtomicLong(0);
 
-    public record CacheEntry(int eval, int depth) {
-
+    public enum NodeKind {
+        EXACT,
+        UPPER,
+        LOWER
     }
 
-    public static Optional<CacheEntry> get(long positionHash) {
-        Optional<CacheEntry> eval = Optional.ofNullable(cache.get(positionHash));
+    public record CacheEntry(int eval, NodeKind kind, int depth, long hash) {
+    }
+
+    private static int index(long hash) {
+        return (int) Math.abs(hash % MAX_ENTRIES);
+    }
+
+    public static CacheEntry get(long positionHash) {
+        var value = cache[index(positionHash)];
+        if (value != null && value.hash != positionHash) {
+            // Index collision
+            value = null;
+        }
+
         if (DEBUG) {
-            if (eval.isPresent()) {
+            if (value != null) {
                 debugHits.incrementAndGet();
             } else {
                 debugMisses.incrementAndGet();
             }
         }
-        return eval;
+
+        return value;
     }
 
-    public static synchronized void put(long positionHash, int depth, int eval) {
+    public static synchronized void put(long positionHash, NodeKind kind, int depth, int eval) {
         if (DEBUG) {
             debugInsertions++;
         }
-        if (cache.size() >= MAX_ENTRIES) {
-            if (cache.get(positionHash) != null) {
-                // This position is in the cache but the eval is from a lower depth, so we can remove the lower depth eval
-                // This assumes that new entries will always have a higher depth than older ones (this is checked in the search before inserting a new entry)
-//                cache.remove(positionHash);
-            } else {
-                // TODO: Replacement policy
-            }
-            if (DEBUG) {
-                debugEvictions++;
-            }
-        }
-        cache.put(positionHash, new CacheEntry(eval, depth));
+
+        cache[index(positionHash)] = new CacheEntry(eval, kind, depth, positionHash);
     }
 
     public static void clearDebugStats() {
@@ -74,7 +76,13 @@ public class EvalCache {
         return debugMisses.get();
     }
 
-    public static long getPercentUsed() {
-        return cache.size() / MAX_ENTRIES * 100;
+    public static double getPercentUsed() {
+        return 0;
+        // TODO
+//        return ((double) cache.size() / MAX_ENTRIES) * 100;
+    }
+
+    public static void clear() {
+        Arrays.fill(cache, null);
     }
 }
