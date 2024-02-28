@@ -63,7 +63,7 @@ public class Search {
                 break;
             }
             board.makeMove(move);
-            int eval = -evaluate(board, depth - 1, NEGATIVE_INFINITY, POSITIVE_INFINITY);
+            int eval = -evaluate(board, depth - 1, 1, NEGATIVE_INFINITY, POSITIVE_INFINITY, 0);
             if (eval >= bestEval) {
                 bestEval = eval;
                 bestMove = move;
@@ -74,14 +74,14 @@ public class Search {
         return new SearchResult(bestMove, bestEval, debugPositionsEvaluated);
     }
 
-    public static int evaluate(Board board, int depth, int alpha, int beta) {
+    public static int evaluate(Board board, int depth, int ply, int alpha, int beta, int extensionCount) {
         boolean shouldCache = false;
         EvalCache.NodeKind nodeKind = EvalCache.NodeKind.UPPER;
         long hash = Hash.hash(board);
 
         if (USE_CACHE) {
             var existingEntry = EvalCache.get(hash);
-            if (existingEntry != null && existingEntry.depth() >= depth) {
+            if (existingEntry != null && existingEntry.depth() < ply) {
                 if (existingEntry.kind() == EvalCache.NodeKind.EXACT) {
                     return existingEntry.eval();
                 }
@@ -101,7 +101,7 @@ public class Search {
         if (moves.isEmpty()) {
             if (board.isDraw()) {
                 if (shouldCache) {
-                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, depth, 0);
+                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, ply, 0);
                 }
                 return 0;
             }
@@ -111,7 +111,7 @@ public class Search {
                 // can be played.
                 int mateEval = NEGATIVE_INFINITY + 255 - depth;
                 if (shouldCache) {
-                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, depth, mateEval);
+                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, ply, mateEval);
                 }
                 return mateEval;
             }
@@ -128,11 +128,17 @@ public class Search {
                 break;
             }
             board.makeMove(move);
-            int eval = -evaluate(board, depth - 1, -beta, -alpha);
+            int extension = 0;
+            if (extensionCount <= 5) {
+                if (board.isCheck()) {
+                    extension = 1;
+                }
+            }
+            int eval = -evaluate(board, depth - 1 + extension, ply + 1, -beta, -alpha, extensionCount + extension);
             board.unmakeMove();
             if (eval >= beta) {
                 if (shouldCache && !stopSearch) {
-                    EvalCache.put(hash, EvalCache.NodeKind.LOWER, depth, beta);
+                    EvalCache.put(hash, EvalCache.NodeKind.LOWER, ply, beta);
                 }
                 return beta;
             }
@@ -143,7 +149,7 @@ public class Search {
         }
 
         if (shouldCache && !stopSearch) {
-            EvalCache.put(hash, nodeKind, depth, alpha);
+            EvalCache.put(hash, nodeKind, ply, alpha);
         }
 
         return alpha;
