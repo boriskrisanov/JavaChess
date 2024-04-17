@@ -1,0 +1,36 @@
+plugins {
+    id "java-library"
+}
+
+group = "io.github.boriskrisanov.javachess.engine"
+version = "1.0-SNAPSHOT"
+sourceCompatibility = '17'
+
+
+//application {
+//    mainClass = "io.github.boriskrisanov.javachess.engine.Main"
+//    mainModule = "io.github.boriskrisanov.javachess.engine"
+//}
+
+test {
+    systemProperty("junit.jupiter.execution.parallel.enabled", true)
+}
+
+jar {
+    manifest {
+//        attributes "Main-Class": application.mainClass
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    testImplementation platform("org.junit:junit-bom:5.10.0")
+    testImplementation "org.junit.jupiter:junit-jupiter"
+}
+
+test {
+    useJUnitPlatform()
+}
