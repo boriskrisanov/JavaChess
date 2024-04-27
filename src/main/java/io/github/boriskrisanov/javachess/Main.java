@@ -1,6 +1,7 @@
 package io.github.boriskrisanov.javachess;
 
 import io.github.boriskrisanov.javachess.board.*;
+import io.github.boriskrisanov.javachess.piece.*;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -24,7 +25,6 @@ public class Main {
                 case "position" -> {
                     board.getMoveHistoryStack().clear();
                     board.boardHistory.clear();
-                    board.hashHistory.clear();
                     String type = command[1];
                     if (type.equals("fen")) {
                         board.loadFen(commandString.split("fen")[1].trim());
@@ -67,6 +67,7 @@ public class Main {
                     System.out.println("FEN: " + board.getFen());
                     System.out.println("Hash: " + HexFormat.of().toHexDigits(Hash.hash(board)));
                 }
+
             }
 
         } while (!command[0].equals("quit"));

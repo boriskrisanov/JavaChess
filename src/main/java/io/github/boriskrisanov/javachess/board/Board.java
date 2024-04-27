@@ -14,6 +14,7 @@ import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
 public class Board {
     private final Piece[] board = new Piece[64];
     private long squaresAttackedByWhite = 0;
+    private long[] attackingSquares = new long[64];
 
     // Pawn attacking squares are only used for move ordering
     private long whitePawnAttackingSquares = 0;
@@ -21,9 +22,10 @@ public class Board {
     private final Deque<Move> moveHistory = new ArrayDeque<>();
     // TODO: Store this in moves
     public final Deque<BoardState> boardHistory = new ArrayDeque<>();
-    public final Deque<Long> hashHistory = new ArrayDeque<>();
+    ArrayList<Move> legalMoves = new ArrayList<>();
     private long squaresAttackedByBlack = 0;
     private ArrayList<Integer> checkResolutions = new ArrayList<>();
+    long hash = 0;
     private int whiteKingPos = 0;
     private int blackKingPos = 0;
     private int enPassantTargetSquare;
@@ -50,6 +52,8 @@ public class Board {
     public Board(String fen) {
         Hash.init();
         loadFen(fen);
+        computeAttackingSquares();
+        computeLegalMoves();
     }
 
     /**
@@ -58,6 +62,8 @@ public class Board {
     public Board() {
         Hash.init();
         loadStartingPosition();
+        computeAttackingSquares();
+        computeLegalMoves();
     }
 
     /**
@@ -68,7 +74,7 @@ public class Board {
     }
 
     public void loadFen(String fen) {
-        hashHistory.clear();
+        boardHistory.clear();
         for (int i = 0; i < 64; i++) {
             board[i] = null;
         }
@@ -149,7 +155,6 @@ public class Board {
         computeAttackingSquares();
         computePinLines();
         computeCheckResolutions();
-        hashHistory.push(Hash.hash(this));
     }
 
     /**
@@ -281,10 +286,14 @@ public class Board {
      * Makes a move on the board without checking if it is legal. Also updates en passant target square.
      */
     public void makeMove(Move move) {
+        makeMove(move, true);
+    }
+
+    private void makeMove(Move move, boolean recomputeLegalMoves) {
         moveHistory.push(move);
-        hashHistory.push(Hash.hash(this));
+        var hash = Hash.hash(this);
         // TODO: Only compute hash in one method and reuse it for search
-        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, whitePawnAttackingSquares, squaresAttackedByBlack, blackPawnAttackingSquares, checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock));
+        boardHistory.push(new BoardState(enPassantTargetSquare, squaresAttackedByWhite, whitePawnAttackingSquares, squaresAttackedByBlack, blackPawnAttackingSquares, attackingSquares.clone(), checkResolutions, whiteKingPos, blackKingPos, new CastlingRights(castlingRights), halfMoveClock, hash, new ArrayList<>(legalMoves)));
 
         var movedPiece = board[move.start()];
 
@@ -448,14 +457,21 @@ public class Board {
 
         sideToMove = sideToMove.getOpposite();
 
+        // Order is important - Piece.getLegalMoves() is called with attackingSquares
         computeAttackingSquares();
+        if (recomputeLegalMoves) {
+            computeLegalMoves();
+        }
+
+        // Order doesn't matter - only used for evaluation
         updatePawnAttackingSquares();
-        computePinLines();
-        computeCheckResolutions();
     }
 
     public void unmakeMove() {
-        hashHistory.pop();
+        unmakeMove(true);
+    }
+
+    private void unmakeMove(boolean restoreLegalMoves) {
         var move = moveHistory.pop();
         var boardState = boardHistory.pop();
 
@@ -587,11 +603,15 @@ public class Board {
 
         squaresAttackedByWhite = boardState.whiteAttackingSquares();
         squaresAttackedByBlack = boardState.blackAttackingSquares();
+        attackingSquares = boardState.attackingSquares();
+        if (restoreLegalMoves) {
+            legalMoves = boardState.legalMoves();
+        }
 
         sideToMove = sideToMove.getOpposite();
 
-        computePinLines();
-        computeCheckResolutions();
+//        computePinLines();
+//        computeCheckResolutions();
     }
 
     private void computeAttackingSquares() {
@@ -817,9 +837,9 @@ public class Board {
     public boolean isSideInCheckAfterMove(Piece.Color side, Move move) {
         boolean isInCheck;
 
-        makeMove(move);
+        makeMove(move, false);
         isInCheck = isSideInCheck(side);
-        unmakeMove();
+        unmakeMove(false);
 
         return isInCheck;
     }
@@ -849,17 +869,17 @@ public class Board {
         HashMap<Long, Integer> repetitions = new HashMap<>();
 
         boolean isThreefoldRepetition = false;
-        for (long hash : hashHistory) {
-            if (repetitions.containsKey(hash)) {
-                repetitions.put(hash, repetitions.get(hash) + 1);
-            } else {
-                repetitions.put(hash, 1);
-            }
-            if (repetitions.get(hash) >= 3) {
-                isThreefoldRepetition = true;
-                break;
-            }
-        }
+//        for (long hash : hashHistory) {
+//            if (repetitions.containsKey(hash)) {
+//                repetitions.put(hash, repetitions.get(hash) + 1);
+//            } else {
+//                repetitions.put(hash, 1);
+//            }
+//            if (repetitions.get(hash) >= 3) {
+//                isThreefoldRepetition = true;
+//                break;
+//            }
+//        }
 
         // TODO: Improve insufficient material detection
         boolean isInsufficientMaterial = whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
@@ -879,9 +899,9 @@ public class Board {
         for (Piece piece : board) {
             if (piece instanceof Pawn) {
                 if (piece.getColor() == WHITE) {
-                    whitePawnAttackingSquares |= piece.getAttackingSquares();
+                    whitePawnAttackingSquares |= attackingSquares[piece.getPosition()];
                 } else {
-                    blackPawnAttackingSquares |= piece.getAttackingSquares();
+                    blackPawnAttackingSquares |= attackingSquares[piece.getPosition()];
                 }
             }
         }
@@ -892,21 +912,13 @@ public class Board {
 
         for (Piece piece : board) {
             if (piece != null && piece.getColor() == side) {
-                bitboard |= piece.getAttackingSquares();
+                long pieceAttackingSquares = piece.getAttackingSquares();
+                attackingSquares[piece.getPosition()] = pieceAttackingSquares;
+                bitboard |= pieceAttackingSquares;
             }
         }
 
         return bitboard;
-    }
-
-    public ArrayList<Move> getAllLegalMoves() {
-        var legalMoves = new ArrayList<Move>();
-
-        Arrays.stream(board)
-                .filter(Objects::nonNull)
-                .forEach(piece -> legalMoves.addAll(piece.getLegalMoves()));
-
-        return legalMoves;
     }
 
     public ArrayList<Move> getAllLegalMovesForSide(Piece.Color side) {
@@ -914,23 +926,19 @@ public class Board {
 
         for (Piece piece : board) {
             if (piece != null && piece.getColor() == side) {
-                legalMoves.addAll(piece.getLegalMoves());
+                legalMoves.addAll(piece.getLegalMoves(attackingSquares[piece.getPosition()]));
             }
         }
 
         return legalMoves;
     }
 
-    public ArrayList<Move> getLegalMovesForSideToMove() {
-        var moves = new ArrayList<Move>();
+    private void computeLegalMoves() {
+        legalMoves = getAllLegalMovesForSide(sideToMove);
+    }
 
-        for (Piece piece : board) {
-            if (piece != null && piece.getColor() == sideToMove) {
-                moves.addAll(piece.getLegalMoves());
-            }
-        }
-
-        return moves;
+    public List<Move> getLegalMovesForSideToMove() {
+        return legalMoves;
     }
 
     public ArrayList<Move> getCapturesForSideToMove() {

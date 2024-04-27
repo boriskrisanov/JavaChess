@@ -8,11 +8,14 @@ public record BoardState(
         long whitePawnAttackingSquares,
         long blackAttackingSquares,
         long blackPawnAttackingSquares,
+        long[] attackingSquares,
         ArrayList<Integer> checkResolutions,
         int whiteKingPos,
         int blackKingPos,
         CastlingRights castlingRights,
-        int halfMoveClock
+        int halfMoveClock,
+        long hash,
+        ArrayList<Move> legalMoves
 ) {
 
 }

@@ -37,32 +37,32 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public ArrayList<Move> getLegalMoves() {
+    public ArrayList<Move> getLegalMoves(long attackingSquares) {
         var legalMoves = new ArrayList<Move>();
 
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
-        var attackingSquares = getAttackingSquares();
         var edgeDist = new EdgeDistance(position);
 
         // Ignore squares that are occupied by friendly pieces
         attackingSquares &= ~board.getPieces(this.color);
+        long capturesBitboard = attackingSquares & board.getPieces(color.getOpposite());
 
         // Captures
-        for (int targetSquare : BitboardUtils.squaresOf(attackingSquares)) {
-            if (board.getBoard()[targetSquare] == null || board.getBoard()[targetSquare].getColor() == this.color) {
-                continue;
-            }
+        for (int targetSquare : BitboardUtils.squaresOf(capturesBitboard)) {
+//            if (board.getBoard()[targetSquare] == null || board.getBoard()[targetSquare].getColor() == this.color) {
+//                continue;
+//            }
 
             Piece capturedPiece = board.getPieceOn(targetSquare);
             Move move = new Move(this.position, targetSquare, capturedPiece);
 
-            if (capturedPiece == null || capturedPiece.getColor() == this.color
-                    || (targetSquare == position - 8 - 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))
-                    || (targetSquare == position - 8 + 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
-                    || (targetSquare == position + 8 - 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
-                    || (targetSquare == position + 8 + 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))) {
-                continue;
-            }
+//            if (capturedPiece == null || capturedPiece.getColor() == this.color
+//                    || (targetSquare == position - 8 - 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))
+//                    || (targetSquare == position - 8 + 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
+//                    || (targetSquare == position + 8 - 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
+//                    || (targetSquare == position + 8 + 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))) {
+//                continue;
+//            }
 
             if ((color == Color.WHITE && Square.isLastRank(targetSquare)) || (color == Color.BLACK && Square.isFirstRank(targetSquare))) {
                 legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.KNIGHT));
@@ -140,24 +140,21 @@ public class Pawn extends Piece {
             }
         }
 
-        if (board.isSideInCheck(this.color)) {
-            var legalResolutionMoves = new ArrayList<Move>();
+//        if (board.isSideInCheck(this.color)) {
+//            var legalResolutionMoves = new ArrayList<Move>();
+//
+//            for (Move move : legalMoves) {
+//                if (board.getCheckResolutions().contains(move.destination()) || (move.capturedPiece() != null && board.getCheckResolutions().contains(move.capturedPiece().getPosition()))) {
+//                    legalResolutionMoves.add(move);
+//                }
+//            }
+//
+//            return legalResolutionMoves;
+//        }
 
-            for (Move move : legalMoves) {
-                if (board.getCheckResolutions().contains(move.destination()) || (move.capturedPiece() != null && board.getCheckResolutions().contains(move.capturedPiece().getPosition()))) {
-                    legalResolutionMoves.add(move);
-                }
-            }
-
-            return legalResolutionMoves;
-        }
+        legalMoves.removeIf(m -> board.isSideInCheckAfterMove(color, m));
 
         return legalMoves;
-    }
-
-    @Override
-    protected long getAttackingSquaresIncludingPins() {
-        return getAttackingSquares();
     }
 
     @Override

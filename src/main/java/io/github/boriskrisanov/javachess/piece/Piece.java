@@ -44,17 +44,14 @@ public abstract class Piece {
 
     public abstract long getAttackingSquares();
 
-    protected abstract long getAttackingSquaresIncludingPins();
-
-    public ArrayList<Move> getLegalMoves() {
+    public ArrayList<Move> getLegalMoves(long attackingSquares) {
         ArrayList<Move> moves = new ArrayList<>();
-        var attackingSquares = getAttackingSquaresIncludingPins();
 
         // Ignore squares that are occupied by friendly pieces
         attackingSquares &= ~board.getPieces(this.color);
 
         for (int attackingSquare : BitboardUtils.squaresOf(attackingSquares)) {
-            if (board.isSideInCheck(this.color)) {
+            if (board.isSideInCheck(this.color) && false) {
                 for (int resolution : board.getCheckResolutions()) {
                     // Check if this piece can move to the resolution square
                     // TODO: Some of this might be redundant
@@ -77,6 +74,9 @@ public abstract class Piece {
             } else {
                 Piece capturedPiece = board.getPieceOn(attackingSquare);
                 Move move = new Move(position, attackingSquare, capturedPiece);
+                if (board.isSideInCheckAfterMove(color, move)) {
+                    continue;
+                }
                 moves.add(move);
             }
         }

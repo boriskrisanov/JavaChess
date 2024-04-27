@@ -17,10 +17,11 @@ public class Hash {
     }
 
     public static long hash(Board board) {
+        // TODO: Use bitboards
         long result = 0;
 
         for (int i = 0; i < 64; i++) {
-            if (board.getPieceOn(i) == null) {
+            if (board.isSquareEmpty(i)) {
                 continue;
             }
 

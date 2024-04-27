@@ -4,7 +4,7 @@ import java.util.*;
 import java.util.concurrent.atomic.*;
 
 public class EvalCache {
-    public static final int MAX_ENTRIES = 1_000_000;
+    public static final int MAX_ENTRIES = 100_000_000;
     public static final boolean DEBUG = false;
     private static final CacheEntry[] cache = new CacheEntry[MAX_ENTRIES];
     private static long debugInsertions = 0;
