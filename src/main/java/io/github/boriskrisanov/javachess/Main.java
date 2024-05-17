@@ -67,7 +67,7 @@ public class Main {
                     } else {
                         String promotion = "";
                         if (bestMove.bestMove().promotion() != null) {
-                            promotion = "=" + bestMove.bestMove().toString().charAt(5);
+                            promotion = "=" + bestMove.bestMove().promotion();
                         }
                         System.out.println("bestmove " + bestMove.bestMove().start() + ":" + bestMove.bestMove().destination() + promotion);
                     }
