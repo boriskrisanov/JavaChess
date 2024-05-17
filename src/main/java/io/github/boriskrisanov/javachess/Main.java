@@ -134,10 +134,10 @@ public class Main {
                     // start:end=promotion
                     String move = command[1];
                     int start = Integer.parseInt(move.split(":")[0]);
-                    int end = Integer.parseInt(move.split(":")[1]);
+                    int end = Integer.parseInt(move.split(":")[1].split("=")[0]);
                     String promotion = "";
                     if (move.contains("=")) {
-                        promotion = "=" + move.split("=")[1];
+                        promotion = move.split("=")[1];
                     }
 
                     board.makeMove(new Square(start).toString() + new Square(end) + promotion);
