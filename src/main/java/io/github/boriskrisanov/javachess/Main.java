@@ -2,7 +2,6 @@ package io.github.boriskrisanov.javachess;
 
 import io.github.boriskrisanov.javachess.board.*;
 import io.github.boriskrisanov.javachess.piece.*;
-import org.w3c.dom.*;
 
 import java.util.*;
 import java.util.concurrent.*;
@@ -236,6 +235,19 @@ public class Main {
                     System.out.println("P(W) = " + (double)whiteWins/n);
                     System.out.println("P(L) = " + (double)blackWins/n);
                     System.out.println("P(D) = " + (double)draws/n);
+
+                    long maxVisits = 0;
+                    Move bestMove = null;
+                    for (Move move : board.getLegalMovesForSideToMove()) {
+                        board.makeMove(move);
+                        long hash = Hash.hash(board);
+                        board.unmakeMove();
+                        if (nodes.get(hash).visits > maxVisits) {
+                            maxVisits = nodes.get(hash).visits;
+                            bestMove = move;
+                        }
+                    }
+                    System.out.println("bestmove " + bestMove);
                 }
             }
 
