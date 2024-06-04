@@ -346,29 +346,26 @@ public class Board {
 
         // Update castling rights if rook has moved
         boolean rookWasCaptured = move.capturedPiece() instanceof Rook && (move.capturedPiece().getPosition() == 0 || move.capturedPiece().getPosition() == 7 || move.capturedPiece().getPosition() == 56 || move.capturedPiece().getPosition() == 63);
-        if (movedPiece instanceof Rook || rookWasCaptured) {
-            if (!rookWasCaptured) {
-                // Rook has moved
-                if (movedPiece.getPosition() == 0) {
-                    castlingRights.removeForSide(BLACK, CastlingDirection.LONG);
-                } else if (movedPiece.getPosition() == 7) {
-                    castlingRights.removeForSide(BLACK, CastlingDirection.SHORT);
-                } else if (movedPiece.getPosition() == 56) {
-                    castlingRights.removeForSide(WHITE, CastlingDirection.LONG);
-                } else if (movedPiece.getPosition() == 63) {
-                    castlingRights.removeForSide(WHITE, CastlingDirection.SHORT);
-                }
-            } else {
-                // Rook was captured
-                if (move.destination() == 0) {
-                    castlingRights.removeForSide(BLACK, CastlingDirection.LONG);
-                } else if (move.destination() == 7) {
-                    castlingRights.removeForSide(BLACK, CastlingDirection.SHORT);
-                } else if (move.destination() == 56) {
-                    castlingRights.removeForSide(WHITE, CastlingDirection.LONG);
-                } else if (move.destination() == 63) {
-                    castlingRights.removeForSide(WHITE, CastlingDirection.SHORT);
-                }
+        if (movedPiece instanceof Rook) {
+            if (movedPiece.getPosition() == 0) {
+                castlingRights.removeForSide(BLACK, CastlingDirection.LONG);
+            } else if (movedPiece.getPosition() == 7) {
+                castlingRights.removeForSide(BLACK, CastlingDirection.SHORT);
+            } else if (movedPiece.getPosition() == 56) {
+                castlingRights.removeForSide(WHITE, CastlingDirection.LONG);
+            } else if (movedPiece.getPosition() == 63) {
+                castlingRights.removeForSide(WHITE, CastlingDirection.SHORT);
+            }
+        }
+        if (rookWasCaptured) {
+            if (move.destination() == 0) {
+                castlingRights.removeForSide(BLACK, CastlingDirection.LONG);
+            } else if (move.destination() == 7) {
+                castlingRights.removeForSide(BLACK, CastlingDirection.SHORT);
+            } else if (move.destination() == 56) {
+                castlingRights.removeForSide(WHITE, CastlingDirection.LONG);
+            } else if (move.destination() == 63) {
+                castlingRights.removeForSide(WHITE, CastlingDirection.SHORT);
             }
         }
 

@@ -96,6 +96,11 @@ public class MoveGenerationTest {
     }
 
     @Test
+    void testPosition6() {
+        assertEquals(13699553, runTest(5, Board.STARTING_POSITION_FEN, "h2h4 g7g5 h4g5 b8c6 g5g6 a8b8 g6h7 b8a8 h7g8n h8h1 g8h6 a8b8 h6g4 b8a8 g4h2 a8b8 a2a3 b8a8 a3a4 a8b8 a4a5 b8a8 a5a6 a8b8 a6b7 b8b7 b2b3 f8h6 b3b4"));
+    }
+
+    @Test
     void realTestPosition1() {
         // https://lichess.org/QR5UbqUY#16
         assertEquals(108181315, runTest(5, "r1bqk2r/ppp2ppp/2n1pn2/8/QbBP4/2N2N2/PP3PPP/R1B2RK1 w kq - 4 9"));
