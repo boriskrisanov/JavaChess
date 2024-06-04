@@ -2,9 +2,17 @@ package io.github.boriskrisanov.javachess;
 
 import io.github.boriskrisanov.javachess.board.*;
 import io.github.boriskrisanov.javachess.piece.*;
+import org.w3c.dom.*;
 
 import java.util.*;
 import java.util.concurrent.*;
+
+class Node {
+    public long wins = 0;
+    public long losses = 0;
+    public long draws = 0;
+    public long visits = 0;
+}
 
 public class Main {
     public static void main(String[] args) throws InterruptedException, ExecutionException {
@@ -71,7 +79,7 @@ public class Main {
                         }
                         System.out.println("bestmove " + bestMove.bestMove().start() + ":" + bestMove.bestMove().destination() + promotion);
                     }
-                    System.out.println("eval " + ((double)bestMove.eval()) / 100);
+                    System.out.println("eval " + ((double) bestMove.eval()) / 100);
                 }
                 case "d" -> {
                     System.out.println(board);
@@ -141,6 +149,93 @@ public class Main {
                     }
 
                     board.makeMove(new Square(start).toString() + new Square(end) + promotion);
+                }
+                case "mcts" -> {
+                    Random random = new Random();
+                    final double r = 0;
+                    HashMap<Long, Node> nodes = new HashMap<>();
+                    int n = Integer.parseInt(command[1]);
+                    int whiteWins = 0;
+                    int blackWins = 0;
+                    int draws = 0;
+                    final Piece.Color side = board.getSideToMove();
+                    for (int i = 0; i < n; i++) {
+                        ArrayList<Long> visitedNodes = new ArrayList<>();
+                        Board board2 = new Board(board.getFen());
+                        long lastNode = Hash.hash(board2);
+                        while (true) {
+                            if (!nodes.containsKey(lastNode)) {
+                                nodes.put(lastNode, new Node());
+                            }
+                            nodes.get(lastNode).visits++;
+                            if (board2.isCheckmate(Piece.Color.WHITE)) {
+                                blackWins++;
+                                if (side == Piece.Color.WHITE) {
+                                    nodes.get(lastNode).losses++;
+                                    for (long nodeHash : visitedNodes) {
+                                        nodes.get(nodeHash).losses++;
+                                    }
+                                } else {
+                                    nodes.get(lastNode).wins++;
+                                    for (long nodeHash : visitedNodes) {
+                                        nodes.get(nodeHash).wins++;
+                                    }
+                                }
+                                break;
+                            }
+                            if (board2.isCheckmate(Piece.Color.BLACK)) {
+                                whiteWins++;
+                                if (side == Piece.Color.WHITE) {
+                                    nodes.get(lastNode).wins++;
+                                    for (long nodeHash : visitedNodes) {
+                                        nodes.get(nodeHash).wins++;
+                                    }
+                                } else {
+                                    nodes.get(lastNode).losses++;
+                                    for (long nodeHash : visitedNodes) {
+                                        nodes.get(nodeHash).losses++;
+                                    }
+                                }
+                                break;
+                            }
+                            if (board2.isDraw()) {
+                                draws++;
+                                nodes.get(lastNode).draws++;
+                                for (long nodeHash : visitedNodes) {
+                                    nodes.get(nodeHash).draws++;
+                                }
+                                break;
+                            }
+                            var moves = board2.getLegalMovesForSideToMove();
+                            double maxScore = Integer.MIN_VALUE + 1;
+                            Move bestMove = moves.getFirst();
+                            for (Move move : moves) {
+                                board2.makeMove(move);
+                                long hash = Hash.hash(board2);
+                                if (!nodes.containsKey(hash)) {
+                                    nodes.put(hash, new Node());
+                                }
+                                nodes.get(hash).visits++;
+                                double winRatio = (double) nodes.get(hash).wins / nodes.get(hash).visits;
+                                double lnParentVisitCount = Math.log(nodes.get(lastNode).visits);
+                                double score = winRatio + Math.sqrt(5) * Math.sqrt(lnParentVisitCount / (nodes.get(hash).visits));
+                                board2.unmakeMove();
+                                if (score > maxScore) {
+                                    maxScore = score;
+                                    bestMove = move;
+                                }
+                            }
+                            visitedNodes.add(Hash.hash(board2));
+                            lastNode = Hash.hash(board2);
+                            board2.makeMove(bestMove);
+                        }
+                    }
+                    System.out.println("W: " + whiteWins);
+                    System.out.println("B: " + blackWins);
+                    System.out.println("D: " + draws);
+                    System.out.println("P(W) = " + (double)whiteWins/n);
+                    System.out.println("P(L) = " + (double)blackWins/n);
+                    System.out.println("P(D) = " + (double)draws/n);
                 }
             }
 
