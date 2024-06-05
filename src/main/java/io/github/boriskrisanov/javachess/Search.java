@@ -96,36 +96,22 @@ public class Search {
             }
         }
 
-        var moves = board.getLegalMovesForSideToMove();
-
-        if (moves.isEmpty()) {
-            if (board.isDraw()) {
-                if (shouldCache) {
-                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, ply, 0);
-                }
-                return 0;
-            }
-            if (board.isCheck()) {
-                // Checkmates closer to the root are better, so they should have a lower score
-                // Not doing this causes the engine to make draws and not play the best move, even if it knows that it
-                // can be played.
-                int mateEval = NEGATIVE_INFINITY + 255 - depth;
-                if (shouldCache) {
-                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, ply, mateEval);
-                }
-                return mateEval;
-            }
-        }
-
         if (depth == 0) {
             return evaluateCaptures(board, alpha, beta);
         }
+
+        var moves = board.getPseudoLegalMoves();
+        int moveCount = moves.size();
 
         moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
         for (Move move : moves) {
             if (stopSearch) {
                 break;
+            }
+            if (!board.isPseudoLegalMoveLegal(move)) {
+                moveCount--;
+                continue;
             }
             board.makeMove(move);
             int extension = 0;
@@ -148,6 +134,25 @@ public class Search {
             }
         }
 
+        if (moveCount == 0) {
+            if (board.isDraw()) {
+                if (shouldCache) {
+                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, ply, 0);
+                }
+                return 0;
+            }
+            if (board.isCheck()) {
+                // Checkmates closer to the root are better, so they should have a lower score
+                // Not doing this causes the engine to make draws and not play the best move, even if it knows that it
+                // can be played.
+                int mateEval = NEGATIVE_INFINITY + 255 - depth;
+                if (shouldCache) {
+                    EvalCache.put(hash, EvalCache.NodeKind.EXACT, ply, mateEval);
+                }
+                return mateEval;
+            }
+        }
+
         if (shouldCache && !stopSearch) {
             EvalCache.put(hash, nodeKind, ply, alpha);
         }
@@ -162,13 +167,16 @@ public class Search {
         }
         alpha = Math.max(alpha, eval);
 
-        var moves = board.getCapturesForSideToMove();
+        var moves = board.getPseudoLegalCaptures();
 
         moves.sort(Comparator.comparingInt(move -> moveScore(board, (Move) move, board.getSideToMove())).reversed());
 
         for (Move move : moves) {
             if (stopSearch) {
                 break;
+            }
+            if (!board.isPseudoLegalMoveLegal(move)) {
+                continue;
             }
 
             board.makeMove(move);

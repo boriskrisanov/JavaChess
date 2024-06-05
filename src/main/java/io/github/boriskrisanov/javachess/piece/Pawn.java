@@ -37,7 +37,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public ArrayList<Move> getLegalMoves() {
+    public ArrayList<Move> getPseudoLegalMoves() {
         var legalMoves = new ArrayList<Move>();
 
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
@@ -49,6 +49,7 @@ public class Pawn extends Piece {
 
         // Captures
         for (int targetSquare : BitboardUtils.squaresOf(attackingSquares)) {
+            // TODO: Optimise with bitboards
             if (board.getBoard()[targetSquare] == null || board.getBoard()[targetSquare].getColor() == this.color) {
                 continue;
             }
@@ -56,13 +57,13 @@ public class Pawn extends Piece {
             Piece capturedPiece = board.getPieceOn(targetSquare);
             Move move = new Move(this.position, targetSquare, capturedPiece);
 
-            if (capturedPiece == null || capturedPiece.getColor() == this.color
-                    || (targetSquare == position - 8 - 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))
-                    || (targetSquare == position - 8 + 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
-                    || (targetSquare == position + 8 - 1 && (pinDirection != null && pinDirection != PinDirection.POSITIVE_DIAGONAL))
-                    || (targetSquare == position + 8 + 1 && (pinDirection != null && pinDirection != PinDirection.NEGATIVE_DIAGONAL))) {
-                continue;
-            }
+//            if (capturedPiece == null || capturedPiece.getColor() == this.color
+//                    || (targetSquare == position - 8 - 1 && pinDirection != null)
+//                    || (targetSquare == position - 8 + 1 && pinDirection != null)
+//                    || (targetSquare == position + 8 - 1 && pinDirection != null)
+//                    || (targetSquare == position + 8 + 1 && pinDirection != null)) {
+//                continue;
+//            }
 
             if ((color == Color.WHITE && Square.isLastRank(targetSquare)) || (color == Color.BLACK && Square.isFirstRank(targetSquare))) {
                 legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.KNIGHT));
@@ -106,40 +107,39 @@ public class Pawn extends Piece {
         }
 
         // Normal moves
-        if (pinDirection == null || pinDirection == PinDirection.VERTICAL) {
-            if (this.color == Color.WHITE) {
-                if (board.isSquareEmpty(position - 8)) {
-                    if (Square.isLastRank(position - 8)) {
-                        legalMoves.add(new Move(position, position - 8, null, Promotion.KNIGHT));
-                        legalMoves.add(new Move(position, position - 8, null, Promotion.BISHOP));
-                        legalMoves.add(new Move(position, position - 8, null, Promotion.ROOK));
-                        legalMoves.add(new Move(position, position - 8, null, Promotion.QUEEN));
-                    } else {
-                        legalMoves.add(new Move(position, position - 8, null));
-                    }
-
-                    if (Square.getRank(position) == 2 && board.isSquareEmpty(position - 8 * 2)) {
-                        legalMoves.add(new Move(position, position - 8 * 2, null));
-                    }
+        if (this.color == Color.WHITE) {
+            if (board.isSquareEmpty(position - 8)) {
+                if (Square.isLastRank(position - 8)) {
+                    legalMoves.add(new Move(position, position - 8, null, Promotion.KNIGHT));
+                    legalMoves.add(new Move(position, position - 8, null, Promotion.BISHOP));
+                    legalMoves.add(new Move(position, position - 8, null, Promotion.ROOK));
+                    legalMoves.add(new Move(position, position - 8, null, Promotion.QUEEN));
+                } else {
+                    legalMoves.add(new Move(position, position - 8, null));
                 }
-            } else {
-                if (board.isSquareEmpty(position + 8)) {
-                    if (Square.isFirstRank(position + 8)) {
-                        legalMoves.add(new Move(position, position + 8, null, Promotion.KNIGHT));
-                        legalMoves.add(new Move(position, position + 8, null, Promotion.BISHOP));
-                        legalMoves.add(new Move(position, position + 8, null, Promotion.ROOK));
-                        legalMoves.add(new Move(position, position + 8, null, Promotion.QUEEN));
-                    } else {
-                        legalMoves.add(new Move(position, position + 8, null));
-                    }
 
-                    if (Square.getRank(position) == 7 && board.isSquareEmpty(position + 8 * 2)) {
-                        legalMoves.add(new Move(position, position + 8 * 2, null));
-                    }
+                if (Square.getRank(position) == 2 && board.isSquareEmpty(position - 8 * 2)) {
+                    legalMoves.add(new Move(position, position - 8 * 2, null));
+                }
+            }
+        } else {
+            if (board.isSquareEmpty(position + 8)) {
+                if (Square.isFirstRank(position + 8)) {
+                    legalMoves.add(new Move(position, position + 8, null, Promotion.KNIGHT));
+                    legalMoves.add(new Move(position, position + 8, null, Promotion.BISHOP));
+                    legalMoves.add(new Move(position, position + 8, null, Promotion.ROOK));
+                    legalMoves.add(new Move(position, position + 8, null, Promotion.QUEEN));
+                } else {
+                    legalMoves.add(new Move(position, position + 8, null));
+                }
+
+                if (Square.getRank(position) == 7 && board.isSquareEmpty(position + 8 * 2)) {
+                    legalMoves.add(new Move(position, position + 8 * 2, null));
                 }
             }
         }
 
+        // TODO: This might not be needed with the new pseudo legal move generation
         if (board.isSideInCheck(this.color)) {
             var legalResolutionMoves = new ArrayList<Move>();
 

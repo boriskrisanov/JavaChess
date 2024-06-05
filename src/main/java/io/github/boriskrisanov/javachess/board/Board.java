@@ -447,7 +447,6 @@ public class Board {
 
         computeAttackingSquares();
         updatePawnAttackingSquares();
-        computePinLines();
         computeCheckResolutions();
     }
 
@@ -587,7 +586,6 @@ public class Board {
 
         sideToMove = sideToMove.getOpposite();
 
-        computePinLines();
         computeCheckResolutions();
     }
 
@@ -896,14 +894,19 @@ public class Board {
         return bitboard;
     }
 
-    public ArrayList<Move> getAllLegalMoves() {
-        var legalMoves = new ArrayList<Move>();
+    public boolean isPseudoLegalMoveLegal(Move pseudoLegalMove) {
+        return !isSideInCheckAfterMove(board[pseudoLegalMove.start()].getColor(), pseudoLegalMove);
+    }
 
-        Arrays.stream(board)
-                .filter(Objects::nonNull)
-                .forEach(piece -> legalMoves.addAll(piece.getLegalMoves()));
-
-        return legalMoves;
+    public ArrayList<Move> getPseudoLegalMoves() {
+        var moves = new ArrayList<Move>();
+        for (Piece piece : board) {
+            if (piece == null || piece.getColor() != sideToMove) {
+                continue;
+            }
+            moves.addAll(piece.getPseudoLegalMoves());
+        }
+        return moves;
     }
 
     public ArrayList<Move> getAllLegalMovesForSide(Piece.Color side) {
@@ -934,6 +937,18 @@ public class Board {
         var moves = new ArrayList<Move>();
 
         for (Move move : getLegalMovesForSideToMove()) {
+            if (move.capturedPiece() != null) {
+                moves.add(move);
+            }
+        }
+
+        return moves;
+    }
+
+    public ArrayList<Move> getPseudoLegalCaptures() {
+        var moves = new ArrayList<Move>();
+
+        for (Move move : getPseudoLegalMoves()) {
             if (move.capturedPiece() != null) {
                 moves.add(move);
             }

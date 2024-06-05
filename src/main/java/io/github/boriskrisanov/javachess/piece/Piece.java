@@ -41,14 +41,23 @@ public abstract class Piece {
         };
     }
 
-
     public abstract long getAttackingSquares();
 
     protected abstract long getAttackingSquaresIncludingPins();
 
     public ArrayList<Move> getLegalMoves() {
         ArrayList<Move> moves = new ArrayList<>();
-        var attackingSquares = getAttackingSquaresIncludingPins();
+        for (Move move : getPseudoLegalMoves()) {
+            if (board.isPseudoLegalMoveLegal(move)) {
+                moves.add(move);
+            }
+        }
+        return moves;
+    }
+
+    public ArrayList<Move> getPseudoLegalMoves() {
+        ArrayList<Move> moves = new ArrayList<>();
+        var attackingSquares = getAttackingSquares();
 
         // Ignore squares that are occupied by friendly pieces
         attackingSquares &= ~board.getPieces(this.color);

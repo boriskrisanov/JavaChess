@@ -67,7 +67,10 @@ public class Main {
                     if (searchTimeMilliseconds != -1) {
                         bestMove = TimeLimitedSearch.bestMove(board, searchTimeMilliseconds);
                     } else {
+                        long startTime = System.currentTimeMillis();
                         bestMove = Search.bestMove(board, depth);
+                        long endTime = System.currentTimeMillis();
+                        System.out.println("debug: search took " + (endTime - startTime) + " ms");
                     }
                     if (isUciMode) {
                         System.out.println("bestmove " + bestMove.bestMove());
@@ -150,8 +153,6 @@ public class Main {
                     board.makeMove(new Square(start).toString() + new Square(end) + promotion);
                 }
                 case "mcts" -> {
-                    Random random = new Random();
-                    final double r = 0;
                     HashMap<Long, Node> nodes = new HashMap<>();
                     int n = Integer.parseInt(command[1]);
                     int whiteWins = 0;

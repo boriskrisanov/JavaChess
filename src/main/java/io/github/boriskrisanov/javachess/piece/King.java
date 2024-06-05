@@ -44,7 +44,7 @@ public class King extends Piece {
     }
 
     @Override
-    public ArrayList<Move> getLegalMoves() {
+    public ArrayList<Move> getPseudoLegalMoves() {
         long opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
         var castlingRights = board.getCastlingRights();
         var attackingSquares = getAttackingSquares();
