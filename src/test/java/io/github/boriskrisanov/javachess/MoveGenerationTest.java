@@ -101,6 +101,21 @@ public class MoveGenerationTest {
     }
 
     @Test
+    void testPosition7() {
+        assertEquals(71379963, runTest(5, "r3k1nr/p1ppprpp/Q1n1b1BP/Pp1bP3/2qPrP1b/NP1p1pP1/P1P1P1pP/R1BQKBNR w KQkq - 0 1"));
+    }
+
+    @Test
+    void testPosition8() {
+        assertEquals(64081091, runTest(6, "8/k1p5/8/KP5r/8/8/6p1/4R2N w - - 0 1"));
+    }
+
+    @Test
+    void testPosition9() {
+        assertEquals(463437512, runTest(6, "q6r/1k6/8/8/8/8/1K6/Q6R w - - 0 1"));
+    }
+
+    @Test
     void realTestPosition1() {
         // https://lichess.org/QR5UbqUY#16
         assertEquals(108181315, runTest(5, "r1bqk2r/ppp2ppp/2n1pn2/8/QbBP4/2N2N2/PP3PPP/R1B2RK1 w kq - 4 9"));

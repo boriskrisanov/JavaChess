@@ -250,8 +250,10 @@ public class Main {
                     }
                     System.out.println("bestmove " + bestMove);
                 }
+                case "find_magics" -> {
+                    Rook.findMagics(Integer.parseInt(command[1]));
+                }
             }
-
         } while (!command[0].equals("quit"));
     }
 }
