@@ -156,11 +156,6 @@ public class Pawn extends Piece {
     }
 
     @Override
-    protected long getAttackingSquaresIncludingPins() {
-        return getAttackingSquares();
-    }
-
-    @Override
     public char getChar() {
         return color == Color.WHITE ? 'P' : 'p';
     }
