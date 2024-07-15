@@ -251,7 +251,26 @@ public class Main {
                     System.out.println("bestmove " + bestMove);
                 }
                 case "find_magics" -> {
-                    Rook.findMagics(Integer.parseInt(command[1]));
+                    var magicBitboard = Rook.getMagicBitboard();
+                    magicBitboard.findMagics(1);
+                    Thread.sleep(5 * 1000);
+                    var magics = magicBitboard.stop();
+                    for (long shift : magics.shifts()) {
+                        System.out.println(shift);
+                    }
+//                    Rook.findMagics(Integer.parseInt(command[1]));
+//
+//                    codeString.append("final long[] ROOK_MAGICS = {");
+//                    for (long magic : magics) {
+//                        codeString
+//                                .append("0x")
+//                                .append(Long.toHexString(magic))
+//                                .append(", ");
+//                    }
+//                    codeString.deleteCharAt(codeString.length() - 1);
+//                    codeString.deleteCharAt(codeString.length() - 1);
+//                    codeString.append("};\n");
+//                    codeString.append("final long[] ROOK_SHIFTS = {");
                 }
             }
         } while (!command[0].equals("quit"));

@@ -9,6 +9,10 @@ application {
     mainClass = "io.github.boriskrisanov.javachess.Main"
 }
 
+compileJava {
+    options.compilerArgs << '-Xlint:unchecked'
+}
+
 test {
     systemProperty("junit.jupiter.execution.parallel.enabled", true)
 }

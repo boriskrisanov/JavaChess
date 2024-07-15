@@ -92,12 +92,12 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition5() {
-        assertEquals(164075551, runTest(5, "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10 "));
+        assertEquals(6923051137L, runTest(6, "r4rk1/1pp1qppp/p1np1n2/2b1p1B1/2B1P1b1/P1NP1N2/1PP1QPPP/R4RK1 w - - 0 10"));
     }
 
     @Test
     void testPosition6() {
-        assertEquals(13699553, runTest(5, Board.STARTING_POSITION_FEN, "h2h4 g7g5 h4g5 b8c6 g5g6 a8b8 g6h7 b8a8 h7g8n h8h1 g8h6 a8b8 h6g4 b8a8 g4h2 a8b8 a2a3 b8a8 a3a4 a8b8 a4a5 b8a8 a5a6 a8b8 a6b7 b8b7 b2b3 f8h6 b3b4"));
+        assertEquals(367853606, runTest(6, Board.STARTING_POSITION_FEN, "h2h4 g7g5 h4g5 b8c6 g5g6 a8b8 g6h7 b8a8 h7g8n h8h1 g8h6 a8b8 h6g4 b8a8 g4h2 a8b8 a2a3 b8a8 a3a4 a8b8 a4a5 b8a8 a5a6 a8b8 a6b7 b8b7 b2b3 f8h6 b3b4"));
     }
 
     @Test
@@ -113,6 +113,11 @@ public class MoveGenerationTest {
     @Test
     void testPosition9() {
         assertEquals(463437512, runTest(6, "q6r/1k6/8/8/8/8/1K6/Q6R w - - 0 1"));
+    }
+
+    @Test
+    void testPosition10() {
+        assertEquals(4695624192L, runTest(8, "k7/pppppppp/8/8/8/8/PPPPPPPP/K7 w - - 0 1"));
     }
 
     @Test
@@ -154,6 +159,6 @@ public class MoveGenerationTest {
     @Test
     void realTestPosition7() {
         // Played in engine test game
-        assertEquals(101255241, runTest(5, "r2q1rk1/ppp2p1p/1bn5/7R/1P1p2b1/N1P5/P4QP1/R1B1KBN1 b Q - 0 19"));
+        assertEquals(4331976777L, runTest(6, "r2q1rk1/ppp2p1p/1bn5/7R/1P1p2b1/N1P5/P4QP1/R1B1KBN1 b Q - 0 19"));
     }
 }

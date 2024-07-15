@@ -8,7 +8,17 @@ import java.util.*;
 import static io.github.boriskrisanov.javachess.board.Direction.*;
 
 public class Rook extends Piece {
+    /**
+    The value at index n is bitboard of possible positions where pieces that block the movement of a rook on square n
+    could be. This is equivalent to the rook's legal moves from square n without squares on the edge, since it is
+    assumed that a blocking piece can always be captured, and thus has no effect on the rook's legal moves if it is on
+    the edge.
+    */
     private static final long[] ROOK_BLOCKER_MASKS = new long[64];
+    /**
+     * The nth element stores, for a rook at square index n, a map of blocker bitboards to attacking squares (legal moves)
+     */
+    @SuppressWarnings("unchecked")
     private static final HashMap<Long, Long>[] ATTACKING_SQUARES = new HashMap[64];
 
     static {
@@ -21,6 +31,7 @@ public class Rook extends Piece {
 
             for (int i = 0; i < 64; i++) {
                 if (i != rookIndex && (Square.getRank(i) == Square.getRank(rookIndex) || Square.getFile(i) == Square.getFile(rookIndex))) {
+                    // Don't add the square if it's on the edge
                     if ((Square.getFile(i) == 1 && Square.getFile(rookIndex) != 1) || (Square.getFile(i) == 8 && Square.getFile(rookIndex) != 8)) {
                         continue;
                     }
@@ -38,6 +49,9 @@ public class Rook extends Piece {
         }
     }
 
+    /**
+     * Computes a list of all possible blocker configuration bitboards for a given rook position
+     */
     private static List<Long> computePossibleBlockerPositions(int rookIndex) {
         long blockerMask = ROOK_BLOCKER_MASKS[rookIndex];
 
@@ -66,49 +80,38 @@ public class Rook extends Piece {
         return possibleBlockerPositions;
     }
 
-    public static long[] findMagics(int minIterations) {
-        Random random = new Random();
-        long[] magics = new long[64];
-        long[] bitCounts = new long[64];
+    public static MagicBitboard getMagicBitboard() {
+        List<List<Long>> possibleBlockerPositions = new ArrayList<>();
 
-        for (int rookIndex = 0; rookIndex < 64; rookIndex++) {
-            var possibleBlockerPositions = computePossibleBlockerPositions(rookIndex);
-            bitCounts[rookIndex] = 16;
-            boolean foundMagic = false;
-            for (int i = 0; i < minIterations || !foundMagic; i++) {
-                ArrayList<Integer> usedKeys = new ArrayList<>();
-                boolean collision = false;
-                long magic = random.nextLong();
-                for (long blockerPositions : possibleBlockerPositions) {
-                    int key = (int) Math.abs((blockerPositions * magic) >> (64 - bitCounts[rookIndex]));
-                    if (usedKeys.contains(key)) {
-                        collision = true;
-                        break;
-                    }
-                    usedKeys.add(key);
-                }
-                if (!collision) {
-                    foundMagic = true;
-                    magics[rookIndex] = magic;
-                    bitCounts[rookIndex]--;
-                }
-            }
-            System.out.println("Found magic for index " + rookIndex + ": " + Long.toHexString(magics[rookIndex]) + " (" + (bitCounts[rookIndex] + 1) + " bits)");
+        for (int i = 0; i < 64; i++) {
+            possibleBlockerPositions.add(computePossibleBlockerPositions(i));
         }
-        StringBuilder codeString = new StringBuilder();
-        codeString.append("final long[] ROOK_MAGICS = {");
-        for (long magic : magics) {
-            codeString
-                    .append("0x")
-                    .append(Long.toHexString(magic))
-                    .append(", ");
-        }
-        codeString.deleteCharAt(codeString.length() - 1);
-        codeString.deleteCharAt(codeString.length() - 1);
-        codeString.append("};");
-        System.out.println(codeString);
-        System.out.println("Total index bits: " + (Arrays.stream(bitCounts).sum() + 64));
-        return magics;
+
+        return new MagicBitboard(possibleBlockerPositions);
+
+//        StringBuilder codeString = new StringBuilder();
+//        codeString.append("final long[] ROOK_MAGICS = {");
+//        for (long magic : magics) {
+//            codeString
+//                    .append("0x")
+//                    .append(Long.toHexString(magic))
+//                    .append(", ");
+//        }
+//        codeString.deleteCharAt(codeString.length() - 1);
+//        codeString.deleteCharAt(codeString.length() - 1);
+//        codeString.append("};\n");
+//        codeString.append("final long[] ROOK_SHIFTS = {");
+//        for (long bitCount : bitCounts) {
+//            codeString
+//                    .append(64 - bitCount + 1)
+//                    .append(", ");
+//        }
+//        codeString.deleteCharAt(codeString.length() - 1);
+//        codeString.deleteCharAt(codeString.length() - 1);
+//        codeString.append("};");
+//        System.out.println(codeString);
+//        System.out.println("Total index bits: " + (Arrays.stream(bitCounts).sum() + 64));
+//        return magics;
     }
 
     public Rook(Color color, int position, Board board) {
