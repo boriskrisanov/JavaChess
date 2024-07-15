@@ -233,9 +233,9 @@ public class Main {
                     System.out.println("W: " + whiteWins);
                     System.out.println("B: " + blackWins);
                     System.out.println("D: " + draws);
-                    System.out.println("P(W) = " + (double)whiteWins/n);
-                    System.out.println("P(L) = " + (double)blackWins/n);
-                    System.out.println("P(D) = " + (double)draws/n);
+                    System.out.println("P(W) = " + (double) whiteWins / n);
+                    System.out.println("P(L) = " + (double) blackWins / n);
+                    System.out.println("P(D) = " + (double) draws / n);
 
                     long maxVisits = 0;
                     Move bestMove = null;
@@ -253,25 +253,35 @@ public class Main {
                 case "find_magics" -> {
                     var magicBitboard = Rook.getMagicBitboard();
                     magicBitboard.findMagics(1);
-                    Thread.sleep(5 * 1000);
+                    Thread.sleep(Integer.parseInt(command[1]) * 1000);
                     var magics = magicBitboard.stop();
-                    for (long shift : magics.shifts()) {
-                        System.out.println(shift);
+
+                    var codeString = new StringBuilder();
+
+                    codeString.append("final long[] ROOK_MAGICS = {");
+                    for (long magic : magics.magics()) {
+                        codeString
+                                .append("0x")
+                                .append(Long.toHexString(magic))
+                                .append("L")
+                                .append(", ");
                     }
-//                    Rook.findMagics(Integer.parseInt(command[1]));
-//
-//                    codeString.append("final long[] ROOK_MAGICS = {");
-//                    for (long magic : magics) {
-//                        codeString
-//                                .append("0x")
-//                                .append(Long.toHexString(magic))
-//                                .append(", ");
-//                    }
-//                    codeString.deleteCharAt(codeString.length() - 1);
-//                    codeString.deleteCharAt(codeString.length() - 1);
-//                    codeString.append("};\n");
-//                    codeString.append("final long[] ROOK_SHIFTS = {");
+                    codeString.deleteCharAt(codeString.length() - 1);
+                    codeString.deleteCharAt(codeString.length() - 1);
+                    codeString.append("};\n");
+                    codeString.append("final long[] ROOK_SHIFTS = {");
+                    for (int shift : magics.shifts()) {
+                        codeString
+                                .append(shift)
+                                .append(", ");
+                    }
+                    codeString.deleteCharAt(codeString.length() - 1);
+                    codeString.deleteCharAt(codeString.length() - 1);
+                    codeString.append("};");
+
+                    System.out.println(codeString);
                 }
+
             }
         } while (!command[0].equals("quit"));
     }

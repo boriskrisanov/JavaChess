@@ -9,7 +9,7 @@ public class MagicBitboard {
     private boolean shouldStop = false;
     private final long[] magics = new long[64];
     // Stores the largest known shift value for each square
-    private final long[] shifts = new long[64];
+    private final int[] shifts = new int[64];
     private static final boolean[] foundMagics = new boolean[64];
     private final List<List<Long>> _possibleBlockerPositions;
     private final ArrayList<Thread> searchThreads = new ArrayList<>();;
@@ -20,7 +20,7 @@ public class MagicBitboard {
         Arrays.fill(shifts, DEFAULT_SHIFT - 1);
     }
 
-    public record Magics(long[] magics, long[] shifts) {
+    public record Magics(long[] magics, int[] shifts) {
     }
 
     /**
@@ -50,9 +50,10 @@ public class MagicBitboard {
                     var possibleBlockerPositions = _possibleBlockerPositions.get(i);
                     boolean collision = false;
                     long magic = random.nextLong();
+                    // shifts[i] is the best current value, so add 1 to search for a larger shift
+                    int newShift = shifts[i] + 1;
                     for (long blockerPositions : possibleBlockerPositions) {
-                        // shifts[i] is the best current value, so add 1 to search for a larger shift
-                        long key = Math.abs((blockerPositions * magic) >> shifts[i] + 1);
+                        long key = Math.abs((blockerPositions * magic) >> newShift);
                         if (usedKeys.contains(key)) {
                             collision = true;
                             break;
@@ -61,10 +62,10 @@ public class MagicBitboard {
                     }
                     if (!collision) {
                         // Found magic
-                        System.out.println("Found magic " + magic + " shift " + shifts[i]);
+                        System.out.println("Found magic " + magic + " shift " + newShift);
                         foundMagics[i] = true;
                         magics[i] = magic;
-                        shifts[i]++;
+                        shifts[i] = newShift;
                     }
                 }
                 if (!allMagicsFound) {
