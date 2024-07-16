@@ -20,7 +20,7 @@ public class Rook extends Piece {
      */
     @SuppressWarnings("unchecked")
     private static final HashMap<Long, Long>[] ATTACKING_SQUARES = new HashMap[64];
-    private static long[][] attackingSquaresArray = new long[64][];
+    private static final long[][] attackingSquaresArray = new long[64][];
 
     private static final long[] ROOK_MAGICS = {0x725fb52ab5ff6ff5L, 0x51db3dd9529f37adL, 0x55f48977fbd1ede2L, 0xb34899f821a40b01L, 0x6b4afbe3effff783L, 0xc0bc972e2f353227L, 0x3be3211176ea1943L, 0x861cf83d77a98e61L, 0x2cce6ce5e3078d0eL, 0x75c4b3a38f6fd9a8L, 0x5846eafdeff00b4aL, 0x1eeb78850ac865b0L, 0x47a6b168faa5f2f4L, 0x96bf018c01b3c407L, 0x92f12799ed9d830cL, 0x57cdafd005e164acL, 0xecd4e82ef96bcccaL, 0xc031f715863f718dL, 0x8a296292c1159fe2L, 0x1da9fa251efe3f3L, 0x898ba7cf3f1c03fcL, 0x81f012abc7297510L, 0xd35ba88330115de5L, 0xefbcc789e430e265L, 0xf4143c9e55024281L, 0xfddfe04a60a207d9L, 0x9d7569f10f865814L, 0xb7e3421cfcfcea7bL, 0x155508b88d07c2fbL, 0xbbbd764b989c060fL, 0x35f81fb29332df96L, 0xb9621f884bfc7fe4L, 0xeb3e2cc071afe487L, 0x93ecec21b1e987c4L, 0x38289ac00620d745L, 0x27422349035ebb04L, 0x281074ba96a207e2L, 0x2fedabbc2502db8fL, 0xd960a22c6f8efb6cL, 0x44b380001db8cbf1L, 0xd105a495687d92adL, 0xe9c55d1f6ca89bc0L, 0xef54ab36e5620bbL, 0x63e8ab1801a17a5aL, 0xefb70ad7e943d0b1L, 0x2d10e5f7c386ba24L, 0x3637897df281cc0dL, 0x671e003c0184c1afL, 0xdc24fcef4cd91b11L, 0x71a8f8b0a679867L, 0x60cc27fcfec26100L, 0x5c3463f7fecfd00cL, 0xb5ea8013537654fL, 0x948ff2ad44892ea0L, 0xb7d90ba70c93e910L, 0x8f5d865f5ea1c58eL, 0x54b9dfd12d29e8f1L, 0xdbad112286dd908fL, 0x33c435534e0bd25fL, 0x260d41fab79e8d14L, 0x47742adc0090b61aL, 0x64264112d3ba1375L, 0x73ac4bc1a30324acL, 0xae07761705aa2542L};
     private static final long[] ROOK_SHIFTS = {49, 50, 50, 49, 50, 50, 50, 49, 51, 51, 51, 51, 51, 51, 52, 51, 51, 52, 51, 50, 51, 51, 52, 50, 50, 51, 51, 51, 51, 51, 51, 50, 50, 51, 51, 51, 51, 51, 51, 50, 50, 51, 51, 51, 51, 51, 51, 50, 50, 51, 51, 51, 51, 51, 51, 50, 49, 50, 49, 49, 49, 49, 50, 49};
@@ -109,30 +109,6 @@ public class Rook extends Piece {
         }
 
         return new MagicBitboard(possibleBlockerPositions);
-
-//        StringBuilder codeString = new StringBuilder();
-//        codeString.append("final long[] ROOK_MAGICS = {");
-//        for (long magic : magics) {
-//            codeString
-//                    .append("0x")
-//                    .append(Long.toHexString(magic))
-//                    .append(", ");
-//        }
-//        codeString.deleteCharAt(codeString.length() - 1);
-//        codeString.deleteCharAt(codeString.length() - 1);
-//        codeString.append("};\n");
-//        codeString.append("final long[] ROOK_SHIFTS = {");
-//        for (long bitCount : bitCounts) {
-//            codeString
-//                    .append(64 - bitCount + 1)
-//                    .append(", ");
-//        }
-//        codeString.deleteCharAt(codeString.length() - 1);
-//        codeString.deleteCharAt(codeString.length() - 1);
-//        codeString.append("};");
-//        System.out.println(codeString);
-//        System.out.println("Total index bits: " + (Arrays.stream(bitCounts).sum() + 64));
-//        return magics;
     }
 
     public Rook(Color color, int position, Board board) {
@@ -142,7 +118,6 @@ public class Rook extends Piece {
     public long getAttackingSquares() {
         // Assume blocking pieces can be captured, then filter using friendly pieces bitboard later
         long blockers = board.getAllPieces() & ROOK_BLOCKER_MASKS[position];
-//        return ATTACKING_SQUARES[position].get(blockers) & ~board.getPieces(color);
         return attackingSquaresArray[position][index(position, blockers)] & ~board.getPieces(color);
     }
 
