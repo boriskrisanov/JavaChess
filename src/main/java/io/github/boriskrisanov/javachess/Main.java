@@ -139,6 +139,8 @@ public class Main {
                     // Remove trailing space
                     output.deleteCharAt(output.length() - 1);
                     System.out.println("position " + output);
+                    int checkIndex = board.isCheck() ? board.getKingPosition(board.getSideToMove()) : -1;
+                    System.out.println("check " + checkIndex);
                 }
                 case "make_move" -> {
                     // start:end=promotion
