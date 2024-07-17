@@ -87,7 +87,7 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition4() {
-        assertEquals(89941194, runTest(5, "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"));
+        assertEquals(3048196529L, runTest(6, "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8"));
     }
 
     @Test
@@ -102,12 +102,12 @@ public class MoveGenerationTest {
 
     @Test
     void testPosition7() {
-        assertEquals(71379963, runTest(5, "r3k1nr/p1ppprpp/Q1n1b1BP/Pp1bP3/2qPrP1b/NP1p1pP1/P1P1P1pP/R1BQKBNR w KQkq - 0 1"));
+        assertEquals(3230759529L, runTest(6, "r3k1nr/p1ppprpp/Q1n1b1BP/Pp1bP3/2qPrP1b/NP1p1pP1/P1P1P1pP/R1BQKBNR w KQkq - 0 1"));
     }
 
     @Test
     void testPosition8() {
-        assertEquals(64081091, runTest(6, "8/k1p5/8/KP5r/8/8/6p1/4R2N w - - 0 1"));
+        assertEquals(1077816625, runTest(7, "8/k1p5/8/KP5r/8/8/6p1/4R2N w - - 0 1"));
     }
 
     @Test
@@ -135,13 +135,13 @@ public class MoveGenerationTest {
     @Test
     void realTestPosition3() {
         // https://lichess.org/INY3KINN#115
-        assertEquals(85338565, runTest(6, "6k1/6p1/7p/2N3P1/PR6/5PK1/r5P1/6n1 b - - 2 58"));
+        assertEquals(1599108505, runTest(7, "6k1/6p1/7p/2N3P1/PR6/5PK1/r5P1/6n1 b - - 2 58"));
     }
 
     @Test
     void realTestPosition4() {
         // https://lichess.org/751DRMPG#29
-        assertEquals(63507755, runTest(5, "r2q1rk1/4bppp/1p2pn2/3pP3/2p2B2/4P2P/1PPNQPP1/R4RK1 b - - 0 15"));
+        assertEquals(2420954729L, runTest(6, "r2q1rk1/4bppp/1p2pn2/3pP3/2p2B2/4P2P/1PPNQPP1/R4RK1 b - - 0 15"));
     }
 
     @Test
