@@ -254,10 +254,10 @@ public class Main {
                 }
                 case "find_magics" -> {
                     var rookMagicBitboard = Rook.getMagicBitboard();
-                    rookMagicBitboard.findMagics(1);
+                    rookMagicBitboard.findMagics();
 
                     var bishopMagicBitboard = Bishop.getMagicBitboard();
-                    bishopMagicBitboard.findMagics(1);
+                    bishopMagicBitboard.findMagics();
 
                     Thread.sleep(Integer.parseInt(command[1]) * 1000L);
 
