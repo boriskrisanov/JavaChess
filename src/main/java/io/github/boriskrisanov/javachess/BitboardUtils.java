@@ -46,4 +46,34 @@ public class BitboardUtils {
 
         return string.toString();
     }
+
+    /**
+     * Computes a list of all possible blocker configuration bitboards for a given piece position
+     * TODO: Write better comment
+     */
+    public static List<Long> computePossibleBlockerPositions(int pieceIndex, long blockerMask) {
+        ArrayList<Long> possibleBlockerPositions = new ArrayList<>();
+        ArrayList<Integer> indexes = new ArrayList<>();
+        for (int i = 0; i < 64; i++) {
+            if (((1L << i) & blockerMask) != 0) {
+                indexes.add(63 - i);
+            }
+        }
+
+        // 2^k possible blocker configurations
+        int n = 1 << Long.bitCount(blockerMask);
+        for (int configuration = 0; configuration < n; configuration++) {
+            int j = 0;
+            long finalConfig = 0;
+            for (int i = 0; i < Long.bitCount(blockerMask); i++) {
+                if (((configuration >> i) & 1) != 0) {
+                    finalConfig |= (1L << (63 - indexes.get(j)));
+                }
+                j++;
+            }
+            possibleBlockerPositions.add(finalConfig);
+        }
+
+        return possibleBlockerPositions;
+    }
 }

@@ -47,7 +47,7 @@ public class Rook extends Piece {
                 }
             }
 
-            for (long blockerPositions : computePossibleBlockerPositions(rookIndex)) {
+            for (long blockerPositions : BitboardUtils.computePossibleBlockerPositions(rookIndex, ROOK_BLOCKER_MASKS[rookIndex])) {
                 ATTACKING_SQUARES[rookIndex].put(blockerPositions, SlidingPiece.getAttackingSquares2(blockerPositions, rookIndex, new Direction[]{UP, DOWN, LEFT, RIGHT}));
             }
         }
@@ -70,42 +70,11 @@ public class Rook extends Piece {
         return (int) Math.abs((blockerBitboard * ROOK_MAGICS[i]) >> ROOK_SHIFTS[i]);
     }
 
-    /**
-     * Computes a list of all possible blocker configuration bitboards for a given rook position
-     */
-    private static List<Long> computePossibleBlockerPositions(int rookIndex) {
-        long blockerMask = ROOK_BLOCKER_MASKS[rookIndex];
-
-        ArrayList<Long> possibleBlockerPositions = new ArrayList<>();
-        ArrayList<Integer> indexes = new ArrayList<>();
-        for (int i = 0; i < 64; i++) {
-            if (((1L << i) & blockerMask) != 0) {
-                indexes.add(63 - i);
-            }
-        }
-
-        // 2^k possible blocker configurations
-        int n = 1 << Long.bitCount(blockerMask);
-        for (int configuration = 0; configuration < n; configuration++) {
-            int j = 0;
-            long finalConfig = 0;
-            for (int i = 0; i < Long.bitCount(blockerMask); i++) {
-                if (((configuration >> i) & 1) != 0) {
-                    finalConfig |= (1L << (63 - indexes.get(j)));
-                }
-                j++;
-            }
-            possibleBlockerPositions.add(finalConfig);
-        }
-
-        return possibleBlockerPositions;
-    }
-
     public static MagicBitboard getMagicBitboard() {
         List<List<Long>> possibleBlockerPositions = new ArrayList<>();
 
         for (int i = 0; i < 64; i++) {
-            possibleBlockerPositions.add(computePossibleBlockerPositions(i));
+            possibleBlockerPositions.add(BitboardUtils.computePossibleBlockerPositions(i, ROOK_BLOCKER_MASKS[i]));
         }
 
         return new MagicBitboard(possibleBlockerPositions);

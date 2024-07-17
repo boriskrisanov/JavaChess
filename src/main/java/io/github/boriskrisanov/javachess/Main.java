@@ -253,35 +253,65 @@ public class Main {
                     System.out.println("bestmove " + bestMove);
                 }
                 case "find_magics" -> {
-                    var magicBitboard = Rook.getMagicBitboard();
-                    magicBitboard.findMagics(1);
-                    Thread.sleep(Integer.parseInt(command[1]) * 1000);
-                    var magics = magicBitboard.stop();
+                    var rookMagicBitboard = Rook.getMagicBitboard();
+                    rookMagicBitboard.findMagics(1);
 
-                    var codeString = new StringBuilder();
+                    var bishopMagicBitboard = Bishop.getMagicBitboard();
+                    bishopMagicBitboard.findMagics(1);
 
-                    codeString.append("final long[] ROOK_MAGICS = {");
-                    for (long magic : magics.magics()) {
-                        codeString
+                    Thread.sleep(Integer.parseInt(command[1]) * 1000L);
+
+                    var rookMagics = rookMagicBitboard.stop();
+                    var bishopMagics = bishopMagicBitboard.stop();
+
+                    var rookCodeString = new StringBuilder();
+                    var bishopCodeString = new StringBuilder();
+
+                    rookCodeString.append("final long[] ROOK_MAGICS = {");
+                    for (long magic : rookMagics.magics()) {
+                        rookCodeString
                                 .append("0x")
                                 .append(Long.toHexString(magic))
                                 .append("L")
                                 .append(", ");
                     }
-                    codeString.deleteCharAt(codeString.length() - 1);
-                    codeString.deleteCharAt(codeString.length() - 1);
-                    codeString.append("};\n");
-                    codeString.append("final long[] ROOK_SHIFTS = {");
-                    for (int shift : magics.shifts()) {
-                        codeString
+                    rookCodeString.deleteCharAt(rookCodeString.length() - 1);
+                    rookCodeString.deleteCharAt(rookCodeString.length() - 1);
+                    rookCodeString.append("};\n");
+                    rookCodeString.append("final long[] ROOK_SHIFTS = {");
+                    for (int shift : rookMagics.shifts()) {
+                        rookCodeString
                                 .append(shift)
                                 .append(", ");
                     }
-                    codeString.deleteCharAt(codeString.length() - 1);
-                    codeString.deleteCharAt(codeString.length() - 1);
-                    codeString.append("};");
+                    rookCodeString.deleteCharAt(rookCodeString.length() - 1);
+                    rookCodeString.deleteCharAt(rookCodeString.length() - 1);
+                    rookCodeString.append("};");
 
-                    System.out.println(codeString);
+                    System.out.println(rookCodeString);
+
+                    bishopCodeString.append("final long[] BISHOP_MAGICS = {");
+                    for (long magic : bishopMagics.magics()) {
+                        bishopCodeString
+                                .append("0x")
+                                .append(Long.toHexString(magic))
+                                .append("L")
+                                .append(", ");
+                    }
+                    bishopCodeString.deleteCharAt(bishopCodeString.length() - 1);
+                    bishopCodeString.deleteCharAt(bishopCodeString.length() - 1);
+                    bishopCodeString.append("};\n");
+                    bishopCodeString.append("final long[] BISHOP_SHIFTS = {");
+                    for (int shift : bishopMagics.shifts()) {
+                        bishopCodeString
+                                .append(shift)
+                                .append(", ");
+                    }
+                    bishopCodeString.deleteCharAt(bishopCodeString.length() - 1);
+                    bishopCodeString.deleteCharAt(bishopCodeString.length() - 1);
+                    bishopCodeString.append("};");
+
+                    System.out.println(bishopCodeString);
                 }
 
             }
