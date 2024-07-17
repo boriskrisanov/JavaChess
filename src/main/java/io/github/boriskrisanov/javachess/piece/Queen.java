@@ -14,30 +14,15 @@ public class Queen extends Piece {
     }
 
     public long getAttackingSquares() {
-        var directions = new ArrayList<>(List.of(Direction.values()));
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
-    }
-
-    protected long getAttackingSquaresIncludingPins() {
-        var directions = new ArrayList<Direction>();
-
-        if (pinDirection == null) {
-            directions.addAll(List.of(Direction.values()));
-        } else if (pinDirection == VERTICAL) {
-            directions.add(UP);
-            directions.add(DOWN);
-        } else if (pinDirection == HORIZONTAL) {
-            directions.add(LEFT);
-            directions.add(RIGHT);
-        } else if (pinDirection == POSITIVE_DIAGONAL) {
-            directions.add(TOP_RIGHT);
-            directions.add(BOTTOM_LEFT);
-        } else if (pinDirection == NEGATIVE_DIAGONAL) {
-            directions.add(TOP_LEFT);
-            directions.add(BOTTOM_RIGHT);
-        }
-
-        return SlidingPiece.getAttackingSquares(board.getBoard(), this, directions);
+        /*
+        The same board is being passed to the rook and bishop constructor, so there will technically still be a queen on
+        the square where the rook/bishop is supposed to be. This shouldn't cause any problems but it's worth mentioning.
+        TODO: Benchmark to check whether making the Rook and Bishop calls static would be faster (I'm assuming that this
+         will be optimised but it might still be faster to make Rook/Bishop.getAttackingSquares() static.)
+        */
+        long rookAttackingSquares = new Rook(color, position, board).getAttackingSquares();
+        long bishopAttackingSquares = new Bishop(color, position, board).getAttackingSquares();
+        return rookAttackingSquares | bishopAttackingSquares;
     }
 
     @Override
