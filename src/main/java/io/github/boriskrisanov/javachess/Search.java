@@ -71,7 +71,7 @@ public class Search {
             board.unmakeMove();
         }
 
-        return new SearchResult(bestMove, bestEval, debugPositionsEvaluated);
+        return new SearchResult(board.getSideToMove(), bestMove, bestEval, debugPositionsEvaluated);
     }
 
     public static int evaluate(Board board, int depth, int ply, int alpha, int beta, int extensionCount) {

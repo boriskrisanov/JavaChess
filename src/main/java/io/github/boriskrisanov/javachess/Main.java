@@ -81,7 +81,7 @@ public class Main {
                         }
                         System.out.println("bestmove " + bestMove.bestMove().start() + ":" + bestMove.bestMove().destination() + promotion);
                     }
-                    System.out.println("eval " + ((double) bestMove.eval()) / 100);
+                    System.out.println("eval " + bestMove.standardEval());
                 }
                 case "d" -> {
                     System.out.println(board);
