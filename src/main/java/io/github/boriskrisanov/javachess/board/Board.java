@@ -1038,8 +1038,8 @@ public class Board {
                 Resolve ambiguous moves where multiple pieces of the same type can move to the same square. This is done
                 by first generating all the legal moves in that position and checking if there are any moves with the same
                 destination square. If there are, we iterate over them to check which position component (file or rank)
-                is different, and add it to the move. If both the file and rank are the same (Such as in the position
-                8/k7/8/8/7Q/8/8/4Q1KQ, where 3 queens can move to e4, we append the full square after the letter of the
+                is different, and add it to the move. If both the file and rank are the same (such as in the position
+                8/k7/8/8/7Q/8/8/4Q1KQ, where 3 queens can move to e4), we append the full square after the letter of the
                 moving piece.
                  */
                 var moves = board2.getLegalMovesForSideToMove();

@@ -141,6 +141,13 @@ public class Main {
                     System.out.println("position " + output);
                     int checkIndex = board.isCheck() ? board.getKingPosition(board.getSideToMove()) : -1;
                     System.out.println("check " + checkIndex);
+                    if (board.isCheckmate(Piece.Color.WHITE)) {
+                        System.out.println("mate w");
+                    } else if (board.isCheckmate(Piece.Color.BLACK)) {
+                        System.out.println("mate b");
+                    } else if (board.isDraw()) {
+                        System.out.println("draw");
+                    }
                 }
                 case "make_move" -> {
                     // start:end=promotion
