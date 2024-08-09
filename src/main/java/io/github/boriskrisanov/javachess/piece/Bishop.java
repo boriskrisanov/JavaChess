@@ -6,7 +6,6 @@ import io.github.boriskrisanov.javachess.board.*;
 import java.util.*;
 
 import static io.github.boriskrisanov.javachess.board.Direction.*;
-import static io.github.boriskrisanov.javachess.board.PinDirection.*;
 
 
 public class Bishop extends Piece {

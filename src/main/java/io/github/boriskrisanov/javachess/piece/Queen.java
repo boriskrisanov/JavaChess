@@ -2,11 +2,6 @@ package io.github.boriskrisanov.javachess.piece;
 
 import io.github.boriskrisanov.javachess.board.*;
 
-import java.util.*;
-
-import static io.github.boriskrisanov.javachess.board.Direction.*;
-import static io.github.boriskrisanov.javachess.board.PinDirection.*;
-
 public class Queen extends Piece {
 
     public Queen(Color color, int position, Board board) {
