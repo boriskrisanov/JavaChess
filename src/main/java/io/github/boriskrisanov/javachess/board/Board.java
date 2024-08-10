@@ -827,8 +827,26 @@ public class Board {
         return isSideInCheck(WHITE) || isSideInCheck(BLACK);
     }
 
-    public boolean isDraw() {
-        // TODO: Update material count on make and unmake move
+    public boolean isThreefoldRepetition() {
+        HashMap<Long, Integer> repetitions = new HashMap<>();
+
+        for (long hash : hashHistory) {
+            if (repetitions.containsKey(hash)) {
+                repetitions.put(hash, repetitions.get(hash) + 1);
+            } else {
+                repetitions.put(hash, 1);
+            }
+            if (repetitions.get(hash) >= 3) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isInsufficientMaterial() {
+        // TODO: Improve insufficient material detection
+
         int whitePawnCount = Long.bitCount(whitePawns);
         int whiteKnightCount = Long.bitCount(whiteKnights);
         int whiteBishopCount = Long.bitCount(whiteBishops);
@@ -841,25 +859,15 @@ public class Board {
         int blackRookCount = Long.bitCount(blackRooks);
         int blackQueenCount = Long.bitCount(blackQueens);
 
-        HashMap<Long, Integer> repetitions = new HashMap<>();
+        return whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
+    }
 
-        boolean isThreefoldRepetition = false;
-        for (long hash : hashHistory) {
-            if (repetitions.containsKey(hash)) {
-                repetitions.put(hash, repetitions.get(hash) + 1);
-            } else {
-                repetitions.put(hash, 1);
-            }
-            if (repetitions.get(hash) >= 3) {
-                isThreefoldRepetition = true;
-                break;
-            }
-        }
+    public boolean isStalemate() {
+        return !isCheck() && getLegalMovesForSideToMove().isEmpty();
+    }
 
-        // TODO: Improve insufficient material detection
-        boolean isInsufficientMaterial = whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
-        boolean isStalemate = !isCheck() && getLegalMovesForSideToMove().isEmpty();
-        return halfMoveClock >= 50 || isStalemate || isInsufficientMaterial || isThreefoldRepetition;
+    public boolean isDraw() {
+        return halfMoveClock >= 50 || isStalemate() || isInsufficientMaterial() || isThreefoldRepetition();
     }
 
     public int getKingPosition(Piece.Color color) {
