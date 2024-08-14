@@ -145,8 +145,14 @@ public class Main {
                         System.out.println("mate w");
                     } else if (board.isCheckmate(Piece.Color.BLACK)) {
                         System.out.println("mate b");
-                    } else if (board.isDraw()) {
-                        System.out.println("draw");
+                    } else if (board.isThreefoldRepetition()) {
+                        System.out.println("draw threefold_repetition");
+                    } else if (board.isInsufficientMaterial()) {
+                        System.out.println("draw insufficient_material");
+                    } else if (board.isStalemate()) {
+                        System.out.println("draw stalemate");
+                    } else if (board.getHalfMoveClock() >= 50) {
+                        System.out.println("draw 50_move_rule");
                     }
                 }
                 case "make_move" -> {
@@ -320,7 +326,6 @@ public class Main {
 
                     System.out.println(bishopCodeString);
                 }
-
             }
         } while (!command[0].equals("quit"));
     }
