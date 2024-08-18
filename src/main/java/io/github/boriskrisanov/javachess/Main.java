@@ -167,6 +167,12 @@ public class Main {
 
                     board.makeMove(new Square(start).toString() + new Square(end) + promotion);
                 }
+                case "undo_move" -> {
+                    board.unmakeMove();
+                }
+                case "get_pgn" -> {
+                    System.out.println("pgn " + board.getPgn());
+                }
                 case "mcts" -> {
                     HashMap<Long, Node> nodes = new HashMap<>();
                     int n = Integer.parseInt(command[1]);
