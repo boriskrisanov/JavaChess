@@ -109,10 +109,6 @@ public class King extends Piece {
         return moves;
     }
 
-    protected long getAttackingSquaresIncludingPins() {
-        return getAttackingSquares();
-    }
-
     @Override
     public char getChar() {
         return color == Color.WHITE ? 'K' : 'k';

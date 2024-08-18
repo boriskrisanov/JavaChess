@@ -48,7 +48,7 @@ public class Rook extends Piece {
             }
 
             for (long blockerPositions : BitboardUtils.computePossibleBlockerPositions(rookIndex, ROOK_BLOCKER_MASKS[rookIndex])) {
-                ATTACKING_SQUARES[rookIndex].put(blockerPositions, SlidingPiece.getAttackingSquares2(blockerPositions, rookIndex, new Direction[]{UP, DOWN, LEFT, RIGHT}));
+                ATTACKING_SQUARES[rookIndex].put(blockerPositions, SlidingPiece.getAttackingSquares(blockerPositions, rookIndex, new Direction[]{UP, DOWN, LEFT, RIGHT}));
             }
         }
 
@@ -60,9 +60,7 @@ public class Rook extends Piece {
             attackingSquaresArray[i] = new long[maxIndex + 1];
 
             int finalI = i;
-            ATTACKING_SQUARES[i].forEach((blockerBitboard, attackingSquaresBitboard) -> {
-                attackingSquaresArray[finalI][index(finalI, blockerBitboard)] = attackingSquaresBitboard;
-            });
+            ATTACKING_SQUARES[i].forEach((blockerBitboard, attackingSquaresBitboard) -> attackingSquaresArray[finalI][index(finalI, blockerBitboard)] = attackingSquaresBitboard);
         }
     }
 

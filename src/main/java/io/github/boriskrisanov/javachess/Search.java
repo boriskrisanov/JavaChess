@@ -8,7 +8,6 @@ import java.util.*;
 import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
 
 public class Search {
-    private static long debugPositionsEvaluated = 0;
     // +1 and -1 to avoid overflow when multiplying by -1
     private static final int POSITIVE_INFINITY = Integer.MAX_VALUE - 1;
     private static final int NEGATIVE_INFINITY = Integer.MIN_VALUE + 1;
@@ -50,7 +49,7 @@ public class Search {
 
     public static SearchResult bestMove(Board board, int depth) {
         stopSearch = false;
-        debugPositionsEvaluated = 0;
+        long debugPositionsEvaluated = 0;
 
         Move bestMove = null;
         int bestEval = NEGATIVE_INFINITY;

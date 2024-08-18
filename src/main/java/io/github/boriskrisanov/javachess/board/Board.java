@@ -14,7 +14,6 @@ import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
 public class Board {
     private final Piece[] board = new Piece[64];
     private long squaresAttackedByWhite = 0;
-
     // Pawn attacking squares are only used for move ordering
     private long whitePawnAttackingSquares = 0;
     private long blackPawnAttackingSquares = 0;
@@ -23,12 +22,13 @@ public class Board {
     public final Deque<BoardState> boardHistory = new ArrayDeque<>();
     public final Deque<Long> hashHistory = new ArrayDeque<>();
     private long squaresAttackedByBlack = 0;
-    private ArrayList<Integer> checkResolutions = new ArrayList<>();
+    private final ArrayList<Integer> checkResolutions = new ArrayList<>();
     private int whiteKingPos = 0;
     private int blackKingPos = 0;
     private int enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
+    // TODO: Refactor bitboards to separate class
     private int halfMoveClock = 0;
     private int moveNumber = 0;
     private long whitePawns = 0;
@@ -221,10 +221,6 @@ public class Board {
         return boardString.toString();
     }
 
-    public boolean isSquareEmpty(Square square) {
-        return board[square.getIndex()] == null;
-    }
-
     public boolean isSquareEmpty(int index) {
         return board[index] == null;
     }
@@ -233,16 +229,10 @@ public class Board {
         return board[index];
     }
 
-
-    public Piece getPieceOn(Square square) {
-        return board[square.getIndex()];
-    }
-
     public void makeMove(String uciMove) {
         if (uciMove.length() != 4 && uciMove.length() != 5) {
             throw new IllegalArgumentException(uciMove);
         }
-
 
         int start = Square.fromString(String.valueOf(uciMove.charAt(0)) + uciMove.charAt(1));
         int destination = Square.fromString(String.valueOf(uciMove.charAt(2)) + uciMove.charAt(3));

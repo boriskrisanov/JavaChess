@@ -57,14 +57,6 @@ public class Pawn extends Piece {
             Piece capturedPiece = board.getPieceOn(targetSquare);
             Move move = new Move(this.position, targetSquare, capturedPiece);
 
-//            if (capturedPiece == null || capturedPiece.getColor() == this.color
-//                    || (targetSquare == position - 8 - 1 && pinDirection != null)
-//                    || (targetSquare == position - 8 + 1 && pinDirection != null)
-//                    || (targetSquare == position + 8 - 1 && pinDirection != null)
-//                    || (targetSquare == position + 8 + 1 && pinDirection != null)) {
-//                continue;
-//            }
-
             if ((color == Color.WHITE && Square.isLastRank(targetSquare)) || (color == Color.BLACK && Square.isFirstRank(targetSquare))) {
                 legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.KNIGHT));
                 legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.BISHOP));

@@ -38,7 +38,7 @@ public class Bishop extends Piece {
             }
 
             for (long blockerPositions : BitboardUtils.computePossibleBlockerPositions(bishopIndex, BISHOP_BLOCKER_MASKS[bishopIndex])) {
-                ATTACKING_SQUARES[bishopIndex].put(blockerPositions, SlidingPiece.getAttackingSquares2(blockerPositions, bishopIndex, new Direction[]{TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT}));
+                ATTACKING_SQUARES[bishopIndex].put(blockerPositions, SlidingPiece.getAttackingSquares(blockerPositions, bishopIndex, new Direction[]{TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT}));
             }
         }
 
@@ -50,9 +50,7 @@ public class Bishop extends Piece {
             attackingSquaresArray[i] = new long[maxIndex + 1];
 
             int finalI = i;
-            ATTACKING_SQUARES[i].forEach((blockerBitboard, attackingSquaresBitboard) -> {
-                attackingSquaresArray[finalI][index(finalI, blockerBitboard)] = attackingSquaresBitboard;
-            });
+            ATTACKING_SQUARES[i].forEach((blockerBitboard, attackingSquaresBitboard) -> attackingSquaresArray[finalI][index(finalI, blockerBitboard)] = attackingSquaresBitboard);
         }
     }
 

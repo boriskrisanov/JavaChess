@@ -1,23 +1,6 @@
 package io.github.boriskrisanov.javachess.board;
 
-public class Square {
-    final int index;
-    int rank;
-
-    public Square(int index) {
-        this.index = index;
-
-        // @formatter:off
-        if      (index < 8)     rank = 8;
-        else if (index < 8 * 2) rank = 7;
-        else if (index < 8 * 3) rank = 6;
-        else if (index < 8 * 4) rank = 5;
-        else if (index < 8 * 5) rank = 4;
-        else if (index < 8 * 6) rank = 3;
-        else if (index < 8 * 7) rank = 2;
-        else if (index < 8 * 8) rank = 1;
-        // @formatter:on
-    }
+public record Square(int index) {
 
     public static int fromString(String square) {
         int rank;
@@ -41,7 +24,6 @@ public class Square {
     }
 
     @Override
-    
     public String toString() {
         int rank = 8;
         char file = 'a';
@@ -59,11 +41,7 @@ public class Square {
 
     @Override
     public boolean equals(Object object) {
-        return object instanceof Square && ((Square) object).getIndex() == index;
-    }
-
-    public int getIndex() {
-        return index;
+        return object instanceof Square && ((Square) object).index() == index;
     }
 
     public static int getRank(int index) {
