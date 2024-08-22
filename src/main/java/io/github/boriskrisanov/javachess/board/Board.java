@@ -28,22 +28,9 @@ public class Board {
     private int enPassantTargetSquare;
     private Piece.Color sideToMove;
     private CastlingRights castlingRights = new CastlingRights(false, false, false, false);
-    // TODO: Refactor bitboards to separate class
     private int halfMoveClock = 0;
     private int moveNumber = 0;
-    private long whitePawns = 0;
-    private long whiteKnights = 0;
-    private long whiteBishops = 0;
-    private long whiteRooks = 0;
-    private long whiteQueens = 0;
-    private long whiteKing = 0;
-    private long blackPawns = 0;
-    private long blackKnights = 0;
-    private long blackBishops = 0;
-    private long blackRooks = 0;
-    private long blackQueens = 0;
-    private long blackKing = 0;
-    // Stores the number of times a position has occurred (the key is the position hash)
+    private BitboardManager bitboards = new BitboardManager();
 
     public static final String STARTING_POSITION_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -72,8 +59,8 @@ public class Board {
         for (int i = 0; i < 64; i++) {
             board[i] = null;
         }
-        whitePawns = whiteKnights = whiteBishops = whiteRooks = whiteQueens = whiteKing
-                = blackPawns = blackKnights = blackBishops = blackRooks = blackQueens = blackKing = 0;
+        // Reset bitboards
+        bitboards = new BitboardManager();
 
         // TODO: Allow FEN strings with only some information
         //  (Only placement info is needed, everything else can be set to default)
@@ -93,35 +80,7 @@ public class Board {
                 i += n - 1;
             } else {
                 board[i] = Piece.fromChar(c, i, this);
-                if (board[i].getColor() == WHITE) {
-                    if (board[i] instanceof Pawn) {
-                        whitePawns |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Knight) {
-                        whiteKnights |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Bishop) {
-                        whiteBishops |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Rook) {
-                        whiteRooks |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Queen) {
-                        whiteQueens |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof King) {
-                        whiteKing |= BitboardUtils.withSquare(i);
-                    }
-                } else {
-                    if (board[i] instanceof Pawn) {
-                        blackPawns |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Knight) {
-                        blackKnights |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Bishop) {
-                        blackBishops |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Rook) {
-                        blackRooks |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof Queen) {
-                        blackQueens |= BitboardUtils.withSquare(i);
-                    } else if (board[i] instanceof King) {
-                        blackKing |= BitboardUtils.withSquare(i);
-                    }
-                }
+                bitboards.addPiece(board[i], i);
                 if (board[i] instanceof King) {
                     if (board[i].getColor() == WHITE) {
                         whiteKingPos = i;
@@ -309,14 +268,14 @@ public class Board {
                         var rook = movedPiece.getColor() == WHITE ? board[63] : board[7];
                         board[rook.getPosition()] = null;
                         board[move.destination() - 1] = rook;
-                        movePiece(rook, null, rook.getPosition(), move.destination() - 1);
+                        bitboards.movePiece(rook, null, rook.getPosition(), move.destination() - 1);
                         rook.setPosition(move.destination() - 1);
                     }
                     case LONG -> {
                         var rook = movedPiece.getColor() == WHITE ? board[56] : board[0];
                         board[rook.getPosition()] = null;
                         board[move.destination() + 1] = rook;
-                        movePiece(rook, null, rook.getPosition(), move.destination() + 1);
+                        bitboards.movePiece(rook, null, rook.getPosition(), move.destination() + 1);
                         rook.setPosition(move.destination() + 1);
                     }
                 }
@@ -361,10 +320,10 @@ public class Board {
 
         if (isEnPassant && movedPiece instanceof Pawn) {
             if (sideToMove == WHITE) {
-                blackPawns &= ~BitboardUtils.withSquare(move.destination() + 8);
+                bitboards.blackPawns &= ~BitboardUtils.withSquare(move.destination() + 8);
                 board[move.destination() + 8] = null;
             } else {
-                whitePawns &= ~BitboardUtils.withSquare(move.destination() - 8);
+                bitboards.whitePawns &= ~BitboardUtils.withSquare(move.destination() - 8);
                 board[move.destination() - 8] = null;
             }
         }
@@ -372,14 +331,14 @@ public class Board {
         board[move.start()] = null;
 
         if (!isPromotion) {
-            movePiece(movedPiece, board[move.destination()], move.start(), move.destination());
+            bitboards.movePiece(movedPiece, board[move.destination()], move.start(), move.destination());
             board[move.destination()] = movedPiece;
             movedPiece.setPosition(move.destination());
         } else {
             if (sideToMove == WHITE) {
-                whitePawns &= ~BitboardUtils.withSquare(move.start());
+                bitboards.whitePawns &= ~BitboardUtils.withSquare(move.start());
             } else {
-                blackPawns &= ~BitboardUtils.withSquare(move.start());
+                bitboards.blackPawns &= ~BitboardUtils.withSquare(move.start());
             }
             board[move.destination()] = switch (move.promotion()) {
                 case QUEEN -> new Queen(sideToMove, move.destination(), this);
@@ -387,49 +346,10 @@ public class Board {
                 case BISHOP -> new Bishop(sideToMove, move.destination(), this);
                 case KNIGHT -> new Knight(sideToMove, move.destination(), this);
             };
-            long moveDestinationBitboard = BitboardUtils.withSquare(move.destination());
-            if (sideToMove == WHITE) {
-                switch (move.promotion()) {
-                    case QUEEN -> whiteQueens |= moveDestinationBitboard;
-                    case ROOK -> whiteRooks |= moveDestinationBitboard;
-                    case BISHOP -> whiteBishops |= moveDestinationBitboard;
-                    case KNIGHT -> whiteKnights |= moveDestinationBitboard;
-                }
-            } else {
-                switch (move.promotion()) {
-                    case QUEEN -> blackQueens |= moveDestinationBitboard;
-                    case ROOK -> blackRooks |= moveDestinationBitboard;
-                    case BISHOP -> blackBishops |= moveDestinationBitboard;
-                    case KNIGHT -> blackKnights |= moveDestinationBitboard;
-                }
-            }
+            bitboards.addPiece(move.promotion(), sideToMove, move.destination());
             // Remove captured piece from bitboards
             if (move.capturedPiece() != null) {
-                if (move.capturedPiece().getColor() == WHITE) {
-                    if (move.capturedPiece() instanceof Pawn) {
-                        whitePawns &= ~BitboardUtils.withSquare(move.destination());
-                    } else if (move.capturedPiece() instanceof Knight) {
-                        whiteKnights &= ~BitboardUtils.withSquare(move.destination());
-                    } else if (move.capturedPiece() instanceof Bishop) {
-                        whiteBishops &= ~BitboardUtils.withSquare(move.destination());
-                    } else if (move.capturedPiece() instanceof Rook) {
-                        whiteRooks &= ~BitboardUtils.withSquare(move.destination());
-                    } else if (move.capturedPiece() instanceof Queen) {
-                        whiteQueens &= ~BitboardUtils.withSquare(move.destination());
-                    }
-                } else {
-                    if (move.capturedPiece() instanceof Pawn) {
-                        blackPawns &= ~BitboardUtils.withSquare(move.destination());
-                    } else if (move.capturedPiece() instanceof Knight) {
-                        blackKnights &= ~BitboardUtils.withSquare(move.destination());
-                    } else if (move.capturedPiece() instanceof Bishop) {
-                        blackBishops &= ~BitboardUtils.withSquare(move.destination());
-                    } else if (move.capturedPiece() instanceof Rook) {
-                        blackRooks &= ~BitboardUtils.withSquare(move.destination());
-                    } else if (move.capturedPiece() instanceof Queen) {
-                        blackQueens &= ~BitboardUtils.withSquare(move.destination());
-                    }
-                }
+                bitboards.removePiece(move.capturedPiece(), move.destination());
             }
         }
 
@@ -466,13 +386,13 @@ public class Board {
                 var rook = board[61];
                 board[61] = null;
                 board[63] = rook;
-                movePiece(rook, null, 61, 63);
+                bitboards.movePiece(rook, null, 61, 63);
                 rook.setPosition(63);
             } else {
                 var rook = board[5];
                 board[5] = null;
                 board[7] = rook;
-                movePiece(rook, null, 5, 7);
+                bitboards.movePiece(rook, null, 5, 7);
                 rook.setPosition(7);
             }
         } else if (move.castlingDirection() == CastlingDirection.LONG) {
@@ -480,13 +400,13 @@ public class Board {
                 var rook = board[59];
                 board[59] = null;
                 board[56] = rook;
-                movePiece(rook, null, 59, 56);
+                bitboards.movePiece(rook, null, 59, 56);
                 rook.setPosition(56);
             } else {
                 var rook = board[3];
                 board[3] = null;
                 board[0] = rook;
-                movePiece(rook, null, 3, 0);
+                bitboards.movePiece(rook, null, 3, 0);
                 rook.setPosition(0);
             }
         }
@@ -494,26 +414,10 @@ public class Board {
         board[move.destination()] = null;
         board[move.start()] = movedPiece;
 
-        movePiece(movedPiece, null, move.destination(), move.start());
+        bitboards.movePiece(movedPiece, null, move.destination(), move.start());
 
         if (move.promotion() != null) {
-            if (movedPiece.getColor() == WHITE) {
-//            whitePawns |= move.destination() + 8;
-                switch (move.promotion()) {
-                    case QUEEN -> whiteQueens &= ~BitboardUtils.withSquare(move.destination());
-                    case ROOK -> whiteRooks &= ~BitboardUtils.withSquare(move.destination());
-                    case BISHOP -> whiteBishops &= ~BitboardUtils.withSquare(move.destination());
-                    case KNIGHT -> whiteKnights &= ~BitboardUtils.withSquare(move.destination());
-                }
-            } else {
-//            blackPawns |= move.destination() - 8;
-                switch (move.promotion()) {
-                    case QUEEN -> blackQueens &= ~BitboardUtils.withSquare(move.destination());
-                    case ROOK -> blackRooks &= ~BitboardUtils.withSquare(move.destination());
-                    case BISHOP -> blackBishops &= ~BitboardUtils.withSquare(move.destination());
-                    case KNIGHT -> blackKnights &= ~BitboardUtils.withSquare(move.destination());
-                }
-            }
+            bitboards.removePiece(move.promotion(), movedPiece.getColor(), move.destination());
         }
         movedPiece.setPosition(move.start());
 
@@ -525,49 +429,17 @@ public class Board {
                     board[move.destination() - 8] = move.capturedPiece();
                     move.capturedPiece().setPosition(move.destination() - 8);
                     // If the move is an en passant capture, the captured piece must be a pawn
-                    whitePawns |= BitboardUtils.withSquare(move.destination() - 8);
+                    bitboards.whitePawns |= BitboardUtils.withSquare(move.destination() - 8);
                 } else {
                     board[move.destination() + 8] = move.capturedPiece();
                     move.capturedPiece().setPosition(move.destination() + 8);
                     // If the move is an en passant capture, the captured piece must be a pawn
-                    blackPawns |= BitboardUtils.withSquare(move.destination() + 8);
+                    bitboards.blackPawns |= BitboardUtils.withSquare(move.destination() + 8);
                 }
             } else {
                 board[move.destination()] = move.capturedPiece();
                 move.capturedPiece().setPosition(move.destination());
-//                board[move.destination()].setPosition(move.destination());
-                long capturedPiecePositionBitboard = BitboardUtils.withSquare(move.destination());
-                if (move.capturedPiece().getColor() == WHITE) {
-                    if (move.capturedPiece() instanceof Pawn) {
-                        whitePawns |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof Knight) {
-                        whiteKnights |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof Bishop) {
-                        whiteBishops |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof Rook) {
-                        whiteRooks |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof Queen) {
-                        whiteQueens |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof King) {
-                        // This probably isn't necessary, but I'll write this just in case the code breaks
-                        whiteKing |= capturedPiecePositionBitboard;
-                    }
-                } else {
-                    if (move.capturedPiece() instanceof Pawn) {
-                        blackPawns |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof Knight) {
-                        blackKnights |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof Bishop) {
-                        blackBishops |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof Rook) {
-                        blackRooks |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof Queen) {
-                        blackQueens |= capturedPiecePositionBitboard;
-                    } else if (move.capturedPiece() instanceof King) {
-                        // This probably isn't necessary, but I'll write this just in case the code breaks
-                        blackKing |= capturedPiecePositionBitboard;
-                    }
-                }
+                bitboards.addPiece(move.capturedPiece(), move.destination());
             }
         }
 
@@ -794,7 +666,7 @@ public class Board {
     }
 
     public boolean isSideInCheck(Piece.Color side) {
-        long kingBitboard = side == WHITE ? whiteKing : blackKing;
+        long kingBitboard = side == WHITE ? bitboards.whiteKing : bitboards.blackKing;
         long squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
         return (squaresAttackedBySide & kingBitboard) != 0;
     }
@@ -837,17 +709,17 @@ public class Board {
     public boolean isInsufficientMaterial() {
         // TODO: Improve insufficient material detection
 
-        int whitePawnCount = Long.bitCount(whitePawns);
-        int whiteKnightCount = Long.bitCount(whiteKnights);
-        int whiteBishopCount = Long.bitCount(whiteBishops);
-        int whiteRookCount = Long.bitCount(whiteRooks);
-        int whiteQueenCount = Long.bitCount(whiteQueens);
+        int whitePawnCount = Long.bitCount(bitboards.whitePawns);
+        int whiteKnightCount = Long.bitCount(bitboards.whiteKnights);
+        int whiteBishopCount = Long.bitCount(bitboards.whiteBishops);
+        int whiteRookCount = Long.bitCount(bitboards.whiteRooks);
+        int whiteQueenCount = Long.bitCount(bitboards.whiteQueens);
 
-        int blackPawnCount = Long.bitCount(blackPawns);
-        int blackKnightCount = Long.bitCount(blackKnights);
-        int blackBishopCount = Long.bitCount(blackBishops);
-        int blackRookCount = Long.bitCount(blackRooks);
-        int blackQueenCount = Long.bitCount(blackQueens);
+        int blackPawnCount = Long.bitCount(bitboards.blackPawns);
+        int blackKnightCount = Long.bitCount(bitboards.blackKnights);
+        int blackBishopCount = Long.bitCount(bitboards.blackBishops);
+        int blackRookCount = Long.bitCount(bitboards.blackRooks);
+        int blackQueenCount = Long.bitCount(bitboards.blackQueens);
 
         return whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
     }
@@ -1096,167 +968,19 @@ public class Board {
         return s.toString();
     }
 
-// ********************************************************
-// Bitboard methods
-// ********************************************************
-
-    /**
-     * Updates the appropriate bitboard to reflect the new position of the piece
-     *
-     * @param piece       The piece being moved
-     * @param start       The starting position index
-     * @param destination The destination position index
-     */
-    private void movePiece(Piece piece, Piece capturedPiece, int start, int destination) {
-        // Remove captured piece
-        if (capturedPiece instanceof Pawn) {
-            if (capturedPiece.getColor() == WHITE) {
-                whitePawns &= ~BitboardUtils.withSquare(destination);
-            } else {
-                blackPawns &= ~BitboardUtils.withSquare(destination);
-            }
-        } else if (capturedPiece instanceof Knight) {
-            if (capturedPiece.getColor() == WHITE) {
-                whiteKnights &= ~BitboardUtils.withSquare(destination);
-            } else {
-                blackKnights &= ~BitboardUtils.withSquare(destination);
-            }
-        } else if (capturedPiece instanceof Bishop) {
-            if (capturedPiece.getColor() == WHITE) {
-                whiteBishops &= ~BitboardUtils.withSquare(destination);
-            } else {
-                blackBishops &= ~BitboardUtils.withSquare(destination);
-            }
-        } else if (capturedPiece instanceof Rook) {
-            if (capturedPiece.getColor() == WHITE) {
-                whiteRooks &= ~BitboardUtils.withSquare(destination);
-            } else {
-                blackRooks &= ~BitboardUtils.withSquare(destination);
-            }
-        } else if (capturedPiece instanceof Queen) {
-            if (capturedPiece.getColor() == WHITE) {
-                whiteQueens &= ~BitboardUtils.withSquare(destination);
-            } else {
-                blackQueens &= ~BitboardUtils.withSquare(destination);
-            }
-        }
-
-        // Move piece
-        if (piece instanceof Pawn) {
-            if (piece.getColor() == WHITE) {
-                whitePawns &= ~(BitboardUtils.withSquare(start));
-                whitePawns |= BitboardUtils.withSquare(destination);
-            } else {
-                blackPawns &= ~(BitboardUtils.withSquare(start));
-                blackPawns |= BitboardUtils.withSquare(destination);
-            }
-        } else if (piece instanceof Knight) {
-            if (piece.getColor() == WHITE) {
-                whiteKnights &= ~(BitboardUtils.withSquare(start));
-                whiteKnights |= BitboardUtils.withSquare(destination);
-            } else {
-                blackKnights &= ~(BitboardUtils.withSquare(start));
-                blackKnights |= BitboardUtils.withSquare(destination);
-            }
-        } else if (piece instanceof Bishop) {
-            if (piece.getColor() == WHITE) {
-                whiteBishops &= ~(BitboardUtils.withSquare(start));
-                whiteBishops |= BitboardUtils.withSquare(destination);
-            } else {
-                blackBishops &= ~(BitboardUtils.withSquare(start));
-                blackBishops |= BitboardUtils.withSquare(destination);
-            }
-        } else if (piece instanceof Rook) {
-            if (piece.getColor() == WHITE) {
-                whiteRooks &= ~(BitboardUtils.withSquare(start));
-                whiteRooks |= BitboardUtils.withSquare(destination);
-            } else {
-                blackRooks &= ~(BitboardUtils.withSquare(start));
-                blackRooks |= BitboardUtils.withSquare(destination);
-            }
-        } else if (piece instanceof Queen) {
-            if (piece.getColor() == WHITE) {
-                whiteQueens &= ~(BitboardUtils.withSquare(start));
-                whiteQueens |= BitboardUtils.withSquare(destination);
-            } else {
-                blackQueens &= ~(BitboardUtils.withSquare(start));
-                blackQueens |= BitboardUtils.withSquare(destination);
-            }
-        } else if (piece instanceof King) {
-            if (piece.getColor() == WHITE) {
-                whiteKing &= ~(BitboardUtils.withSquare(start));
-                whiteKing |= BitboardUtils.withSquare(destination);
-            } else {
-                blackKing &= ~(BitboardUtils.withSquare(start));
-                blackKing |= BitboardUtils.withSquare(destination);
-            }
-        }
-    }
-
-    public long getAllPieces() {
-        return getPieces(WHITE) | getPieces(BLACK);
-    }
-
-    public long getPieces(Piece.Color side) {
-        if (side == WHITE) {
-            return whitePawns | whiteKnights | whiteBishops | whiteRooks | whiteQueens | whiteKing;
-        }
-        return blackPawns | blackKnights | blackBishops | blackRooks | blackQueens | blackKing;
-    }
-
-    public long getWhitePawns() {
-        return whitePawns;
-    }
-
-    public long getWhiteKnights() {
-        return whiteKnights;
-    }
-
-    public long getWhiteBishops() {
-        return whiteBishops;
-    }
-
-    public long getWhiteRooks() {
-        return whiteRooks;
-    }
-
-    public long getWhiteQueens() {
-        return whiteQueens;
-    }
-
-    public long getWhiteKing() {
-        return whiteKing;
-    }
-
-    public long getBlackPawns() {
-        return blackPawns;
-    }
-
-    public long getBlackKnights() {
-        return blackKnights;
-    }
-
-    public long getBlackBishops() {
-        return blackBishops;
-    }
-
-    public long getBlackRooks() {
-        return blackRooks;
-    }
-
-    public long getBlackQueens() {
-        return blackQueens;
-    }
-
-    public long getBlackKing() {
-        return blackKing;
-    }
-
     public long getWhitePawnAttackingSquares() {
         return whitePawnAttackingSquares;
     }
 
     public long getBlackPawnAttackingSquares() {
         return blackPawnAttackingSquares;
+    }
+
+    public long getAllPieces() {
+        return bitboards.getAllPieces();
+    }
+
+    public long getPieces(Piece.Color side) {
+        return bitboards.getPieces(side);
     }
 }
