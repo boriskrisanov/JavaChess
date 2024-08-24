@@ -581,20 +581,6 @@ public class Board {
         return null;
     }
 
-    /**
-     * Plays the move on a separate board and returns the check state of that board (the current board is not modified)
-     */
-
-    public Piece.Color getCheckStateAfterMove(Move move) {
-        Piece.Color checkState;
-
-        makeMove(move);
-        checkState = getCheckState();
-        unmakeMove();
-
-        return checkState;
-    }
-
     public boolean isSideInCheck(Piece.Color side) {
         long kingBitboard = side == WHITE ? bitboards.whiteKing : bitboards.blackKing;
         long squaresAttackedBySide = getSquaresAttackedBySide(side.getOpposite());
@@ -727,18 +713,6 @@ public class Board {
         for (Piece piece : board) {
             if (piece != null && piece.getColor() == sideToMove) {
                 moves.addAll(piece.getLegalMoves());
-            }
-        }
-
-        return moves;
-    }
-
-    public ArrayList<Move> getCapturesForSideToMove() {
-        var moves = new ArrayList<Move>();
-
-        for (Move move : getLegalMovesForSideToMove()) {
-            if (move.capturedPiece() != null) {
-                moves.add(move);
             }
         }
 
