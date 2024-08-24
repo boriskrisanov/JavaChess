@@ -106,7 +106,6 @@ public class Board {
         this.moveNumber = Integer.parseInt(fullMoveNumber);
 
         computeAttackingSquares();
-        computePinLines();
         computeCheckResolutions();
         hashHistory.push(Hash.hash(this));
     }
@@ -567,75 +566,6 @@ public class Board {
         // TODO: This might cause concurrency bugs
         checkResolutions.clear();
         checkResolutions.addAll(checkResolutionBuffer);
-    }
-
-    private void computePinLines() {
-        computePinLines(WHITE);
-        computePinLines(BLACK);
-    }
-
-    private void computePinLines(Piece.Color side) {
-        int kingPosition = getKingPosition(side);
-
-        // Reset pin directions
-        for (Piece piece : board) {
-            if (piece != null && piece.getColor() == side) {
-                piece.setPinDirection(null);
-            }
-        }
-
-        for (Direction direction : Direction.values()) {
-            Piece lastFriendlyPieceSeen = null;
-            PinDirection pinDirection = null;
-
-            if (direction == UP || direction == DOWN) {
-                pinDirection = PinDirection.VERTICAL;
-            } else if (direction == LEFT || direction == RIGHT) {
-                pinDirection = PinDirection.HORIZONTAL;
-            } else if (direction == BOTTOM_LEFT || direction == TOP_RIGHT) {
-                pinDirection = PinDirection.POSITIVE_DIAGONAL;
-            } else if (direction == BOTTOM_RIGHT || direction == TOP_LEFT) {
-                pinDirection = PinDirection.NEGATIVE_DIAGONAL;
-            }
-
-            for (int i = 0; i < EdgeDistance.get(kingPosition, direction); i++) {
-                int targetSquare = kingPosition + direction.offset * (i + 1);
-
-                boolean kingCanBeAttackedByRook = direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT;
-                boolean kingCanBeAttackedByBishop = direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT;
-                boolean targetPieceCanAttackKing = board[targetSquare] instanceof Queen || (board[targetSquare] instanceof Rook && kingCanBeAttackedByRook) || (board[targetSquare] instanceof Bishop && kingCanBeAttackedByBishop);
-
-
-                if (board[targetSquare] == null) {
-                    continue;
-                }
-
-                if (!targetPieceCanAttackKing && board[targetSquare].getColor() == side.getOpposite() && lastFriendlyPieceSeen == null) {
-                    // Not in check from this direction
-                    break;
-                }
-
-                if (board[targetSquare].isSlidingPiece() && board[targetSquare].getColor() != side
-                        && (((direction == UP || direction == DOWN || direction == LEFT || direction == RIGHT) && (board[targetSquare] instanceof Rook || board[targetSquare] instanceof Queen))
-                        || ((direction == TOP_LEFT || direction == TOP_RIGHT || direction == BOTTOM_LEFT || direction == BOTTOM_RIGHT) && (board[targetSquare] instanceof Bishop || board[targetSquare] instanceof Queen)))
-                ) {
-                    if (lastFriendlyPieceSeen == null) {
-                        // King is in check from this direction
-                        break;
-                    }
-
-                    lastFriendlyPieceSeen.setPinDirection(pinDirection);
-                    break;
-                }
-                if (lastFriendlyPieceSeen != null && board[targetSquare] != null) {
-                    // There are more than 2 pieces in front of the king, therefore none of them are pinned
-                    break;
-                }
-                if (board[targetSquare].getColor() == side) {
-                    lastFriendlyPieceSeen = board[targetSquare];
-                }
-            }
-        }
     }
 
     /**

@@ -11,7 +11,6 @@ public abstract class Piece {
     protected final Color color;
     protected int position;
     protected Board board;
-    protected PinDirection pinDirection;
 
     public Piece(Color color, int position, Board board) {
         this.color = color;
@@ -70,11 +69,6 @@ public abstract class Piece {
                         continue;
                     }
 
-                    if ((pinDirection == PinDirection.HORIZONTAL && Square.getRank(position) != Square.getRank(resolution))
-                            || (pinDirection == PinDirection.VERTICAL && Square.getFile(position) != Square.getFile(resolution))) {
-                        continue;
-                    }
-
                     // No need to check whether the square is empty because either the king is in check from a sliding
                     // piece, in which case the resolution squares must be empty, or the king is in check from a pawn or
                     // a knight, in which case it can be captured. A resolution square can never contain a friendly piece.
@@ -129,13 +123,5 @@ public abstract class Piece {
         public Color getOpposite() {
             return this == WHITE ? BLACK : WHITE;
         }
-    }
-
-    public PinDirection getPinDirection() {
-        return pinDirection;
-    }
-
-    public void setPinDirection(PinDirection pinDirection) {
-        this.pinDirection = pinDirection;
     }
 }
