@@ -637,7 +637,19 @@ public class Board {
         int blackRookCount = Long.bitCount(bitboards.blackRooks);
         int blackQueenCount = Long.bitCount(bitboards.blackQueens);
 
-        return whiteQueenCount + blackQueenCount + whiteRookCount + blackRookCount + whitePawnCount + blackPawnCount == 0;
+        if (whiteQueenCount > 0 || blackQueenCount > 0 || whiteRookCount > 0 || blackRookCount > 0 || whitePawnCount > 0 || blackPawnCount > 0) {
+            return false;
+        }
+
+        if (whiteKnightCount > 2 || blackKnightCount > 2) {
+            return false;
+        }
+
+        if (whiteBishopCount > 2 || blackBishopCount > 2) {
+            return false;
+        }
+
+        return true;
     }
 
     public boolean isStalemate() {

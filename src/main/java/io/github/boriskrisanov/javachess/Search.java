@@ -73,6 +73,10 @@ public class Search {
         return new SearchResult(board.getSideToMove(), bestMove, bestEval, debugPositionsEvaluated);
     }
 
+    /**
+     * @param alpha The lowest eval that the maximising player can possibly achieve
+     * @param beta  The highest score that the minimising player can possibly achieve
+     */
     public static int evaluate(Board board, int depth, int ply, int alpha, int beta, int extensionCount) {
         boolean shouldCache = false;
         EvalCache.NodeKind nodeKind = EvalCache.NodeKind.UPPER;
@@ -119,6 +123,11 @@ public class Search {
                     extension = 1;
                 }
             }
+            /*
+            Swap alpha and beta because the maximising player is now the minimising player and vice versa.
+            Both are negative because the values are from the perspective of the side to move, which will now be reversed,
+            and a good position for the minimising player is bad for the maximising player and vice versa.
+             */
             int eval = -evaluate(board, depth - 1 + extension, ply + 1, -beta, -alpha, extensionCount + extension);
             board.unmakeMove();
             if (eval >= beta) {

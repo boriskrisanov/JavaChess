@@ -37,10 +37,6 @@ public class TimeLimitedSearch {
 
         searchThread.run();
 
-//        searchThread.join(searchTimeMilliseconds);
-//        Search.stop();
-
-//        while (!searchThread.isDone())
         SearchResult bestMove = searchThread.get();
 
         if (bestMove == null) {
