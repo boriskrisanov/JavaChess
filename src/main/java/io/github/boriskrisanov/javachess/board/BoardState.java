@@ -8,7 +8,6 @@ public record BoardState(
         long whitePawnAttackingSquares,
         long blackAttackingSquares,
         long blackPawnAttackingSquares,
-        ArrayList<Integer> checkResolutions,
         int whiteKingPos,
         int blackKingPos,
         CastlingRights castlingRights,

@@ -37,9 +37,7 @@ public class Pawn extends Piece {
     }
 
     @Override
-    public ArrayList<Move> getPseudoLegalMoves() {
-        var legalMoves = new ArrayList<Move>();
-
+    public void getPseudoLegalMoves(ArrayList<Move> moves) {
         var enPassantTargetSquare = board.getEnPassantTargetSquare();
         var attackingSquares = getAttackingSquares();
         var edgeDist = new EdgeDistance(position);
@@ -58,12 +56,12 @@ public class Pawn extends Piece {
             Move move = new Move(this.position, targetSquare, capturedPiece);
 
             if ((color == Color.WHITE && Square.isLastRank(targetSquare)) || (color == Color.BLACK && Square.isFirstRank(targetSquare))) {
-                legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.KNIGHT));
-                legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.BISHOP));
-                legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.ROOK));
-                legalMoves.add(new Move(position, targetSquare, capturedPiece, Promotion.QUEEN));
+                moves.add(new Move(position, targetSquare, capturedPiece, Promotion.KNIGHT));
+                moves.add(new Move(position, targetSquare, capturedPiece, Promotion.BISHOP));
+                moves.add(new Move(position, targetSquare, capturedPiece, Promotion.ROOK));
+                moves.add(new Move(position, targetSquare, capturedPiece, Promotion.QUEEN));
             } else {
-                legalMoves.add(move);
+                moves.add(move);
             }
         }
 
@@ -75,24 +73,24 @@ public class Pawn extends Piece {
                 if (enPassantTargetSquare == position - 8 - 1 && edgeDist.left > 0 && edgeDist.top > 0) {
                     Move move = new Move(position, enPassantTargetSquare, board.getPieceOn(position - 1));
                     if (!board.isSideInCheckAfterMove(this.color, move)) {
-                        legalMoves.add(move);
+                        moves.add(move);
                     }
                 } else if (enPassantTargetSquare == position - 8 + 1 && edgeDist.right > 0 && edgeDist.top > 0) {
                     Move move = new Move(position, enPassantTargetSquare, board.getPieceOn(position + 1));
                     if (!board.isSideInCheckAfterMove(this.color, move)) {
-                        legalMoves.add(move);
+                        moves.add(move);
                     }
                 }
             } else {
                 if (enPassantTargetSquare == position + 8 - 1 && edgeDist.left > 0 && edgeDist.bottom > 0) {
                     Move move = new Move(position, enPassantTargetSquare, board.getPieceOn(position - 1));
                     if (!board.isSideInCheckAfterMove(this.color, move)) {
-                        legalMoves.add(move);
+                        moves.add(move);
                     }
                 } else if (enPassantTargetSquare == position + 8 + 1 && edgeDist.right > 0 && edgeDist.bottom > 0) {
                     Move move = new Move(position, enPassantTargetSquare, board.getPieceOn(position + 1));
                     if (!board.isSideInCheckAfterMove(this.color, move)) {
-                        legalMoves.add(move);
+                        moves.add(move);
                     }
                 }
             }
@@ -102,49 +100,34 @@ public class Pawn extends Piece {
         if (this.color == Color.WHITE) {
             if (board.isSquareEmpty(position - 8)) {
                 if (Square.isLastRank(position - 8)) {
-                    legalMoves.add(new Move(position, position - 8, null, Promotion.KNIGHT));
-                    legalMoves.add(new Move(position, position - 8, null, Promotion.BISHOP));
-                    legalMoves.add(new Move(position, position - 8, null, Promotion.ROOK));
-                    legalMoves.add(new Move(position, position - 8, null, Promotion.QUEEN));
+                    moves.add(new Move(position, position - 8, null, Promotion.KNIGHT));
+                    moves.add(new Move(position, position - 8, null, Promotion.BISHOP));
+                    moves.add(new Move(position, position - 8, null, Promotion.ROOK));
+                    moves.add(new Move(position, position - 8, null, Promotion.QUEEN));
                 } else {
-                    legalMoves.add(new Move(position, position - 8, null));
+                    moves.add(new Move(position, position - 8, null));
                 }
 
                 if (Square.getRank(position) == 2 && board.isSquareEmpty(position - 8 * 2)) {
-                    legalMoves.add(new Move(position, position - 8 * 2, null));
+                    moves.add(new Move(position, position - 8 * 2, null));
                 }
             }
         } else {
             if (board.isSquareEmpty(position + 8)) {
                 if (Square.isFirstRank(position + 8)) {
-                    legalMoves.add(new Move(position, position + 8, null, Promotion.KNIGHT));
-                    legalMoves.add(new Move(position, position + 8, null, Promotion.BISHOP));
-                    legalMoves.add(new Move(position, position + 8, null, Promotion.ROOK));
-                    legalMoves.add(new Move(position, position + 8, null, Promotion.QUEEN));
+                    moves.add(new Move(position, position + 8, null, Promotion.KNIGHT));
+                    moves.add(new Move(position, position + 8, null, Promotion.BISHOP));
+                    moves.add(new Move(position, position + 8, null, Promotion.ROOK));
+                    moves.add(new Move(position, position + 8, null, Promotion.QUEEN));
                 } else {
-                    legalMoves.add(new Move(position, position + 8, null));
+                    moves.add(new Move(position, position + 8, null));
                 }
 
                 if (Square.getRank(position) == 7 && board.isSquareEmpty(position + 8 * 2)) {
-                    legalMoves.add(new Move(position, position + 8 * 2, null));
+                    moves.add(new Move(position, position + 8 * 2, null));
                 }
             }
         }
-
-        // TODO: This might not be needed with the new pseudo legal move generation
-        if (board.isSideInCheck(this.color)) {
-            var legalResolutionMoves = new ArrayList<Move>();
-
-            for (Move move : legalMoves) {
-                if (board.getCheckResolutions().contains(move.destination()) || (move.capturedPiece() != null && board.getCheckResolutions().contains(move.capturedPiece().getPosition()))) {
-                    legalResolutionMoves.add(move);
-                }
-            }
-
-            return legalResolutionMoves;
-        }
-
-        return legalMoves;
     }
 
     @Override

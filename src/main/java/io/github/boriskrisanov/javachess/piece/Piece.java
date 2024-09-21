@@ -3,6 +3,7 @@ package io.github.boriskrisanov.javachess.piece;
 import io.github.boriskrisanov.javachess.*;
 import io.github.boriskrisanov.javachess.board.*;
 
+import java.lang.reflect.*;
 import java.util.*;
 
 import static io.github.boriskrisanov.javachess.piece.Piece.Color.*;
@@ -42,47 +43,27 @@ public abstract class Piece {
 
     public abstract long getAttackingSquares();
 
-    public ArrayList<Move> getLegalMoves() {
-        ArrayList<Move> moves = new ArrayList<>();
-        for (Move move : getPseudoLegalMoves()) {
+    public void getLegalMoves(ArrayList<Move> moves) {
+        ArrayList<Move> pseudoLegalMoves = new ArrayList<>(5);
+        getPseudoLegalMoves(pseudoLegalMoves);
+        for (Move move : pseudoLegalMoves) {
             if (board.isPseudoLegalMoveLegal(move)) {
                 moves.add(move);
             }
         }
-        return moves;
     }
 
-    public ArrayList<Move> getPseudoLegalMoves() {
-        ArrayList<Move> moves = new ArrayList<>();
+    public void getPseudoLegalMoves(ArrayList<Move> moves) {
         var attackingSquares = getAttackingSquares();
 
         // Ignore squares that are occupied by friendly pieces
         attackingSquares &= ~board.getPieces(this.color);
 
         for (int attackingSquare : BitboardUtils.squaresOf(attackingSquares)) {
-            if (board.isSideInCheck(this.color)) {
-                for (int resolution : board.getCheckResolutions()) {
-                    // Check if this piece can move to the resolution square
-                    // TODO: Some of this might be redundant
-
-                    if (resolution != attackingSquare || board.getPieceOn(resolution) instanceof King) {
-                        continue;
-                    }
-
-                    // No need to check whether the square is empty because either the king is in check from a sliding
-                    // piece, in which case the resolution squares must be empty, or the king is in check from a pawn or
-                    // a knight, in which case it can be captured. A resolution square can never contain a friendly piece.
-
-                    moves.add(new Move(position, resolution, board.getBoard()[resolution]));
-                }
-            } else {
-                Piece capturedPiece = board.getPieceOn(attackingSquare);
-                Move move = new Move(position, attackingSquare, capturedPiece);
-                moves.add(move);
-            }
+            Piece capturedPiece = board.getPieceOn(attackingSquare);
+            Move move = new Move(position, attackingSquare, capturedPiece);
+            moves.add(move);
         }
-
-        return moves;
     }
 
     /**

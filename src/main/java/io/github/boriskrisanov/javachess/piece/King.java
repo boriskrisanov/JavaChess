@@ -44,11 +44,10 @@ public class King extends Piece {
     }
 
     @Override
-    public ArrayList<Move> getPseudoLegalMoves() {
+    public void getPseudoLegalMoves(ArrayList<Move> moves) {
         long opponentAttackingSquares = board.getSquaresAttackedBySide(color.getOpposite());
         var castlingRights = board.getCastlingRights();
         var attackingSquares = getAttackingSquares();
-        var moves = new ArrayList<Move>();
 
         // Ignore squares occupied by friendly pieces and squares attacked by enemy pieces
         attackingSquares &= ~(opponentAttackingSquares | board.getPieces(this.color));
@@ -105,8 +104,6 @@ public class King extends Piece {
                 }
             }
         }
-
-        return moves;
     }
 
     @Override
