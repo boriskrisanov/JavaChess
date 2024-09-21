@@ -127,9 +127,6 @@ public class BitboardManager {
 
     public void movePiece(Piece piece, Piece capturedPiece, int start, int destination) {
         // This will still work if capturedPiece is null as no bitboards will be updated
-//        removePiece(capturedPiece, destination);
-//        removePiece(piece, start);
-//        addPiece(piece, destination);
         // Remove captured piece
         if (capturedPiece instanceof Pawn) {
             if (capturedPiece.getColor() == WHITE) {

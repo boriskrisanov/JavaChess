@@ -47,11 +47,14 @@ public class MoveGenerationTest {
 
         var moveCounts = new TreeMap<String, Long>();
 
+        var start = System.currentTimeMillis();
         long result = generateMoves(board, depth, moveCounts, true);
+        var end = System.currentTimeMillis();
 
         moveCounts.forEach((move, count) -> System.out.println(move + ": " + count));
 
         System.out.println("Positions reached: " + result);
+        System.out.println("Time: " + (end - start) + "ms");
 
         return result;
     }

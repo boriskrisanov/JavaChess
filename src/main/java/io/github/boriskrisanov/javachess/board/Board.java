@@ -188,6 +188,7 @@ public class Board {
     }
 
     public void makeMove(String uciMove) {
+        // TODO: This doesn't handle en passant (?)
         if (uciMove.length() != 4 && uciMove.length() != 5) {
             throw new IllegalArgumentException(uciMove);
         }
@@ -669,6 +670,7 @@ public class Board {
     }
 
     public void updatePawnAttackingSquares() {
+        // TODO: Do this in computeAttackingSquares
         for (Piece piece : board) {
             if (piece instanceof Pawn) {
                 if (piece.getColor() == WHITE) {
